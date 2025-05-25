@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baseball Lineup Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .logo {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #2c5aa0;
+            margin-bottom: 30px;
+        }
+        .login-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .login-btn:hover {
+            background-color: #c0392b;
+        }
+        .features {
+            text-align: left;
+            margin-top: 30px;
+        }
+        .features ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .features li:before {
+            content: "⚾ ";
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">⚾</div>
+        <h1>Baseball Lineup Manager</h1>
+        <p>Connect with TeamSnap to automatically generate fielding positions for your games.</p>
+        
+        <a href="/auth/login" class="login-btn">Connect with TeamSnap</a>
+        
+        <div class="features">
+            <h3>Features:</h3>
+            <ul>
+                <li>Fetch upcoming games from TeamSnap</li>
+                <li>Get list of attending players automatically</li>
+                <li>Generate optimal fielding positions</li>
+                <li>Simple interface for lineup management</li>
+            </ul>
+        </div>
+        
+        <p style="margin-top: 30px; color: #666; font-size: 14px;">
+            You'll need a TeamSnap account and API access to use this app.
+        </p>
+    </div>
+</body>
+</html>

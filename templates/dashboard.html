@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baseball Lineup Manager - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.8em;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn.danger {
+            background-color: #e74c3c;
+        }
+        .btn.danger:hover {
+            background-color: #c0392b;
+        }
+        .btn.success {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn.success:hover {
+            background-color: #219a52;
+            color: white;
+        }
+        .games-list, .players-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .game-item, .player-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .game-item:hover, .player-item:hover {
+            background-color: #f8f9fa;
+        }
+        .game-item.selected {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+        .lineup-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Baseball Diamond Layout */
+        .baseball-diamond {
+            position: relative;
+            width: 700px;
+            height: 600px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, #8fbc8f 0%, #90ee90 100%);
+            border-radius: 10px;
+            border: 3px solid #654321;
+        }
+        
+        .position-card {
+            position: absolute;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #333;
+            min-width: 70px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Position-specific styling */
+        .pitcher { top: 65%; left: 50%; background: #fff3cd; }
+        .catcher { top: 90%; left: 50%; background: #d1ecf1; }
+        .first-base { top: 65%; left: 85%; background: #d4edda; }
+        .second-base { top: 45%; left: 65%; background: #d4edda; }
+        .third-base { top: 65%; left: 15%; background: #d4edda; }
+        .shortstop { top: 45%; left: 35%; background: #d4edda; }
+        .left-field { top: 20%; left: 20%; background: #e2e3e5; }
+        .center-field { top: 15%; left: 50%; background: #e2e3e5; }
+        .right-field { top: 20%; left: 80%; background: #e2e3e5; }
+        
+        /* Home plate and bases */
+        .base {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 2px solid #333;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .home-plate {
+            top: 85%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            background: white;
+            border: 2px solid #333;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%);
+            transform: translate(-50%, -50%);
+        }
+        .first-base-marker { top: 65%; left: 85%; }
+        .second-base-marker { top: 35%; left: 50%; }
+        .third-base-marker { top: 65%; left: 15%; }
+        
+        /* Pitcher's mound */
+        .pitchers-mound {
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: #deb887;
+            border-radius: 50%;
+            border: 2px solid #8b7355;
+            transform: translate(-50%, -50%);
+        }
+        .position-number {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c5aa0;
+        }
+        .position-name {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+        .player-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        .error {
+            color: #e74c3c;
+            background-color: #fdf2f2;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #27ae60;
+            background-color: #f0f9f4;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            .lineup-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            width: 100%;
+        }
+        .tab-buttons {
+            display: flex;
+            background-color: #f1f1f1;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+        .tab-button.active {
+            background-color: white;
+            border-bottom: 3px solid #3498db;
+            color: #3498db;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Print styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .tab-container {
+                border: none;
+                box-shadow: none;
+                background: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header no-print">
+        <div>
+            <span class="logo">⚾</span>
+            <strong>Baseball Lineup Manager</strong>
+        </div>
+        <div>
+            <button class="btn" onclick="loadTeams()">Refresh Teams</button>
+            <a href="/logout" class="btn danger">Logout</a>
+        </div>
+    </div>
+
+    <!-- Tab Container -->
+    <div class="tab-container">
+        <!-- Tab Buttons -->
+        <div class="tab-buttons no-print">
+            <button class="tab-button active" onclick="openTab('teams-tab')">📋 Select Team & Game</button>
+            <button class="tab-button" onclick="openTab('players-tab')">👥 Players</button>
+            <button class="tab-button" onclick="openTab('lineup-tab')">⚾ Lineup</button>
+        </div>
+
+        <!-- Tab Content: Teams and Games -->
+        <div id="teams-tab" class="tab-content active">
+            <h3>Select Team & Game</h3>
+            
+            <!-- Team Status Filter -->
+            <div style="margin-bottom: 20px;">
+                <label for="team-status-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Filter Teams:</label>
+                <select id="team-status-filter" class="btn" style="width: 200px;" onchange="filterTeams()">
+                    <option value="all">All Teams</option>
+                    <option value="active">Active Teams Only</option>
+                    <option value="archived">Archived Teams Only</option>
+                    <option value="cobs" selected>Cobs Teams Only</option>
+                </select>
+            </div>
+            
+            <div id="teams-loading" class="loading">Loading teams...</div>
+            <div id="teams-list" style="display:none;"></div>
+            
+            <div id="games-section" style="display:none;">
+                <hr style="margin: 30px 0;">
+                <h4>Upcoming Games</h4>
+                
+                <!-- Game Filter -->
+                <div style="margin-bottom: 15px;">
+                    <label for="game-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Show Games:</label>
+                    <select id="game-filter" class="btn" style="width: 150px;" onchange="filterGames()">
+                        <option value="next" selected>Next Game Only</option>
+                        <option value="all">All Upcoming Games</option>
+                    </select>
+                </div>
+                
+                <div id="games-loading" class="loading">Loading games...</div>
+                <div id="games-list" class="games-list"></div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn" onclick="openTab('players-tab')" id="next-to-players-btn" style="display:none;">
+                        Next: View Players →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Players -->
+        <div id="players-tab" class="tab-content">
+            <h3>Attending Players</h3>
+            <div id="selected-game-info" style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; display:none;">
+                <strong>Selected Game:</strong> <span id="selected-game-name"></span><br>
+                <small id="selected-game-details"></small>
+            </div>
+            
+            <div id="players-loading" class="loading">Loading players...</div>
+            <div id="players-list" class="players-list"></div>
+            
+            <div style="margin-top: 20px;">
+                <button id="generate-lineup-btn" class="btn success" onclick="generateLineup()" style="display:none;">
+                    Generate Lineup
+                </button>
+                <button class="btn" onclick="generateAndShowLineup()" id="next-to-lineup-btn" style="display:none; margin-left: 10px;">
+                    Next: View Lineup →
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Content: Lineup -->
+        <div id="lineup-tab" class="tab-content">
+            <h3>Fielding Positions</h3>
+            <div id="lineup-display"></div>
+            
+            <div id="bench-section" style="display:none;">
+                <hr style="margin: 30px 0;">
+                <h4>Bench Players</h4>
+                <div id="bench-list"></div>
+            </div>
+            
+            <div style="margin-top: 30px;" class="no-print">
+                <button class="btn" onclick="regenerateLineup()" id="regenerate-btn" style="display:none;">
+                    🔄 Regenerate Lineup
+                </button>
+                <button class="btn" onclick="openTab('players-tab')" style="margin-left: 10px;">
+                    ← Back to Players
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedTeam = null;
+        let selectedGame = null;
+        let attendingPlayers = [];
+        let allTeams = []; // Store all teams for filtering
+        let allGames = []; // Store all games for filtering
+
+        // Load teams on page load
+        window.onload = function() {
+            loadTeams();
+        };
+
+        // Tab functionality
+        function openTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => button.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            const activeButton = document.querySelector(`[onclick="openTab('${tabName}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+        }
+
+        async function loadTeams() {
+            document.getElementById('teams-loading').style.display = 'block';
+            document.getElementById('teams-list').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/teams');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayTeams(data);
+                } else {
+                    showError('Failed to load teams: ' + data.error);
+                }
+            } catch (error) {
+                showError('Failed to load teams: ' + error.message);
+            }
+            
+            document.getElementById('teams-loading').style.display = 'none';
+        }
+
+        function displayTeams(data) {
+            // Store all teams for filtering
+            allTeams = [];
+            
+            if (data.collection && data.collection.items) {
+                data.collection.items.forEach(team => {
+                    const teamData = {};
+                    team.data.forEach(d => teamData[d.name] = d.value);
+                    allTeams.push(teamData);
+                });
+            }
+            
+            // Apply current filter
+            filterTeams();
+            
+            document.getElementById('teams-list').style.display = 'block';
+        }
+
+        function filterTeams() {
+            const teamsList = document.getElementById('teams-list');
+            const filter = document.getElementById('team-status-filter').value;
+            
+            teamsList.innerHTML = '';
+            
+            let filteredTeams = allTeams;
+            
+            // Apply filter
+            if (filter === 'active') {
+                filteredTeams = allTeams.filter(team => team.is_archived !== true && team.season_name !== 'Archived');
+            } else if (filter === 'archived') {
+                filteredTeams = allTeams.filter(team => team.is_archived === true || team.season_name === 'Archived');
+            } else if (filter === 'cobs') {
+                filteredTeams = allTeams.filter(team => 
+                    team.name && team.name.toLowerCase().includes('cobs')
+                );
+            }
+            
+            // Display filtered teams
+            filteredTeams.forEach(teamData => {
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'game-item';
+                
+                // Show more team info for better selection
+                const statusBadge = teamData.is_archived ? '<span style="color: #666; font-size: 12px;">[ARCHIVED]</span>' : '<span style="color: #27ae60; font-size: 12px;">[ACTIVE]</span>';
+                
+                teamDiv.innerHTML = `
+                    <strong>${teamData.name}</strong> ${statusBadge}<br>
+                    <small>Division: ${teamData.division_name || 'N/A'}</small><br>
+                    <small>Season: ${teamData.season_name || 'N/A'}</small>
+                `;
+                teamDiv.onclick = () => selectTeam(teamData.id, teamData.name);
+                teamsList.appendChild(teamDiv);
+            });
+            
+            if (filteredTeams.length === 0) {
+                teamsList.innerHTML = '<p>No teams found for the selected filter.</p>';
+            }
+        }
+
+        async function selectTeam(teamId, teamName) {
+            selectedTeam = teamId;
+            
+            // Highlight selected team
+            document.querySelectorAll('.game-item').forEach(item => item.classList.remove('selected'));
+            event.target.classList.add('selected');
+            
+            // Show games section and load games
+            document.getElementById('games-section').style.display = 'block';
+            document.getElementById('games-loading').style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/games/${teamId}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayGames(data.games);
+                } else {
+                    showError('Failed to load games: ' + data.error);
+                }
+            } catch (error) {
+                showError('Failed to load games: ' + error.message);
+            }
+            
+            document.getElementById('games-loading').style.display = 'none';
+        }
+
+        function displayGames(games) {
+            // Store all games for filtering
+            allGames = games;
+            
+            // Apply current filter
+            filterGames();
+        }
+
+        function filterGames() {
+            const gamesList = document.getElementById('games-list');
+            const filter = document.getElementById('game-filter').value;
+            
+            gamesList.innerHTML = '';
+            
+            let filteredGames = allGames;
+            
+            // Apply filter
+            if (filter === 'next' && allGames.length > 0) {
+                // Sort games by date and take only the first one
+                const sortedGames = [...allGames].sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+                filteredGames = [sortedGames[0]];
+            }
+            
+            if (filteredGames.length === 0) {
+                gamesList.innerHTML = '<p>No upcoming games found.</p>';
+                return;
+            }
+            
+            filteredGames.forEach(game => {
+                const gameDiv = document.createElement('div');
+                gameDiv.className = 'game-item';
+                const gameDate = new Date(game.starts_at).toLocaleDateString();
+                const gameTime = new Date(game.starts_at).toLocaleTimeString();
+                
+                gameDiv.innerHTML = `
+                    <strong>${game.name}</strong><br>
+                    <small>${gameDate} at ${gameTime}</small><br>
+                    <small>📍 ${game.location}</small>
+                `;
+                gameDiv.onclick = () => selectGame(game.id, game.name);
+                gamesList.appendChild(gameDiv);
+            });
+        }
+
+        async function selectGame(gameId, gameName) {
+            selectedGame = gameId;
+            
+            // Highlight selected game
+            document.querySelectorAll('#games-list .game-item').forEach(item => item.classList.remove('selected'));
+            event.target.classList.add('selected');
+            
+            // Show navigation button
+            document.getElementById('next-to-players-btn').style.display = 'block';
+            
+            // Update game info in players tab
+            const selectedGameElement = allGames.find(game => game.id == gameId);
+            if (selectedGameElement) {
+                document.getElementById('selected-game-name').textContent = selectedGameElement.name;
+                const gameDate = new Date(selectedGameElement.starts_at).toLocaleDateString();
+                const gameTime = new Date(selectedGameElement.starts_at).toLocaleTimeString();
+                document.getElementById('selected-game-details').textContent = `${gameDate} at ${gameTime} - ${selectedGameElement.location}`;
+                document.getElementById('selected-game-info').style.display = 'block';
+            }
+            
+            // Load availability
+            document.getElementById('players-loading').style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/availability/${gameId}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    attendingPlayers = data.attending_players;
+                    displayPlayers(attendingPlayers);
+                } else {
+                    showError('Failed to load player availability: ' + data.error);
+                }
+            } catch (error) {
+                showError('Failed to load player availability: ' + error.message);
+            }
+            
+            document.getElementById('players-loading').style.display = 'none';
+        }
+
+        function displayPlayers(players) {
+            const playersList = document.getElementById('players-list');
+            playersList.innerHTML = '';
+            
+            if (players.length === 0) {
+                playersList.innerHTML = '<p>No players marked as attending.</p>';
+                return;
+            }
+            
+            players.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-item';
+                playerDiv.style.display = 'flex';
+                playerDiv.style.justifyContent = 'space-between';
+                playerDiv.style.alignItems = 'center';
+                
+                playerDiv.innerHTML = `
+                    <strong>${player.name}</strong>
+                    <select class="position-preference" data-player-id="${player.id}" style="margin-left: 10px; padding: 5px;">
+                        <option value="any">Any Position</option>
+                        <option value="pitcher">Pitcher</option>
+                        <option value="catcher">Catcher</option>
+                    </select>
+                `;
+                playersList.appendChild(playerDiv);
+            });
+            
+            // Show generate lineup button if we have enough players
+            const generateBtn = document.getElementById('generate-lineup-btn');
+            const nextBtn = document.getElementById('next-to-lineup-btn');
+            if (players.length >= 9) {
+                generateBtn.style.display = 'inline-block';
+                generateBtn.textContent = `Generate Lineup (${players.length} players)`;
+                nextBtn.style.display = 'inline-block';
+            } else {
+                generateBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                showError(`Need at least 9 players for a lineup. Currently have ${players.length} attending.`);
+            }
+        }
+
+        async function generateLineup() {
+            try {
+                // Collect position preferences
+                const playersWithPreferences = attendingPlayers.map(player => {
+                    const preferenceSelect = document.querySelector(`[data-player-id="${player.id}"]`);
+                    return {
+                        ...player,
+                        position_preference: preferenceSelect ? preferenceSelect.value : 'any'
+                    };
+                });
+                
+                const response = await fetch('/api/lineup/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        players: playersWithPreferences
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayLineup(data);
+                } else {
+                    showError('Failed to generate lineup: ' + data.error);
+                }
+            } catch (error) {
+                showError('Failed to generate lineup: ' + error.message);
+            }
+        }
+
+        function displayLineup(data) {
+            const lineupDisplay = document.getElementById('lineup-display');
+            
+            if (data.lineups) {
+                // Display 3 lineups for 6-inning game
+                displayMultipleLineups(data);
+            } else {
+                // Legacy single lineup display
+                displaySingleLineup(data);
+            }
+            
+            // Show regenerate button
+            document.getElementById('regenerate-btn').style.display = 'inline-block';
+            
+            // Automatically switch to lineup tab
+            openTab('lineup-tab');
+            
+            showSuccess('3 lineups generated for 6-inning game!');
+        }
+
+        function displayMultipleLineups(data) {
+            const lineupDisplay = document.getElementById('lineup-display');
+            
+            lineupDisplay.innerHTML = `
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <p style="color: #666; margin: 5px 0;">3 Lineups • 2 Innings Each • No Repeated Pitchers</p>
+                </div>
+                <div style="text-align: center; margin-bottom: 20px;" class="no-print">
+                    <h2>6-Inning Game Plan</h2>
+                    <button onclick="window.print()" class="btn" style="margin: 10px;">🖨️ Print All Lineups</button>
+                </div>
+                <div id="all-lineups"></div>
+            `;
+            
+            const allLineupsDiv = document.getElementById('all-lineups');
+            
+            data.lineups.forEach((lineupData, index) => {
+                const lineupSection = document.createElement('div');
+                lineupSection.className = 'lineup-section';
+                lineupSection.style.marginBottom = '40px';
+                lineupSection.style.pageBreakAfter = index < data.lineups.length - 1 ? 'always' : 'auto';
+                
+                lineupSection.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h3>Lineup ${index + 1} - Innings ${lineupData.innings}</h3>
+                        <p style="color: #2c5aa0; font-weight: bold;">Pitcher: ${lineupData.pitcher}</p>
+                    </div>
+                    
+                    <!-- Baseball diamond graphic -->
+                    <div class="baseball-diamond" id="diamond-${index}">
+                        <!-- Home plate and bases -->
+                        <div class="home-plate"></div>
+                        <div class="base first-base-marker"></div>
+                        <div class="base second-base-marker"></div>
+                        <div class="base third-base-marker"></div>
+                        <div class="pitchers-mound"></div>
+                    </div>
+                    
+                    <!-- Bench section -->
+                    <div id="bench-section-${index}" class="bench-section" style="margin-top: 10px; text-align: center;">
+                        <div id="bench-list-${index}" class="bench-list"></div>
+                    </div>
+                `;
+                
+                allLineupsDiv.appendChild(lineupSection);
+                
+                // Get the diamond for this lineup
+                const diamond = document.getElementById(`diamond-${index}`);
+                
+                // Position class mapping
+                const positionClasses = {
+                    1: 'pitcher',
+                    2: 'catcher',
+                    3: 'first-base',
+                    4: 'second-base', 
+                    5: 'third-base',
+                    6: 'shortstop',
+                    7: 'left-field',
+                    8: 'center-field',
+                    9: 'right-field'
+                };
+                
+                // Display fielding positions on the diamond
+                Object.keys(lineupData.lineup).forEach(position => {
+                    const positionCard = document.createElement('div');
+                    const positionNum = parseInt(position);
+                    const positionClass = positionClasses[positionNum] || '';
+                    
+                    positionCard.className = `position-card ${positionClass}`;
+                    
+                    const playerInfo = lineupData.lineup[position];
+                    positionCard.innerHTML = `
+                        <div class="position-number">${position}</div>
+                        <div class="position-name" style="font-size: 10px; margin: 2px 0;">${playerInfo.position_name}</div>
+                        <div class="player-name" style="font-size: 11px; font-weight: bold;">${playerInfo.player_name}</div>
+                    `;
+                    
+                    diamond.appendChild(positionCard);
+                });
+                
+                // Populate bench
+                const benchList = document.getElementById(`bench-list-${index}`);
+                if (lineupData.bench.length > 0) {
+                    lineupData.bench.forEach(player => {
+                        const benchPlayer = document.createElement('div');
+                        benchPlayer.className = 'player-item';
+                        benchPlayer.innerHTML = player.name;
+                        benchList.appendChild(benchPlayer);
+                    });
+                } else {
+                    benchList.innerHTML = '<em>No bench players</em>';
+                }
+            });
+        }
+
+        function displaySingleLineup(data) {
+            const lineupDisplay = document.getElementById('lineup-display');
+            
+            // Create baseball diamond
+            lineupDisplay.innerHTML = `
+                <div class="baseball-diamond">
+                    <!-- Home plate and bases -->
+                    <div class="home-plate"></div>
+                    <div class="base first-base-marker"></div>
+                    <div class="base second-base-marker"></div>
+                    <div class="base third-base-marker"></div>
+                    <div class="pitchers-mound"></div>
+                </div>
+            `;
+            
+            const diamond = lineupDisplay.querySelector('.baseball-diamond');
+            
+            // Position class mapping
+            const positionClasses = {
+                1: 'pitcher',
+                2: 'catcher',
+                3: 'first-base',
+                4: 'second-base', 
+                5: 'third-base',
+                6: 'shortstop',
+                7: 'left-field',
+                8: 'center-field',
+                9: 'right-field'
+            };
+            
+            // Display fielding positions on the diamond
+            Object.keys(data.lineup).forEach(position => {
+                const positionCard = document.createElement('div');
+                const positionNum = parseInt(position);
+                const positionClass = positionClasses[positionNum] || '';
+                
+                positionCard.className = `position-card ${positionClass}`;
+                
+                const playerInfo = data.lineup[position];
+                positionCard.innerHTML = `
+                    <div class="position-number">${position}</div>
+                    <div class="position-name" style="font-size: 10px; margin: 2px 0;">${playerInfo.position_name}</div>
+                    <div class="player-name" style="font-size: 11px; font-weight: bold;">${playerInfo.player_name}</div>
+                `;
+                
+                diamond.appendChild(positionCard);
+            });
+            
+            // Display bench players if any
+            if (data.bench && data.bench.length > 0) {
+                const benchSection = document.getElementById('bench-section');
+                const benchList = document.getElementById('bench-list');
+                
+                benchList.innerHTML = '';
+                data.bench.forEach(player => {
+                    const benchPlayer = document.createElement('div');
+                    benchPlayer.className = 'player-item';
+                    benchPlayer.innerHTML = `<strong>${player.name}</strong>`;
+                    benchList.appendChild(benchPlayer);
+                });
+                
+                benchSection.style.display = 'block';
+            }
+        }
+
+        function regenerateLineup() {
+            generateLineup();
+        }
+
+        async function generateAndShowLineup() {
+            // First generate the lineup
+            await generateLineup();
+            // The generateLineup function already switches to the lineup tab
+        }
+
+        function showError(message) {
+            // Remove existing messages
+            document.querySelectorAll('.error, .success').forEach(el => el.remove());
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            document.body.insertBefore(errorDiv, document.body.firstChild);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            // Remove existing messages
+            document.querySelectorAll('.error, .success').forEach(el => el.remove());
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            
+            document.body.insertBefore(successDiv, document.body.firstChild);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
