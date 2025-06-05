@@ -509,12 +509,15 @@ if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
     
-    # For development with HTTPS
-    if debug:
+    # For development - disable SSL for easier local access
+    if debug and os.getenv('FLASK_SSL', 'false').lower() == 'true':
         # Create a simple SSL context for development
         import ssl
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         context.load_cert_chain('cert.pem', 'key.pem')
         app.run(host='0.0.0.0', port=port, debug=debug, ssl_context=context)
+    elif debug:
+        # Run without SSL for easier local development
+        app.run(host='0.0.0.0', port=port, debug=debug)
     else:
         app.run(host='0.0.0.0', port=port, debug=debug)
