@@ -354,6 +354,125 @@ def get_availability(event_id):
         print(f"❌ API Error: {str(e)}")
         return jsonify({'error': f'API request failed: {str(e)}'}), 500
 
+def can_fill_all_positions(players, positions_to_fill, assignments=None):
+    """
+    Check if all positions can be filled with available players.
+    Uses recursive backtracking to verify a valid assignment exists.
+    """
+    if assignments is None:
+        assignments = {}
+    
+    # Base case: all positions filled
+    if not positions_to_fill:
+        return True
+    
+    # Get next position to fill
+    position = positions_to_fill[0]
+    remaining_positions = positions_to_fill[1:]
+    
+    # Try each player who can play this position
+    for player in players:
+        player_id = player['id']
+        
+        # Skip if player already assigned
+        if player_id in assignments.values():
+            continue
+            
+        # Check if player can play this position
+        prefs = player.get('position_preferences', [])
+        if not prefs:  # Empty list means any position
+            can_play = True
+        else:  # Has specific preferences - can ONLY play those positions
+            can_play = position in prefs
+            
+        if not can_play:
+            continue
+        
+        # Try assigning this player
+        assignments[position] = player_id
+        
+        # Recursively check if remaining positions can be filled
+        if can_fill_all_positions(players, remaining_positions, assignments):
+            return True
+        
+        # Backtrack
+        del assignments[position]
+    
+    return False
+
+
+def assign_positions_smart(available_players, available_positions, must_play_players, position_candidates, player_position_history=None):
+    """
+    Assign players to positions using a smart algorithm that considers:
+    1. Must-play players get priority
+    2. Position scarcity (positions with fewer candidates are filled first)
+    3. Player flexibility (less flexible players are assigned first)
+    4. Position rotation (prefer positions players haven't played recently)
+    """
+    assignments = {}
+    remaining_players = available_players.copy()
+    remaining_positions = available_positions.copy()
+    
+    # First, ensure we can fill all positions
+    if not can_fill_all_positions(remaining_players, remaining_positions):
+        print("  ⚠️  WARNING: Cannot fill all positions with current constraints!")
+        # Fall back to simple assignment
+        return None
+    
+    # Sort positions by scarcity (fewest candidates first)
+    position_scarcity = []
+    for pos in remaining_positions:
+        candidates = []
+        for p in remaining_players:
+            prefs = p.get('position_preferences', [])
+            if not prefs:  # Can play any position
+                candidates.append(p)
+            elif pos in prefs:  # Can ONLY play specified positions
+                candidates.append(p)
+        position_scarcity.append((pos, len(candidates)))
+    position_scarcity.sort(key=lambda x: x[1])
+    
+    # Assign positions in order of scarcity
+    for position, _ in position_scarcity:
+        # Get candidates for this position
+        candidates = []
+        for p in remaining_players:
+            prefs = p.get('position_preferences', [])
+            if not prefs:  # Can play any position
+                candidates.append(p)
+            elif position in prefs:  # Can ONLY play specified positions
+                candidates.append(p)
+        
+        # Prioritize must-play players
+        must_play_candidates = [p for p in candidates if p in must_play_players]
+        if must_play_candidates:
+            candidates = must_play_candidates
+        
+        # Sort candidates by:
+        # 1. How many times they've played this position (prefer rotation)
+        # 2. Their flexibility (less flexible players first)
+        def candidate_sort_key(player):
+            player_id = player['id']
+            position_count = 0
+            if player_position_history and player_id in player_position_history:
+                position_count = player_position_history[player_id].count(position)
+            
+            prefs = player.get('position_preferences', [])
+            flexibility = len(prefs) if prefs else 9
+            
+            # Return tuple: (times played this position, flexibility)
+            return (position_count, flexibility)
+        
+        candidates.sort(key=candidate_sort_key)
+        
+        if candidates:
+            chosen_player = candidates[0]
+            assignments[position] = chosen_player
+            remaining_players.remove(chosen_player)
+    
+    return assignments
+
+
 @app.route('/api/lineup/generate', methods=['POST'])
 def generate_lineup():
     """Generate 3 complete lineups for 6-inning game with pitcher rotation"""
@@ -366,59 +485,67 @@ def generate_lineup():
     print(f"\n⚾ GENERATING 3 LINEUPS FOR 6-INNING GAME ({len(players)} PLAYERS)")
     print("="*70)
     
-    # Identify potential pitchers
-    pitcher_candidates = []
-    catcher_candidates = []
-    other_players = []
+    # Create a mapping of position -> list of players who can play it
+    position_candidates = {pos: [] for pos in range(1, 10)}
+    flexible_players = []  # Players who can play any position
     
     for player in players:
-        preference = player.get('position_preference', 'any')
-        if preference == 'pitcher':
-            pitcher_candidates.append(player)
-        elif preference == 'catcher':
-            catcher_candidates.append(player)
+        prefs = player.get('position_preferences', [])
+        if not prefs:  # Empty array means any position
+            flexible_players.append(player)
+            for pos in range(1, 10):
+                position_candidates[pos].append(player)
         else:
-            other_players.append(player)
+            for pos in prefs:
+                position_candidates[pos].append(player)
     
-    # If we don't have enough designated pitchers, use other players
-    all_available_pitchers = pitcher_candidates + other_players
+    # Check if we have at least one player who can pitch
+    if len(position_candidates[1]) < 1:
+        return jsonify({'error': 'Need at least 1 player who can pitch'}), 400
     
-    if len(all_available_pitchers) < 3:
-        return jsonify({'error': 'Need at least 3 players who can pitch for 6-inning rotation'}), 400
-    
-    print(f"🥎 Pitcher candidates: {len(pitcher_candidates)} designated + {len(other_players)} others")
-    print(f"🥎 Catcher candidates: {len(catcher_candidates)}")
+    # Log position availability
+    print(f"🥎 Position availability:")
+    for pos, candidates in position_candidates.items():
+        pos_name = FIELDING_POSITIONS[pos]
+        print(f"  {pos}. {pos_name}: {len(candidates)} players")
+    print(f"🥎 Flexible players (any position): {len(flexible_players)}")
     
     lineups = []
-    used_pitchers = []
     used_catchers = []
     
-    # Generate 3 lineups (Innings 1-2, 3-4, 5-6)
-    for lineup_num in range(3):
-        innings = f"{lineup_num*2 + 1}-{lineup_num*2 + 2}"
-        print(f"\n🏟️ LINEUP {lineup_num + 1} (Innings {innings})")
+    # Track consecutive innings on bench for each player
+    bench_tracker = {player['id']: 0 for player in players}
+    
+    # Track which positions each player has played across lineups
+    player_position_history = {player['id']: [] for player in players}
+    
+    # Get all available pitchers
+    available_pitchers = position_candidates[1].copy()
+    print(f"\n⚾ GENERATING {len(available_pitchers)} LINEUPS (One per pitcher)")
+    
+    # Generate one lineup for each pitcher
+    for lineup_num, pitcher in enumerate(available_pitchers):
+        print(f"\n🏟️ LINEUP {lineup_num + 1} - Pitcher: {pitcher['name']}")
         print("-" * 40)
+        
+        # Show position rotation info
+        if lineup_num > 0:
+            print("  🔄 Position rotation active - players will try different positions")
         
         lineup = {}
         assigned_players = set()
         available_positions = list(FIELDING_POSITIONS.keys())
         
-        # Select pitcher (avoid repeating)
-        available_pitchers = [p for p in all_available_pitchers if p['id'] not in used_pitchers]
-        if not available_pitchers:
-            available_pitchers = all_available_pitchers  # Reset if we run out
-            used_pitchers = []
+        # First, identify players who MUST play (sat out 2 consecutive lineups)
+        must_play_players = []
+        if lineup_num > 0:  # Can only check after first lineup
+            for player_id, bench_count in bench_tracker.items():
+                if bench_count >= 2:  # Player has sat out 2 consecutive lineups
+                    player = next(p for p in players if p['id'] == player_id)
+                    must_play_players.append(player)
+                    print(f"  ⚠️  MUST PLAY: {player['name']} (sat out {bench_count} lineups)")
         
-        # Prefer designated pitchers, then others
-        pitcher = None
-        for p in available_pitchers:
-            if p.get('position_preference') == 'pitcher':
-                pitcher = p
-                break
-        if not pitcher:
-            pitcher = available_pitchers[0]
-        
-        used_pitchers.append(pitcher['id'])
+        # Pitcher is already determined from the loop
         
         lineup[1] = {
             'player_name': pitcher['name'],
@@ -426,32 +553,36 @@ def generate_lineup():
         }
         assigned_players.add(pitcher['id'])
         available_positions.remove(1)
+        # Track pitcher position history
+        player_position_history[pitcher['id']].append(1)
         print(f"  🥎 Pitcher: {pitcher['name']}")
         
-        # Assign catcher (rotate if multiple catchers available)
+        # Assign catcher (prioritize must-play players)
         catcher = None
-        if len(catcher_candidates) > 1:
-            # Rotate catchers across lineups
-            available_catchers = [p for p in catcher_candidates if p['id'] not in used_catchers and p['id'] not in assigned_players]
-            if not available_catchers:
-                # Reset rotation if we've used all catchers
-                used_catchers = []
-                available_catchers = [p for p in catcher_candidates if p['id'] not in assigned_players]
-            
-            if available_catchers:
-                catcher = available_catchers[0]
-                used_catchers.append(catcher['id'])
-        else:
-            # Single catcher or prefer any designated catcher
-            available_catchers = [p for p in catcher_candidates if p['id'] not in assigned_players]
-            if available_catchers:
-                catcher = available_catchers[0]
         
-        # If no designated catchers available, use any other player
-        if not catcher:
-            available_others = [p for p in other_players if p['id'] not in assigned_players]
-            if available_others:
-                catcher = available_others[0]
+        # Get available catchers
+        available_catchers = [p for p in position_candidates[2] if p['id'] not in assigned_players]
+        
+        # Check if any must-play player can catch
+        for p in must_play_players:
+            if p['id'] not in assigned_players and p in available_catchers:
+                catcher = p
+                break
+        
+        # If no must-play catcher, use rotation logic
+        if not catcher and available_catchers:
+            # Rotate catchers if multiple available
+            catchers_not_used = [p for p in available_catchers if p['id'] not in used_catchers]
+            if not catchers_not_used:
+                # Reset rotation
+                used_catchers = []
+                catchers_not_used = available_catchers
+            
+            if catchers_not_used:
+                # Prefer specialized catchers (those with fewer position options)
+                catchers_not_used.sort(key=lambda p: len(p.get('position_preferences', [])) if p.get('position_preferences') else 9)
+                catcher = catchers_not_used[0]
+                used_catchers.append(catcher['id'])
         
         if catcher:
             lineup[2] = {
@@ -460,43 +591,106 @@ def generate_lineup():
             }
             assigned_players.add(catcher['id'])
             available_positions.remove(2)
+            # Track catcher position history
+            player_position_history[catcher['id']].append(2)
             print(f"  🥎 Catcher: {catcher['name']}")
         
-        # Assign remaining positions (randomize for variety across lineups)
+        # Assign remaining positions using smart algorithm
+        # Get unassigned players prioritizing must-play and bench time
+        remaining_must_play = [p for p in must_play_players if p['id'] not in assigned_players]
         remaining_players = [p for p in players if p['id'] not in assigned_players]
         
-        # Shuffle remaining players to randomize position assignments
-        random.shuffle(remaining_players)
+        # Try smart assignment first with position history
+        assignments = assign_positions_smart(remaining_players, available_positions, remaining_must_play, position_candidates, player_position_history)
         
-        for position in available_positions:
-            if remaining_players:
-                player = remaining_players.pop(0)
+        if assignments:
+            # Use smart assignments
+            for position, player in assignments.items():
                 lineup[position] = {
                     'player_name': player['name'],
                     'position_name': FIELDING_POSITIONS[position]
                 }
                 assigned_players.add(player['id'])
+                # Track position history for rotation
+                player_position_history[player['id']].append(position)
                 print(f"  {FIELDING_POSITIONS[position]}: {player['name']}")
+        else:
+            # Fallback to simple assignment with bench time priority
+            remaining_players.sort(key=lambda p: bench_tracker[p['id']], reverse=True)
+            all_remaining = remaining_must_play + [p for p in remaining_players if p not in remaining_must_play]
+            
+            # Simple assignment
+            for position in available_positions:
+                if all_remaining:
+                    # Find first player who can play this position
+                    assigned = False
+                    for i, player in enumerate(all_remaining):
+                        prefs = player.get('position_preferences', [])
+                        can_play = False
+                        
+                        if not prefs:  # Empty list = can play any position
+                            can_play = True
+                        elif position in prefs:  # Has preferences and this position is one of them
+                            can_play = True
+                        
+                        if can_play:
+                            lineup[position] = {
+                                'player_name': player['name'],
+                                'position_name': FIELDING_POSITIONS[position]
+                            }
+                            assigned_players.add(player['id'])
+                            # Track position history for rotation
+                            player_position_history[player['id']].append(position)
+                            print(f"  {FIELDING_POSITIONS[position]}: {player['name']}")
+                            all_remaining.pop(i)
+                            assigned = True
+                            break
+                    
+                    if not assigned:
+                        # This should not happen if position preferences are set correctly
+                        print(f"  ❌ ERROR: No valid player for {FIELDING_POSITIONS[position]}!")
+                        if all_remaining:
+                            # Emergency assignment - this violates position preferences
+                            player = all_remaining.pop(0)
+                            lineup[position] = {
+                                'player_name': player['name'],
+                                'position_name': FIELDING_POSITIONS[position]
+                            }
+                            assigned_players.add(player['id'])
+                            print(f"  ⚠️  WARNING: {player['name']} forced to {FIELDING_POSITIONS[position]} (violates preferences!)")
+        
+        # Update bench tracking
+        for player in players:
+            if player['id'] in assigned_players:
+                bench_tracker[player['id']] = 0  # Reset bench count
+            else:
+                bench_tracker[player['id']] += 1  # Increment bench count
         
         # Bench players
         bench = [p for p in players if p['id'] not in assigned_players]
         
         lineups.append({
-            'innings': innings,
             'lineup': lineup,
             'bench': bench,
             'pitcher': pitcher['name']
         })
         
-        print(f"  📋 Bench ({len(bench)}): {', '.join([p['name'] for p in bench])}")
+        bench_info = ', '.join([f"{p['name']} ({bench_tracker[p['id']]} lineups)" for p in bench])
+        print(f"  📋 Bench ({len(bench)}): {bench_info}")
     
-    print(f"\n📊 SUMMARY: 3 lineups generated with pitcher rotation")
+    # Verify no player sat out more than 2 consecutive lineups
+    max_bench_time = max(bench_tracker.values()) if bench_tracker else 0
+    if max_bench_time > 2:
+        print(f"\n⚠️  WARNING: Some players sat out {max_bench_time} lineups!")
+    
+    print(f"\n📊 SUMMARY: {len(lineups)} lineups generated (one per pitcher)")
+    print(f"📊 Max consecutive bench time: {max_bench_time} lineups (should be ≤ 2)")
     print("="*70)
     
     return jsonify({
         'lineups': lineups,
         'positions': FIELDING_POSITIONS,
-        'game_format': '6 innings, 3 lineups, 2 innings per pitcher'
+        'game_format': f'{len(lineups)} lineups available - one per pitcher'
     })
 
 @app.route('/logout')

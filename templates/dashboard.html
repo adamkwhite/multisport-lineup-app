@@ -185,6 +185,28 @@
             border-radius: 5px;
             margin: 10px 0;
         }
+        .position-checkboxes {
+            display: inline-flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .position-checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 12px;
+            background: #f0f0f0;
+            padding: 3px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .position-checkboxes input[type="checkbox"] {
+            margin: 0;
+        }
+        .position-checkboxes label:has(input:checked) {
+            background: #3498db;
+            color: white;
+        }
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -334,7 +356,7 @@
                 <button id="generate-lineup-btn" class="btn success" onclick="generateLineup()" style="display:none;">
                     Generate Lineup
                 </button>
-                <button class="btn" onclick="generateAndShowLineup()" id="next-to-lineup-btn" style="display:none; margin-left: 10px;">
+                <button class="btn" onclick="generateAndShowLineup()" id="players-next-to-lineup-btn" style="display:none; margin-left: 10px;">
                     Next: View Lineup →
                 </button>
             </div>
@@ -565,7 +587,10 @@
             }
             
             // Load availability
-            document.getElementById('players-loading').style.display = 'block';
+            const playersLoading = document.getElementById('players-loading');
+            if (playersLoading) {
+                playersLoading.style.display = 'block';
+            }
             
             try {
                 const response = await fetch(`/api/availability/${gameId}`);
@@ -581,12 +606,21 @@
                 showError('Failed to load player availability: ' + error.message);
             }
             
-            document.getElementById('players-loading').style.display = 'none';
+            if (playersLoading) {
+                playersLoading.style.display = 'none';
+            }
         }
 
         function displayPlayers(players) {
             const playersList = document.getElementById('players-list');
+            if (!playersList) {
+                console.error('players-list element not found!');
+                return;
+            }
+            
             playersList.innerHTML = '';
+            
+            console.log(`Displaying ${players.length} players`);
             
             if (players.length === 0) {
                 playersList.innerHTML = '<p>No players marked as attending.</p>';
@@ -602,22 +636,77 @@
                 
                 playerDiv.innerHTML = `
                     <strong>${player.name}</strong>
-                    <select class="position-preference" data-player-id="${player.id}" style="margin-left: 10px; padding: 5px;">
-                        <option value="any">Any Position</option>
-                        <option value="pitcher">Pitcher</option>
-                        <option value="catcher">Catcher</option>
-                    </select>
+                    <div class="position-checkboxes" data-player-id="${player.id}">
+                        <label><input type="checkbox" value="1"> P</label>
+                        <label><input type="checkbox" value="2"> C</label>
+                        <label><input type="checkbox" value="3"> 1B</label>
+                        <label><input type="checkbox" value="4"> 2B</label>
+                        <label><input type="checkbox" value="5"> 3B</label>
+                        <label><input type="checkbox" value="6"> SS</label>
+                        <label><input type="checkbox" value="7"> LF</label>
+                        <label><input type="checkbox" value="8"> CF</label>
+                        <label><input type="checkbox" value="9"> RF</label>
+                        <label><input type="checkbox" value="0" class="any-position"> Any</label>
+                    </div>
                 `;
                 playersList.appendChild(playerDiv);
             });
             
+            // Add checkbox interaction logic
+            document.querySelectorAll('.position-checkboxes').forEach(container => {
+                const anyCheckbox = container.querySelector('.any-position');
+                const positionCheckboxes = container.querySelectorAll('input[type="checkbox"]:not(.any-position)');
+                
+                // Handle "Any" checkbox
+                anyCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        positionCheckboxes.forEach(cb => {
+                            cb.checked = false;
+                            cb.disabled = true;
+                        });
+                    } else {
+                        positionCheckboxes.forEach(cb => {
+                            cb.disabled = false;
+                        });
+                    }
+                });
+                
+                // Handle position checkboxes
+                positionCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        if (Array.from(positionCheckboxes).some(c => c.checked)) {
+                            anyCheckbox.checked = false;
+                            anyCheckbox.disabled = true;
+                        } else {
+                            anyCheckbox.disabled = false;
+                        }
+                    });
+                });
+                
+                // Don't check any boxes by default - no selection means "any position"
+            });
+            
             // Show generate lineup button if we have enough players
             const generateBtn = document.getElementById('generate-lineup-btn');
-            const nextBtn = document.getElementById('next-to-lineup-btn');
+            const nextBtn = document.getElementById('players-next-to-lineup-btn');
+            
+            console.log('Button check:', {
+                generateBtn: generateBtn ? 'found' : 'NOT FOUND',
+                nextBtn: nextBtn ? 'found' : 'NOT FOUND',
+                playerCount: players.length,
+                shouldShow: players.length >= 9
+            });
+            
+            if (!generateBtn || !nextBtn) {
+                console.error('Buttons not found in DOM!');
+                return;
+            }
+            
             if (players.length >= 9) {
                 generateBtn.style.display = 'inline-block';
                 generateBtn.textContent = `Generate Lineup (${players.length} players)`;
                 nextBtn.style.display = 'inline-block';
+                console.log('Buttons should be visible now');
             } else {
                 generateBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
@@ -629,12 +718,21 @@
             try {
                 // Collect position preferences
                 const playersWithPreferences = attendingPlayers.map(player => {
-                    const preferenceSelect = document.querySelector(`[data-player-id="${player.id}"]`);
+                    const checkboxContainer = document.querySelector(`.position-checkboxes[data-player-id="${player.id}"]`);
+                    const checkedBoxes = checkboxContainer.querySelectorAll('input[type="checkbox"]:checked');
+                    const positions = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+                    
+                    // Log for debugging
+                    console.log(`Player ${player.name}: positions = `, positions);
+                    
                     return {
                         ...player,
-                        position_preference: preferenceSelect ? preferenceSelect.value : 'any'
+                        position_preferences: positions.length === 0 || positions.includes(0) ? [] : positions  // Empty array means "any position"
                     };
                 });
+                
+                // Log the data being sent for debugging
+                console.log('Sending player data to backend:', playersWithPreferences);
                 
                 const response = await fetch('/api/lineup/generate', {
                     method: 'POST',
@@ -675,7 +773,7 @@
             // Automatically switch to lineup tab
             openTab('lineup-tab');
             
-            showSuccess('3 lineups generated for 6-inning game!');
+            showSuccess(`${data.lineups.length} lineup${data.lineups.length > 1 ? 's' : ''} generated!`);
         }
 
         function displayMultipleLineups(data) {
@@ -683,10 +781,10 @@
             
             lineupDisplay.innerHTML = `
                 <div style="text-align: center; margin-bottom: 10px;">
-                    <p style="color: #666; margin: 5px 0;">3 Lineups • 2 Innings Each • No Repeated Pitchers</p>
+                    <p style="color: #666; margin: 5px 0;">${data.lineups.length} Lineup${data.lineups.length > 1 ? 's' : ''} Available • One Per Pitcher</p>
                 </div>
                 <div style="text-align: center; margin-bottom: 20px;" class="no-print">
-                    <h2>6-Inning Game Plan</h2>
+                    <h2>Choose Your Pitcher</h2>
                     <button onclick="window.print()" class="btn" style="margin: 10px;">🖨️ Print All Lineups</button>
                 </div>
                 <div id="all-lineups"></div>
@@ -702,7 +800,7 @@
                 
                 lineupSection.innerHTML = `
                     <div style="text-align: center; margin-bottom: 20px;">
-                        <h3>Lineup ${index + 1} - Innings ${lineupData.innings}</h3>
+                        <h3>Lineup ${index + 1}</h3>
                         <p style="color: #2c5aa0; font-weight: bold;">Pitcher: ${lineupData.pitcher}</p>
                     </div>
                     
