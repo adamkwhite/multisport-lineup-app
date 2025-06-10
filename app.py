@@ -19,10 +19,13 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 CORS(app)
 
+# Port configuration
+PORT = int(os.getenv('PORT', 5001))
+
 # TeamSnap API configuration
 TEAMSNAP_CLIENT_ID = os.getenv('TEAMSNAP_CLIENT_ID')
 TEAMSNAP_CLIENT_SECRET = os.getenv('TEAMSNAP_CLIENT_SECRET')
-TEAMSNAP_REDIRECT_URI = os.getenv('TEAMSNAP_REDIRECT_URI', 'https://localhost:5000/auth/callback')
+TEAMSNAP_REDIRECT_URI = os.getenv('TEAMSNAP_REDIRECT_URI', f'https://localhost:{PORT}/auth/callback')
 TEAMSNAP_API_BASE = 'https://api.teamsnap.com/v3'
 TEAMSNAP_AUTH_BASE = 'https://auth.teamsnap.com'
 
@@ -700,7 +703,7 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
+    port = PORT
     debug = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
     
     # For development - disable SSL for easier local access
@@ -715,3 +718,4 @@ if __name__ == '__main__':
         app.run(host='0.0.0.0', port=port, debug=debug)
     else:
         app.run(host='0.0.0.0', port=port, debug=debug)
+
