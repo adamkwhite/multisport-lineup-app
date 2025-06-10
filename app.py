@@ -20,7 +20,7 @@ app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 CORS(app)
 
 # Port configuration
-PORT = int(os.getenv('PORT', 5001))
+PORT = int(os.getenv('PORT', 5000))
 
 # TeamSnap API configuration
 TEAMSNAP_CLIENT_ID = os.getenv('TEAMSNAP_CLIENT_ID')
@@ -53,6 +53,8 @@ def index():
 @app.route('/auth/login')
 def login():
     """Redirect to TeamSnap OAuth"""
+    from urllib.parse import urlencode
+    
     auth_url = f"{TEAMSNAP_AUTH_BASE}/oauth/authorize"
     params = {
         'client_id': TEAMSNAP_CLIENT_ID,
@@ -61,7 +63,7 @@ def login():
         'scope': 'read write'
     }
     
-    auth_redirect = f"{auth_url}?{'&'.join([f'{k}={v}' for k, v in params.items()])}"
+    auth_redirect = f"{auth_url}?{urlencode(params)}"
     return redirect(auth_redirect)
 
 @app.route('/auth/callback')

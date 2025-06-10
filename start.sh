@@ -27,7 +27,7 @@ if [ ! -f "cert.pem" ] || [ ! -f "key.pem" ]; then
     ./create_ssl_cert.sh
 fi
 
-PORT=${PORT:-5001}  # Default to 5001 if not set
+PORT=${PORT:-5000}  # Default to 5000 if not set
 echo "🌐 Starting Flask app on https://localhost:$PORT"
 echo "⚠️  Your browser will show a security warning for self-signed certificate"
 echo "📝 Press Ctrl+C to stop"
