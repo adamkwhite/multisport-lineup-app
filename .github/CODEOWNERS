@@ -1,0 +1,13 @@
+# CODEOWNERS file for baseball-lineup-app
+# This file defines who owns/reviews code in this repository
+# For more info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global ownership - Adam White owns all files
+* @adamkwhite
+
+# Specific ownership for critical files
+/.github/ @adamkwhite
+/requirements.txt @adamkwhite
+/app.py @adamkwhite
+/templates/ @adamkwhite
+/static/ @adamkwhite
