@@ -1,0 +1,49 @@
+# GitHub Dependabot configuration for baseball-lineup-app
+# Flask web application with Python dependencies
+
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "adamkwhite"
+    assignees:
+      - "adamkwhite"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "flask"
+      - "python"
+    # Group Flask and web dependencies
+    groups:
+      flask-ecosystem:
+        patterns:
+          - "flask*"
+          - "werkzeug*"
+          - "jinja2*"
+        update-types:
+          - "minor"
+          - "patch"
+      web-dependencies:
+        patterns:
+          - "gunicorn*"
+          - "requests*"
+          - "urllib3*"
+        update-types:
+          - "minor"
+          - "patch"
+    allow:
+      - dependency-type: "all"
+    ignore:
+      # Be careful with major Flask updates
+      - dependency-name: "flask"
+        update-types: ["version-update:semver-major"]
