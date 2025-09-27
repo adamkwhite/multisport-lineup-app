@@ -1,0 +1,169 @@
+{
+  "team": {
+    "name": "Demo All-Stars",
+    "id": "demo-001"
+  },
+  "players": [
+    {
+      "id": "player-001",
+      "name": "Mike Trout",
+      "obfuscated_name": "M*** T***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "27"
+    },
+    {
+      "id": "player-002",
+      "name": "Aaron Judge",
+      "obfuscated_name": "A*** J***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "99"
+    },
+    {
+      "id": "player-003",
+      "name": "Mookie Betts",
+      "obfuscated_name": "M*** B***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "50"
+    },
+    {
+      "id": "player-004",
+      "name": "Ronald Acuña Jr.",
+      "obfuscated_name": "R*** A*** J*",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "13"
+    },
+    {
+      "id": "player-005",
+      "name": "Derek Jeter",
+      "obfuscated_name": "D*** J***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "2"
+    },
+    {
+      "id": "player-006",
+      "name": "Ken Griffey Jr.",
+      "obfuscated_name": "K** G*** J*",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "24"
+    },
+    {
+      "id": "player-007",
+      "name": "Tony Gwynn",
+      "obfuscated_name": "T*** G***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "19"
+    },
+    {
+      "id": "player-008",
+      "name": "Cal Ripken Jr.",
+      "obfuscated_name": "C** R*** J*",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "8"
+    },
+    {
+      "id": "player-009",
+      "name": "Babe Ruth",
+      "obfuscated_name": "B*** R***",
+      "position_preference": "pitcher",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "3"
+    },
+    {
+      "id": "player-010",
+      "name": "Willie Mays",
+      "obfuscated_name": "W*** M***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "24"
+    },
+    {
+      "id": "player-011",
+      "name": "Hank Aaron",
+      "obfuscated_name": "H*** A***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "44"
+    },
+    {
+      "id": "player-012",
+      "name": "Mickey Mantle",
+      "obfuscated_name": "M*** M***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "7"
+    },
+    {
+      "id": "player-013",
+      "name": "Shohei Ohtani",
+      "obfuscated_name": "S*** O***",
+      "position_preference": "pitcher",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "17"
+    },
+    {
+      "id": "player-014",
+      "name": "Jackie Robinson",
+      "obfuscated_name": "J*** R***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "42"
+    },
+    {
+      "id": "player-015",
+      "name": "Ted Williams",
+      "obfuscated_name": "T** W***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "9"
+    }
+  ],
+  "games": [
+    {
+      "id": "game-001",
+      "date": "2025-10-05",
+      "time": "10:00 AM",
+      "opponent": "Demo Rivals"
+    },
+    {
+      "id": "game-002",
+      "date": "2025-10-12",
+      "time": "2:00 PM",
+      "opponent": "Championship Challengers"
+    },
+    {
+      "id": "game-003",
+      "date": "2025-10-19",
+      "time": "11:00 AM",
+      "opponent": "League Leaders"
+    },
+    {
+      "id": "game-004",
+      "date": "2025-10-26",
+      "time": "1:30 PM",
+      "opponent": "Victory Vanguards"
+    }
+  ]
+}
