@@ -344,13 +344,17 @@
                 margin: 5px 0;
             }
         }
+        .demo-indicator {
+            color: #e74c3c;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="header no-print">
         <div>
             <span class="logo">⚾</span>
-            <strong>Baseball Lineup Manager</strong>
+            <strong>Baseball Lineup Manager{% if session.demo_mode %} <span class="demo-indicator">(DEMO)</span>{% endif %}</strong>
         </div>
         <div style="position: relative;">
             <button class="btn" onclick="loadTeams()">Refresh Teams</button>
@@ -385,10 +389,9 @@
             <div style="margin-bottom: 20px;">
                 <label for="team-status-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Filter Teams:</label>
                 <select id="team-status-filter" class="btn" style="width: 200px;" onchange="filterTeams()">
-                    <option value="all">All Teams</option>
+                    <option value="all" selected>All Teams</option>
                     <option value="active">Active Teams Only</option>
                     <option value="archived">Archived Teams Only</option>
-                    <option value="cobs" selected>Cobs Teams Only</option>
                 </select>
             </div>
             
@@ -403,8 +406,8 @@
                 <div style="margin-bottom: 15px;">
                     <label for="game-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Show Games:</label>
                     <select id="game-filter" class="btn" style="width: 180px;" onchange="filterGames()">
-                        <option value="next" selected>Next Game Only</option>
-                        <option value="all">All Upcoming Games</option>
+                        <option value="next">Next Game Only</option>
+                        <option value="all" selected>All Upcoming Games</option>
                         <option value="all-states">All Games (Any State)</option>
                     </select>
                 </div>
