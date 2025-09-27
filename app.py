@@ -12,20 +12,73 @@ import requests
 from datetime import datetime, timedelta
 import random
 
+def obfuscate_name(full_name):
+    """
+    Obfuscate player name using format: First letter + stars + Last letter + stars
+    Example: "Adam White" -> "A*** W****"
+    """
+    if not full_name or not full_name.strip():
+        return "Unknown Player"
+    
+    parts = full_name.strip().split()
+    if len(parts) < 2:
+        # Handle single names
+        name = parts[0]
+        if len(name) == 1:
+            return name
+        return f"{name[0]}{'*' * (len(name) - 1)}"
+    
+    first_name = parts[0]
+    last_name = parts[-1]  # Handle middle names by taking last part
+    
+    # Handle very short names
+    if len(first_name) == 1:
+        first_part = first_name
+    else:
+        first_part = f"{first_name[0]}{'*' * (len(first_name) - 1)}"
+    
+    if len(last_name) == 1:
+        last_part = last_name
+    else:
+        last_part = f"{last_name[0]}{'*' * (len(last_name) - 1)}"
+    
+    return f"{first_part} {last_part}"
+
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
-CORS(app)
+# Generate secure secret key for production if not provided
+if os.getenv('SECRET_KEY'):
+    app.secret_key = os.getenv('SECRET_KEY')
+else:
+    # For development only - generate a secure key for production
+    import secrets
+    app.secret_key = os.getenv('SECRET_KEY', secrets.token_hex(32))
 
-# Port configuration
+# Configure CORS for production
+if os.getenv('RENDER') or os.getenv('FLASK_ENV') == 'production':
+    # Production: Allow specific origins
+    app_name = os.getenv('RENDER_SERVICE_NAME', 'baseball-lineup-app')
+    CORS(app, origins=[f'https://{app_name}.onrender.com'])
+else:
+    # Development: Allow all origins
+    CORS(app)
+
+# Port configuration - Render provides PORT environment variable
 PORT = int(os.getenv('PORT', 5001))
 
 # TeamSnap API configuration
 TEAMSNAP_CLIENT_ID = os.getenv('TEAMSNAP_CLIENT_ID')
 TEAMSNAP_CLIENT_SECRET = os.getenv('TEAMSNAP_CLIENT_SECRET')
-TEAMSNAP_REDIRECT_URI = os.getenv('TEAMSNAP_REDIRECT_URI', f'https://localhost:{PORT}/auth/callback')
+# Dynamic redirect URI based on environment
+if os.getenv('RENDER'):
+    # Production on Render
+    app_name = os.getenv('RENDER_SERVICE_NAME', 'baseball-lineup-app')
+    TEAMSNAP_REDIRECT_URI = f'https://{app_name}.onrender.com/auth/callback'
+else:
+    # Development
+    TEAMSNAP_REDIRECT_URI = os.getenv('TEAMSNAP_REDIRECT_URI', f'https://localhost:{PORT}/auth/callback')
 TEAMSNAP_API_BASE = 'https://api.teamsnap.com/v3'
 TEAMSNAP_AUTH_BASE = 'https://auth.teamsnap.com'
 
@@ -153,31 +206,41 @@ def get_games(team_id):
     
     headers = {'Authorization': f"Bearer {session['access_token']}"}
     
+    # Check if we should include all games regardless of state
+    include_all_states = request.args.get('include_all_states', 'false').lower() == 'true'
+    
     try:
-        # Use the events search endpoint with team_id parameter and date filter
-        today = datetime.now().strftime('%Y-%m-%d')
-        thirty_days_later = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d')
-        events_url = f"{TEAMSNAP_API_BASE}/events/search?team_id={team_id}&started_after={today}&started_before={thirty_days_later}"
-        print(f"Events URL: {events_url}")
+        if include_all_states:
+            # Get all events for this team (no date filter)
+            events_url = f"{TEAMSNAP_API_BASE}/events/search?team_id={team_id}"
+            print(f"Events URL (ALL STATES): {events_url}")
+        else:
+            # Use the events search endpoint with team_id parameter and date filter
+            today = datetime.now().strftime('%Y-%m-%d')
+            thirty_days_later = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d')
+            events_url = f"{TEAMSNAP_API_BASE}/events/search?team_id={team_id}&started_after={today}&started_before={thirty_days_later}"
+            print(f"Events URL (UPCOMING): {events_url}")
         
         response = requests.get(events_url, headers=headers)
         response.raise_for_status()
         
         events_data = response.json()
         
-        # Filter for upcoming games (next 30 days)
-        upcoming_games = []
+        # Filter games based on request type
+        games = []
         all_events = []
         # Make timezone-aware datetime for comparison
         from datetime import timezone
         now = datetime.now(timezone.utc)
-        thirty_days = now + timedelta(days=30)
         
         print("\n" + "="*80)
-        print(f"🏟️  SEARCHING FOR GAMES - Team ID: {team_id}")
+        filter_type = "ALL GAMES (ANY STATE)" if include_all_states else "UPCOMING GAMES"
+        print(f"🏟️  SEARCHING FOR {filter_type} - Team ID: {team_id}")
         print("="*80)
         print(f"📅 Current time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"📅 Looking until: {thirty_days.strftime('%Y-%m-%d %H:%M:%S')}")
+        if not include_all_states:
+            thirty_days = now + timedelta(days=30)
+            print(f"📅 Looking until: {thirty_days.strftime('%Y-%m-%d %H:%M:%S')}")
         print()
         
         total_events = len(events_data.get('collection', {}).get('items', []))
@@ -217,15 +280,27 @@ def get_games(team_id):
                         start_time = datetime.fromisoformat(start_time_str).replace(tzinfo=timezone.utc)
                     
                     readable_date = start_time.strftime('%Y-%m-%d %H:%M:%S')
-                    is_future = start_time > now
-                    is_within_range = start_time <= thirty_days
                     
                     print(f"    🕐 Parsed: {readable_date}")
-                    print(f"    ⏭️  Future: {'YES' if is_future else 'NO'}")
-                    print(f"    📊 In Range: {'YES' if is_within_range else 'NO'}")
                     
-                    if is_future and is_within_range:
-                        upcoming_games.append({
+                    should_include = False
+                    if include_all_states:
+                        # Include all games regardless of date or state
+                        should_include = True
+                        print(f"    ✅ Including (ALL STATES mode)")
+                    else:
+                        # Only include future games within 30 days
+                        is_future = start_time > now
+                        thirty_days = now + timedelta(days=30)
+                        is_within_range = start_time <= thirty_days
+                        
+                        print(f"    ⏭️  Future: {'YES' if is_future else 'NO'}")
+                        print(f"    📊 In Range: {'YES' if is_within_range else 'NO'}")
+                        
+                        should_include = is_future and is_within_range
+                    
+                    if should_include:
+                        games.append({
                             'id': event_data.get('id'),
                             'name': event_name,
                             'starts_at': starts_at,
@@ -233,6 +308,7 @@ def get_games(team_id):
                         })
                         print(f"    ✅ ADDED TO LINEUP LIST!")
                     else:
+                        is_future = start_time > now
                         reason = "Past event" if not is_future else "Too far in future"
                         print(f"    ❌ SKIPPED: {reason}")
                         
@@ -250,11 +326,12 @@ def get_games(team_id):
         print("="*80)
         print(f"📊 SUMMARY:")
         print(f"   Total Events: {len(all_events)}")
-        print(f"   Upcoming Games: {len(upcoming_games)}")
+        game_type = "Games (All States)" if include_all_states else "Upcoming Games"
+        print(f"   {game_type}: {len(games)}")
         print("="*80)
         
-        print(f"Found {len(upcoming_games)} upcoming games")
-        return jsonify({'games': upcoming_games})
+        print(f"Found {len(games)} {game_type.lower()}")
+        return jsonify({'games': games})
         
     except requests.RequestException as e:
         print(f"Games API Error: {str(e)}")
@@ -307,7 +384,6 @@ def get_availability(event_id):
             
             print(f"👤 Member {member_id}: Status {status_code} = {status_text}")
             
-            # Check only attending players (status code 1 = Yes/Attending)
             if status_code == 1:  # Only include confirmed attending players
                 if member_id:
                     # Get member details using search endpoint
@@ -333,20 +409,23 @@ def get_availability(event_id):
                             
                             # Only add players, skip managers/coaches
                             if member_type == 'player' or (not is_manager and not is_owner):
+                                # Obfuscate the player name for privacy
+                                obfuscated_name = obfuscate_name(player_name or f"Player {member_id}")
+                                
                                 attending_players.append({
                                     'id': member_id,
-                                    'name': player_name or f"Player {member_id}",
+                                    'name': obfuscated_name,
                                     'position_preference': None,
                                     'status_code': status_code,
                                     'type': member_type
                                 })
-                                print(f"  ✅ Added as player: {player_name}")
+                                print(f"  ✅ Added as player: {player_name} -> {obfuscated_name}")
                             else:
                                 print(f"  🚫 Skipped (Manager/Coach): {player_name}")
                     else:
                         print(f"  ❌ Failed to get member details: {member_response.status_code}")
             else:
-                print(f"  ⚠️  Skipped: {status_text}")
+                print(f"  🚫 Skipped Member {member_id}: Status {status_code} = {status_text} (not attending)")
         
         print(f"\n📊 SUMMARY: {len(attending_players)} players attending")
         print("="*60)
@@ -704,18 +783,19 @@ def logout():
 
 if __name__ == '__main__':
     port = PORT
-    debug = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
-    
-    # For development - disable SSL for easier local access
+
+    # Check if running in production (Render sets this)
+    is_production = os.getenv('RENDER') or os.getenv('FLASK_ENV') == 'production'
+    debug = not is_production and os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
+
     if debug and os.getenv('FLASK_SSL', 'false').lower() == 'true':
-        # Create a simple SSL context for development
+        # Development with SSL
         import ssl
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         context.load_cert_chain('cert.pem', 'key.pem')
         app.run(host='0.0.0.0', port=port, debug=debug, ssl_context=context)
-    elif debug:
-        # Run without SSL for easier local development
-        app.run(host='0.0.0.0', port=port, debug=debug)
     else:
+        # Production (Render) or development without SSL
+        # Render handles SSL automatically, no need for SSL context
         app.run(host='0.0.0.0', port=port, debug=debug)
 
