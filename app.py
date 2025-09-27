@@ -100,7 +100,7 @@ def index():
     """Main dashboard"""
     if 'access_token' not in session:
         return render_template('login.html')
-    
+
     return render_template('dashboard.html')
 
 @app.route('/auth/login')
@@ -147,12 +147,31 @@ def auth_callback():
 
 @app.route('/api/teams')
 def get_teams():
-    """Get user's teams from TeamSnap"""
+    """Get user's teams from TeamSnap or demo data"""
     if 'access_token' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
-    
+
+    # Demo mode handling
+    if session.get('demo_mode'):
+        demo_data = load_demo_data()
+        if demo_data:
+            # Return demo team in Collection+JSON format
+            return jsonify({
+                'collection': {
+                    'items': [{
+                        'data': [
+                            {'name': 'id', 'value': demo_data['team']['id']},
+                            {'name': 'name', 'value': demo_data['team']['name']},
+                            {'name': 'location', 'value': 'Demo City'}
+                        ]
+                    }]
+                }
+            })
+        else:
+            return jsonify({'error': 'Demo data not available'}), 500
+
     headers = {'Authorization': f"Bearer {session['access_token']}"}
-    
+
     try:
         # First, get user info
         me_response = requests.get(f"{TEAMSNAP_API_BASE}/me", headers=headers)
@@ -200,15 +219,23 @@ def get_teams():
 
 @app.route('/api/games/<team_id>')
 def get_games(team_id):
-    """Get recent games for a team"""
+    """Get recent games for a team or demo data"""
     if 'access_token' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
-    
+
+    # Demo mode handling
+    if session.get('demo_mode'):
+        demo_data = load_demo_data()
+        if demo_data and team_id == demo_data['team']['id']:
+            return jsonify(demo_data['games'])
+        else:
+            return jsonify({'error': 'Demo team not found'}), 404
+
     headers = {'Authorization': f"Bearer {session['access_token']}"}
-    
+
     # Check if we should include all games regardless of state
     include_all_states = request.args.get('include_all_states', 'false').lower() == 'true'
-    
+
     try:
         if include_all_states:
             # Get all events for this team (no date filter)
@@ -339,12 +366,25 @@ def get_games(team_id):
 
 @app.route('/api/availability/<event_id>')
 def get_availability(event_id):
-    """Get player availability for a specific game"""
+    """Get player availability for a specific game or demo data"""
     if 'access_token' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
-    
+
+    # Demo mode handling
+    if session.get('demo_mode'):
+        demo_data = load_demo_data()
+        if demo_data:
+            # Find the game in demo data
+            for game in demo_data['games']:
+                if game['id'] == event_id:
+                    # Return all demo players as attending
+                    return jsonify(demo_data['players'])
+            return jsonify({'error': 'Demo game not found'}), 404
+        else:
+            return jsonify({'error': 'Demo data not available'}), 500
+
     headers = {'Authorization': f"Bearer {session['access_token']}"}
-    
+
     try:
         print(f"\n🔍 GETTING AVAILABILITY FOR EVENT: {event_id}")
         print("="*60)
@@ -776,6 +816,26 @@ def generate_lineup():
         'positions': FIELDING_POSITIONS,
         'game_format': f'{len(lineups)} lineups available - one per pitcher'
     })
+
+def load_demo_data():
+    """Load demo data from JSON file"""
+    import json
+    try:
+        with open('static/demo-data.json', 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("Demo data file not found!")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error parsing demo data: {e}")
+        return None
+
+@app.route('/demo')
+def demo_mode():
+    """Initialize demo mode and redirect to dashboard"""
+    session['demo_mode'] = True
+    session['access_token'] = 'demo_token'  # Fake token for demo mode
+    return redirect(url_for('index'))
 
 @app.route('/logout')
 def logout():

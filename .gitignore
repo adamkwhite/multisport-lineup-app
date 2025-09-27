@@ -51,3 +51,8 @@ node_modules/
 # Temporary files
 *.tmp
 *.temp
+# SSL certificates
+certs/*.pem
+
+# Virtual environment
+baseball-venv/
