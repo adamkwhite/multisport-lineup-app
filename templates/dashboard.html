@@ -344,13 +344,17 @@
                 margin: 5px 0;
             }
         }
+        .demo-indicator {
+            color: #e74c3c;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="header no-print">
         <div>
             <span class="logo">⚾</span>
-            <strong>Baseball Lineup Manager</strong>
+            <strong>Baseball Lineup Manager{% if session.demo_mode %} <span class="demo-indicator">(DEMO)</span>{% endif %}</strong>
         </div>
         <div style="position: relative;">
             <button class="btn" onclick="loadTeams()">Refresh Teams</button>

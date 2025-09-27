@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(python3:*)",
+      "Bash(./baseball-venv/bin/pip list)",
+      "Bash(test -f .env)",
+      "Bash(grep:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(./baseball-venv/bin/python:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(source:*)",
+      "Bash(./start.sh:*)",
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "Bash(fuser:*)",
+      "Bash(git commit:*)",
+      "Bash(git restore:*)",
+      "Bash(gh pr list:*)",
+      "Read(//home/adam/Code/**)",
+      "Bash(systemctl:*)",
+      "Bash(git pull:*)",
+      "Bash(git mv:*)",
+      "mcp__puppeteer__puppeteer_navigate",
+      "Bash(git reset:*)"
+    ],
+    "deny": []
+  }
+}
