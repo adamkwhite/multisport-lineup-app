@@ -27,9 +27,46 @@
             color: #2c5aa0;
             margin-bottom: 30px;
         }
-        .login-btn {
-            background-color: #e74c3c;
-            color: white;
+        .options-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: nowrap;
+        }
+        .option-card {
+            flex: 1;
+            width: 45%;
+            min-width: 280px;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .options-container {
+                flex-wrap: wrap;
+            }
+            .option-card {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+        .option-card h3 {
+            margin-top: 0;
+            color: #2c5aa0;
+            font-size: 1.5em;
+        }
+        .demo-card {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        .teamsnap-card {
+            border-color: #e74c3c;
+            background: #fff8f8;
+        }
+        .btn {
             padding: 15px 30px;
             font-size: 18px;
             border: none;
@@ -37,9 +74,21 @@
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            margin-top: 20px;
+            margin-top: 15px;
+            font-weight: bold;
         }
-        .login-btn:hover {
+        .demo-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .demo-btn:hover {
+            background-color: #218838;
+        }
+        .teamsnap-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .teamsnap-btn:hover {
             background-color: #c0392b;
         }
         .features {
@@ -58,66 +107,36 @@
             content: "⚾ ";
             margin-right: 10px;
         }
-        .mode-options {
-            display: flex;
-            gap: 20px;
-            margin: 30px 0;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .mode-option {
-            flex: 1;
-            min-width: 280px;
-            max-width: 350px;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 30px 20px;
-            text-align: center;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .mode-option:hover {
-            transform: translateY(-5px);
-            border-color: #e74c3c;
-        }
-        .mode-option h3 {
-            color: #2c5aa0;
-            margin-bottom: 15px;
-            margin-top: 0;
-        }
-        .mode-option p {
-            color: #666;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-        .demo-btn {
-            background-color: #3498db;
-        }
-        .demo-btn:hover {
-            background-color: #2980b9;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">⚾</div>
         <h1>Baseball Lineup Manager</h1>
-        <p>Choose how you'd like to get started with lineup management:</p>
+        <p>Choose how you'd like to get started with lineup generation.</p>
 
-        <div class="mode-options">
-            <div class="mode-option teamsnap-option">
-                <h3>Connect with TeamSnap</h3>
-                <p>Use your existing TeamSnap account to access real team data and games.</p>
-                <a href="/auth/login" class="login-btn">Connect with TeamSnap</a>
+        <div class="options-container">
+            <!-- Demo Mode - LEFT SIDE -->
+            <div class="option-card demo-card">
+                <h3>🏟️ Try Demo Mode</h3>
+                <p>Experience all features instantly with famous baseball players. No account needed!</p>
+                <a href="/demo" class="btn demo-btn">Start Demo</a>
+                <p style="margin-top: 15px; color: #666; font-size: 12px;">
+                    Perfect for trying the app or demonstrations
+                </p>
             </div>
 
-            <div class="mode-option demo-option">
-                <h3>Try Demo Mode</h3>
-                <p>Explore all features with pre-loaded demo data featuring famous baseball players.</p>
-                <a href="/demo" class="login-btn demo-btn">Try Demo Mode</a>
+            <!-- TeamSnap - RIGHT SIDE -->
+            <div class="option-card teamsnap-card">
+                <h3>🔗 Connect TeamSnap</h3>
+                <p>Link your TeamSnap account to automatically manage real team data.</p>
+                <a href="/auth/login" class="btn teamsnap-btn">Connect TeamSnap</a>
+                <p style="margin-top: 15px; color: #666; font-size: 12px;">
+                    Requires TeamSnap account and API access
+                </p>
             </div>
         </div>
-        
+
         <div class="features">
             <h3>Features:</h3>
             <ul>
@@ -127,10 +146,6 @@
                 <li>Simple interface for lineup management</li>
             </ul>
         </div>
-        
-        <p style="margin-top: 30px; color: #666; font-size: 14px;">
-            You'll need a TeamSnap account and API access to use this app.
-        </p>
     </div>
 </body>
 </html>
