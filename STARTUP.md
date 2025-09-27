@@ -26,7 +26,7 @@ Then open: **https://localhost:5000** (accept security warnings for self-signed 
 2. **TeamSnap API Credentials**
    - Copy `.env.example` to `.env`
    - Add your TeamSnap API credentials to `.env`
-   - See [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) for setup details
+   - See [docs/PROJECT_SUMMARY.md](docs/PROJECT_SUMMARY.md) for setup details
 
 3. **SSL Certificates (for HTTPS mode)**
    - Certificates already exist: `cert.pem` and `key.pem`
@@ -75,4 +75,4 @@ For production (Heroku), use HTTPS mode:
 - Set `FLASK_SSL=true` in environment variables
 - Configure proper domain in TeamSnap Developer Portal
 
-See [HOSTING_GUIDE.md](HOSTING_GUIDE.md) for detailed deployment instructions.
+See [docs/HOSTING_GUIDE.md](docs/HOSTING_GUIDE.md) for detailed deployment instructions.
