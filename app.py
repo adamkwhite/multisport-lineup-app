@@ -409,12 +409,14 @@ def get_availability(event_id):
                             
                             # Only add players, skip managers/coaches
                             if member_type == 'player' or (not is_manager and not is_owner):
-                                # Obfuscate the player name for privacy
-                                obfuscated_name = obfuscate_name(player_name or f"Player {member_id}")
-                                
+                                # Send both original and obfuscated names for frontend toggle
+                                original_name = player_name or f"Player {member_id}"
+                                obfuscated_name = obfuscate_name(original_name)
+
                                 attending_players.append({
                                     'id': member_id,
-                                    'name': obfuscated_name,
+                                    'name': original_name,  # Send original name
+                                    'obfuscated_name': obfuscated_name,  # Send obfuscated name
                                     'position_preference': None,
                                     'status_code': status_code,
                                     'type': member_type
