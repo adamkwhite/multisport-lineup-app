@@ -21,6 +21,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
         }
         .logo {
             font-size: 1.8em;
@@ -261,6 +262,54 @@
             display: block;
         }
         
+        /* Hamburger Menu Styles */
+        .hamburger-menu {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .hamburger-menu:hover {
+            background-color: #f0f0f0;
+            color: #3498db;
+        }
+
+        /* Dropdown Menu Styles */
+        .menu-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 180px;
+            margin-top: 5px;
+        }
+        .menu-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 0;
+            font-size: 14px;
+        }
+        .menu-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
         /* Print styles */
         @media print {
             .no-print {
@@ -269,11 +318,30 @@
             body {
                 margin: 0;
                 padding: 0;
+                font-size: 12px;
             }
             .tab-container {
                 border: none;
                 box-shadow: none;
                 background: none;
+            }
+            .lineup-container {
+                page-break-after: always;
+                page-break-inside: avoid;
+                margin-bottom: 0;
+                height: auto;
+                min-height: 0;
+            }
+            .lineup-container:last-child {
+                page-break-after: auto;
+            }
+            h3 {
+                margin-top: 0;
+                margin-bottom: 10px;
+                font-size: 16px;
+            }
+            p {
+                margin: 5px 0;
             }
         }
     </style>
@@ -284,9 +352,19 @@
             <span class="logo">⚾</span>
             <strong>Baseball Lineup Manager</strong>
         </div>
-        <div>
+        <div style="position: relative;">
             <button class="btn" onclick="loadTeams()">Refresh Teams</button>
             <a href="/logout" class="btn danger">Logout</a>
+            <button class="hamburger-menu" onclick="toggleMenu()">☰</button>
+
+            <!-- Dropdown Menu -->
+            <div id="menu-dropdown" class="menu-dropdown" style="display: none;">
+                <div class="menu-item">
+                    <label>
+                        <input type="checkbox" id="name-toggle"> Hide Player Names
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -324,9 +402,10 @@
                 <!-- Game Filter -->
                 <div style="margin-bottom: 15px;">
                     <label for="game-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Show Games:</label>
-                    <select id="game-filter" class="btn" style="width: 150px;" onchange="filterGames()">
+                    <select id="game-filter" class="btn" style="width: 180px;" onchange="filterGames()">
                         <option value="next" selected>Next Game Only</option>
                         <option value="all">All Upcoming Games</option>
+                        <option value="all-states">All Games (Any State)</option>
                     </select>
                 </div>
                 
@@ -364,7 +443,7 @@
 
         <!-- Tab Content: Lineup -->
         <div id="lineup-tab" class="tab-content">
-            <h3>Fielding Positions</h3>
+            <h3 class="no-print">Fielding Positions</h3>
             <div id="lineup-display"></div>
             
             <div id="bench-section" style="display:none;">
@@ -393,8 +472,114 @@
 
         // Load teams on page load
         window.onload = function() {
+            // Initialize toggle state first
+            loadToggleState();
+
+            // Add event listener to toggle
+            const toggle = document.getElementById('name-toggle');
+            if (toggle) {
+                toggle.addEventListener('change', toggleNameObfuscation);
+            }
+
+            // Then load teams
             loadTeams();
         };
+
+        // Hamburger menu functionality
+        function toggleMenu() {
+            const menu = document.getElementById('menu-dropdown');
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menu-dropdown');
+            const hamburger = document.querySelector('.hamburger-menu');
+
+            // If click is outside both menu and hamburger button, close the menu
+            if (menu && hamburger && !menu.contains(event.target) && !hamburger.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
+
+        // Name obfuscation functionality
+        function obfuscateName(fullName) {
+            if (!fullName || !fullName.trim()) {
+                return "Unknown Player";
+            }
+
+            const parts = fullName.trim().split(' ');
+            if (parts.length < 2) {
+                // Handle single names
+                const name = parts[0];
+                if (name.length === 1) {
+                    return name;
+                }
+                return name[0] + '*'.repeat(name.length - 1);
+            }
+
+            const firstName = parts[0];
+            const lastName = parts[parts.length - 1]; // Handle middle names by taking last part
+
+            // Handle very short names
+            let firstPart;
+            if (firstName.length === 1) {
+                firstPart = firstName;
+            } else {
+                firstPart = firstName[0] + '*'.repeat(firstName.length - 1);
+            }
+
+            let lastPart;
+            if (lastName.length === 1) {
+                lastPart = lastName;
+            } else {
+                lastPart = lastName[0] + '*'.repeat(lastName.length - 1);
+            }
+
+            return firstPart + ' ' + lastPart;
+        }
+
+        function toggleNameObfuscation() {
+            const toggle = document.getElementById('name-toggle');
+            const hideNames = toggle.checked;
+
+            // Save preference to localStorage
+            localStorage.setItem('hidePlayerNames', hideNames.toString());
+
+            // Update all visible player names
+            updateAllPlayerNames();
+        }
+
+        function updateAllPlayerNames() {
+            const toggle = document.getElementById('name-toggle');
+            const hideNames = toggle ? toggle.checked : false; // Checked = hide names (obfuscate)
+
+            // Update all elements with class "player-name"
+            document.querySelectorAll('.player-name').forEach(element => {
+                const originalName = element.dataset.originalName;
+                const obfuscatedName = element.dataset.obfuscatedName;
+                if (originalName) {
+                    element.textContent = hideNames ? (obfuscatedName || obfuscateName(originalName)) : originalName;
+                }
+            });
+        }
+
+        function loadToggleState() {
+            const savedState = localStorage.getItem('hidePlayerNames');
+            const hideNames = savedState === 'true'; // Default to false (show real names)
+
+            const toggle = document.getElementById('name-toggle');
+            if (toggle) {
+                toggle.checked = hideNames;
+            }
+
+            return hideNames;
+        }
+
 
         // Tab functionality
         function openTab(tabName) {
@@ -507,7 +692,12 @@
             document.getElementById('games-loading').style.display = 'block';
             
             try {
-                const response = await fetch(`/api/games/${teamId}`);
+                // Check if we need all games regardless of state
+                const gameFilter = document.getElementById('game-filter').value;
+                const url = gameFilter === 'all-states' ? 
+                    `/api/games/${teamId}?include_all_states=true` : 
+                    `/api/games/${teamId}`;
+                const response = await fetch(url);
                 const data = await response.json();
                 
                 if (response.ok) {
@@ -530,11 +720,50 @@
             filterGames();
         }
 
-        function filterGames() {
+        async function filterGames() {
             const gamesList = document.getElementById('games-list');
             const filter = document.getElementById('game-filter').value;
             
             gamesList.innerHTML = '';
+            
+            // If "all-states" is selected and we have a team selected, reload data
+            if (filter === 'all-states' && selectedTeam) {
+                document.getElementById('games-loading').style.display = 'block';
+                try {
+                    const response = await fetch(`/api/games/${selectedTeam}?include_all_states=true`);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        allGames = data.games;
+                    } else {
+                        gamesList.innerHTML = '<p>Error loading games</p>';
+                        document.getElementById('games-loading').style.display = 'none';
+                        return;
+                    }
+                } catch (error) {
+                    gamesList.innerHTML = '<p>Error loading games</p>';
+                    document.getElementById('games-loading').style.display = 'none';
+                    return;
+                }
+                document.getElementById('games-loading').style.display = 'none';
+            } else if ((filter === 'next' || filter === 'all') && selectedTeam) {
+                // If switching back from all-states, reload upcoming games only
+                const currentFilter = filter;
+                document.getElementById('games-loading').style.display = 'block';
+                try {
+                    const response = await fetch(`/api/games/${selectedTeam}`);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        allGames = data.games;
+                    }
+                } catch (error) {
+                    gamesList.innerHTML = '<p>Error loading games</p>';
+                    document.getElementById('games-loading').style.display = 'none';
+                    return;
+                }
+                document.getElementById('games-loading').style.display = 'none';
+            }
             
             let filteredGames = allGames;
             
@@ -617,11 +846,14 @@
                 console.error('players-list element not found!');
                 return;
             }
-            
+
+            // Ensure toggle state is loaded
+            loadToggleState();
+
             playersList.innerHTML = '';
-            
+
             console.log(`Displaying ${players.length} players`);
-            
+
             if (players.length === 0) {
                 playersList.innerHTML = '<p>No players marked as attending.</p>';
                 return;
@@ -633,9 +865,14 @@
                 playerDiv.style.display = 'flex';
                 playerDiv.style.justifyContent = 'space-between';
                 playerDiv.style.alignItems = 'center';
-                
+
+                // Determine what name to display based on current toggle state
+                const toggle = document.getElementById('name-toggle');
+                const hideNames = toggle ? toggle.checked : false;
+                const displayName = hideNames ? (player.obfuscated_name || obfuscateName(player.name)) : player.name;
+
                 playerDiv.innerHTML = `
-                    <strong>${player.name}</strong>
+                    <strong class="player-name" data-original-name="${player.name}" data-obfuscated-name="${player.obfuscated_name || obfuscateName(player.name)}">${displayName}</strong>
                     <div class="position-checkboxes" data-player-id="${player.id}">
                         <label><input type="checkbox" value="1"> P</label>
                         <label><input type="checkbox" value="2"> C</label>
@@ -694,7 +931,7 @@
                 generateBtn: generateBtn ? 'found' : 'NOT FOUND',
                 nextBtn: nextBtn ? 'found' : 'NOT FOUND',
                 playerCount: players.length,
-                shouldShow: players.length >= 9
+                shouldShow: players.length >= 8
             });
             
             if (!generateBtn || !nextBtn) {
@@ -702,7 +939,7 @@
                 return;
             }
             
-            if (players.length >= 9) {
+            if (players.length >= 8) {
                 generateBtn.style.display = 'inline-block';
                 generateBtn.textContent = `Generate Lineup (${players.length} players)`;
                 nextBtn.style.display = 'inline-block';
@@ -710,7 +947,7 @@
             } else {
                 generateBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
-                showError(`Need at least 9 players for a lineup. Currently have ${players.length} attending.`);
+                showError(`Need at least 8 players for a lineup. Currently have ${players.length} attending.`);
             }
         }
 
@@ -772,7 +1009,10 @@
             
             // Automatically switch to lineup tab
             openTab('lineup-tab');
-            
+
+            // Apply current obfuscation setting to newly displayed lineup
+            updateAllPlayerNames();
+
             showSuccess(`${data.lineups.length} lineup${data.lineups.length > 1 ? 's' : ''} generated!`);
         }
 
@@ -780,28 +1020,26 @@
             const lineupDisplay = document.getElementById('lineup-display');
             
             lineupDisplay.innerHTML = `
-                <div style="text-align: center; margin-bottom: 10px;">
+                <div style="text-align: center; margin-bottom: 10px;" class="no-print">
                     <p style="color: #666; margin: 5px 0;">${data.lineups.length} Lineup${data.lineups.length > 1 ? 's' : ''} Available • One Per Pitcher</p>
                 </div>
-                <div style="text-align: center; margin-bottom: 20px;" class="no-print">
-                    <h2>Choose Your Pitcher</h2>
+                <div style="text-align: center; margin-bottom: 10px;" class="no-print">
                     <button onclick="window.print()" class="btn" style="margin: 10px;">🖨️ Print All Lineups</button>
                 </div>
                 <div id="all-lineups"></div>
             `;
             
             const allLineupsDiv = document.getElementById('all-lineups');
+            allLineupsDiv.innerHTML = ''; // Clear any existing content
             
             data.lineups.forEach((lineupData, index) => {
                 const lineupSection = document.createElement('div');
-                lineupSection.className = 'lineup-section';
+                lineupSection.className = 'lineup-container';
                 lineupSection.style.marginBottom = '40px';
-                lineupSection.style.pageBreakAfter = index < data.lineups.length - 1 ? 'always' : 'auto';
                 
                 lineupSection.innerHTML = `
                     <div style="text-align: center; margin-bottom: 20px;">
                         <h3>Lineup ${index + 1}</h3>
-                        <p style="color: #2c5aa0; font-weight: bold;">Pitcher: ${lineupData.pitcher}</p>
                     </div>
                     
                     <!-- Baseball diamond graphic -->
@@ -847,10 +1085,15 @@
                     positionCard.className = `position-card ${positionClass}`;
                     
                     const playerInfo = lineupData.lineup[position];
+                    // Determine what name to display based on current toggle state
+                    const toggle = document.getElementById('name-toggle');
+                    const hideNames = toggle ? toggle.checked : false;
+                    const displayName = hideNames ? obfuscateName(playerInfo.player_name) : playerInfo.player_name;
+
                     positionCard.innerHTML = `
                         <div class="position-number">${position}</div>
                         <div class="position-name" style="font-size: 10px; margin: 2px 0;">${playerInfo.position_name}</div>
-                        <div class="player-name" style="font-size: 11px; font-weight: bold;">${playerInfo.player_name}</div>
+                        <div class="player-name" data-original-name="${playerInfo.player_name}" style="font-size: 11px; font-weight: bold;">${displayName}</div>
                     `;
                     
                     diamond.appendChild(positionCard);
@@ -862,7 +1105,11 @@
                     lineupData.bench.forEach(player => {
                         const benchPlayer = document.createElement('div');
                         benchPlayer.className = 'player-item';
-                        benchPlayer.innerHTML = player.name;
+                        // Determine what name to display based on current toggle state
+                        const toggle = document.getElementById('name-toggle');
+                        const hideNames = toggle ? toggle.checked : false;
+                        const displayName = hideNames ? obfuscateName(player.name) : player.name;
+                        benchPlayer.innerHTML = `<span class="player-name" data-original-name="${player.name}">${displayName}</span>`;
                         benchList.appendChild(benchPlayer);
                     });
                 } else {
@@ -910,10 +1157,15 @@
                 positionCard.className = `position-card ${positionClass}`;
                 
                 const playerInfo = data.lineup[position];
+                // Determine what name to display based on current toggle state
+                const toggle = document.getElementById('name-toggle');
+                const hideNames = toggle ? toggle.checked : false;
+                const displayName = hideNames ? obfuscateName(playerInfo.player_name) : playerInfo.player_name;
+
                 positionCard.innerHTML = `
                     <div class="position-number">${position}</div>
                     <div class="position-name" style="font-size: 10px; margin: 2px 0;">${playerInfo.position_name}</div>
-                    <div class="player-name" style="font-size: 11px; font-weight: bold;">${playerInfo.player_name}</div>
+                    <div class="player-name" data-original-name="${playerInfo.player_name}" style="font-size: 11px; font-weight: bold;">${displayName}</div>
                 `;
                 
                 diamond.appendChild(positionCard);
@@ -928,7 +1180,11 @@
                 data.bench.forEach(player => {
                     const benchPlayer = document.createElement('div');
                     benchPlayer.className = 'player-item';
-                    benchPlayer.innerHTML = `<strong>${player.name}</strong>`;
+                    // Determine what name to display based on current toggle state
+                    const toggle = document.getElementById('name-toggle');
+                    const hideNames = toggle ? toggle.checked : false;
+                    const displayName = hideNames ? obfuscateName(player.name) : player.name;
+                    benchPlayer.innerHTML = `<strong class="player-name" data-original-name="${player.name}">${displayName}</strong>`;
                     benchList.appendChild(benchPlayer);
                 });
                 
@@ -951,7 +1207,7 @@
             document.querySelectorAll('.error, .success').forEach(el => el.remove());
             
             const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
+            errorDiv.className = 'error no-print';
             errorDiv.textContent = message;
             
             document.body.insertBefore(errorDiv, document.body.firstChild);
@@ -965,7 +1221,7 @@
             document.querySelectorAll('.error, .success').forEach(el => el.remove());
             
             const successDiv = document.createElement('div');
-            successDiv.className = 'success';
+            successDiv.className = 'success no-print';
             successDiv.textContent = message;
             
             document.body.insertBefore(successDiv, document.body.firstChild);
