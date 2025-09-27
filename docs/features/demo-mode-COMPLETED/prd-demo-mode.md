@@ -36,9 +36,9 @@ Currently, the app requires TeamSnap authentication to access any functionality,
 
 ### Functional Requirements
 
-1. **Landing Page Split** - Add two options to the initial page:
-   - "Connect to TeamSnap" (existing functionality)
-   - "Try Demo Mode" (new functionality)
+1. **Landing Page Split** - Add two options to the initial page in a side-by-side layout:
+   - "Try Demo Mode" (new functionality) - positioned on the LEFT side
+   - "Connect to TeamSnap" (existing functionality) - positioned on the RIGHT side
 
 2. **Demo Data Loading** - Load fictional team data from static file including:
    - Team name and basic information
@@ -127,9 +127,19 @@ Currently, the app requires TeamSnap authentication to access any functionality,
 - Additional players to reach 12-15 total roster size
 
 ### UI Changes
-- Landing page: Add demo mode button/option
+- Landing page: Add demo mode section/button on LEFT side, TeamSnap section on RIGHT side
+- Use two-column layout with demo mode prominently positioned first (left)
 - Header: Add "(DEMO)" indicator when in demo mode
-- Maintain all existing styling and layouts
+- Maintain all existing styling and layouts for other pages
+
+#### Specific Implementation Details (IMPLEMENTED)
+- **Two-column card layout**: Side-by-side cards using flexbox (`flex-wrap: nowrap`)
+- **Demo mode card (LEFT)**: Green theme (#28a745), positioned first in HTML
+- **TeamSnap card (RIGHT)**: Red theme (#e74c3c), positioned second in HTML
+- **Card sizing**: Each card takes 45% width with 30px gap between cards
+- **Features section**: Moved outside cards, positioned below both options as shared functionality
+- **Responsive design**: Cards stack vertically on mobile screens (<768px)
+- **Clean card content**: Removed internal bullet lists, focused on primary action buttons
 
 ## Dependencies
 
@@ -179,9 +189,18 @@ Currently, the app requires TeamSnap authentication to access any functionality,
 ## Acceptance Criteria
 
 ### Landing Page
-- [ ] Two clear options: "Connect to TeamSnap" and "Try Demo Mode"
-- [ ] Demo mode button navigates to team selection with demo data
-- [ ] TeamSnap option maintains existing OAuth flow
+- [x] Two clear options in side-by-side layout: "Try Demo Mode" (LEFT) and "Connect to TeamSnap" (RIGHT)
+- [x] Demo mode section prominently positioned on the left side
+- [x] Demo mode button navigates to team selection with demo data
+- [x] TeamSnap option maintains existing OAuth flow
+
+#### Implementation Status (COMPLETED)
+- [x] **CSS Layout**: Flexbox with `flex-wrap: nowrap` for side-by-side positioning
+- [x] **Color Themes**: Demo mode green (#28a745), TeamSnap red (#e74c3c)
+- [x] **Card Structure**: Clean design with title, description, button, and subtitle
+- [x] **Features Positioning**: Shared features list moved below both cards
+- [x] **Responsive Behavior**: Mobile stacking at 768px breakpoint
+- [x] **HTML Order**: Demo mode card first in DOM for left positioning
 
 ### Demo Data Experience
 - [ ] Demo team loads with 12-15 famous baseball players
