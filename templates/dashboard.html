@@ -77,6 +77,69 @@
             background-color: #e3f2fd;
             border-color: #2196f3;
         }
+
+        /* Team Selection Radio Button Styles */
+        .team-card-container {
+            position: relative;
+            margin: 5px 0;
+        }
+        .team-radio {
+            display: none;
+        }
+        .team-card {
+            display: block;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: white;
+            transition: all 0.2s ease;
+            position: relative;
+            margin: 0;
+        }
+        .team-card:hover {
+            background-color: #f8f9fa;
+            border-color: #3498db;
+        }
+        .team-radio:checked + .team-card {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            border-width: 2px;
+        }
+        .selection-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        .radio-visual {
+            display: block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            background-color: white;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .team-card:hover .radio-visual {
+            border-color: #3498db;
+        }
+        .team-radio:checked + .team-card .radio-visual {
+            border-color: #2196f3;
+            background-color: #2196f3;
+        }
+        .team-radio:checked + .team-card .radio-visual::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: white;
+        }
         .lineup-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -661,21 +724,37 @@
                 );
             }
             
-            // Display filtered teams
+            // Display filtered teams with radio button selection
             filteredTeams.forEach(teamData => {
-                const teamDiv = document.createElement('div');
-                teamDiv.className = 'game-item';
-                
+                const teamContainer = document.createElement('div');
+                teamContainer.className = 'team-card-container';
+
                 // Show more team info for better selection
                 const statusBadge = teamData.is_archived ? '<span style="color: #666; font-size: 12px;">[ARCHIVED]</span>' : '<span style="color: #27ae60; font-size: 12px;">[ACTIVE]</span>';
-                
-                teamDiv.innerHTML = `
-                    <strong>${teamData.name}</strong> ${statusBadge}<br>
-                    <small>Division: ${teamData.division_name || 'N/A'}</small><br>
-                    <small>Season: ${teamData.season_name || 'N/A'}</small>
+
+                teamContainer.innerHTML = `
+                    <input type="radio" name="team-selection" value="${teamData.id}" id="team-${teamData.id}" class="team-radio">
+                    <label for="team-${teamData.id}" class="team-card">
+                        <div class="team-info" style="padding-right: 30px;">
+                            <strong>${teamData.name}</strong> ${statusBadge}<br>
+                            <small>Division: ${teamData.division_name || 'N/A'}</small><br>
+                            <small>Season: ${teamData.season_name || 'N/A'}</small>
+                        </div>
+                        <div class="selection-indicator">
+                            <span class="radio-visual"></span>
+                        </div>
+                    </label>
                 `;
-                teamDiv.onclick = () => selectTeam(teamData.id, teamData.name);
-                teamsList.appendChild(teamDiv);
+
+                // Add event listener to radio button
+                const radioInput = teamContainer.querySelector('.team-radio');
+                radioInput.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectTeam(teamData.id, teamData.name);
+                    }
+                });
+
+                teamsList.appendChild(teamContainer);
             });
             
             if (filteredTeams.length === 0) {
