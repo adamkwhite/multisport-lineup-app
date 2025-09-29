@@ -108,10 +108,11 @@
         }
         .selection-indicator {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 50%;
+            left: 15px;
             width: 20px;
             height: 20px;
+            transform: translateY(-50%);
         }
         .radio-visual {
             display: block;
@@ -737,13 +738,13 @@
                 teamContainer.innerHTML = `
                     <input type="radio" name="team-selection" value="${teamData.id}" id="team-${teamData.id}" class="team-radio">
                     <label for="team-${teamData.id}" class="team-card">
-                        <div class="team-info" style="padding-right: 30px;">
+                        <div class="selection-indicator">
+                            <span class="radio-visual"></span>
+                        </div>
+                        <div class="team-info" style="padding-left: 45px;">
                             <strong>${teamData.name}</strong> ${statusBadge}<br>
                             <small>Division: ${teamData.division_name || 'N/A'}</small><br>
                             <small>Season: ${teamData.season_name || 'N/A'}</small>
-                        </div>
-                        <div class="selection-indicator">
-                            <span class="radio-visual"></span>
                         </div>
                     </label>
                 `;
