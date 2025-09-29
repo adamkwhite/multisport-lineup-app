@@ -675,6 +675,17 @@
                 this.updateUI();
             },
 
+            getSelectedGame() {
+                return appState.selectedGame;
+            },
+
+            clearSelectedGame() {
+                console.log('StateManager: Clearing selected game');
+                appState.selectedGame = { id: null, name: null, data: null, selectedAt: null };
+                selectedGame = null;
+                this.updateUI();
+            },
+
             // UI state methods
             updateUI() {
                 appState.ui.gamesVisible = appState.selectedTeam.id !== null;
