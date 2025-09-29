@@ -19,9 +19,12 @@
 - [x] Configure Jest coverage with cobertura format
 - [x] Test coverage report configuration
 
-### Phase 3: GitHub Actions Workflow ⏳
-- [ ] Create sonarqube.yml workflow
-- [ ] Configure quality gate checks
+### Phase 3: GitHub Actions Workflow ✅ (Complete)
+- [x] Create sonarqube.yml workflow with Python 3.12 and Node.js 18
+- [x] Configure workflow triggers (main branch push, pull requests)
+- [x] Add test coverage generation steps (pytest and Jest)
+- [x] Add SonarQube scan action with secrets
+- [x] Configure quality gate checks with 5 min timeout
 
 ### Phase 4: SonarQube Project Setup ⏳
 - [ ] Create project in SonarQube instance
