@@ -304,8 +304,59 @@
             .lineup-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            /* Mobile team card optimizations */
+            .team-card {
+                padding: 12px;
+                font-size: 16px; /* Larger touch targets */
+                min-height: 44px; /* iOS recommended touch target size */
+            }
+            .selection-indicator {
+                left: 12px;
+                width: 24px;
+                height: 24px;
+            }
+            .radio-visual {
+                width: 22px;
+                height: 22px;
+            }
+            .team-info {
+                padding-left: 50px !important; /* More space for larger radio button */
+            }
+            .team-card:hover {
+                transform: none; /* Disable hover animations on mobile */
+                box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+            }
         }
-        
+
+        @media (max-width: 480px) {
+            /* Small mobile optimizations */
+            .team-card {
+                padding: 15px 10px;
+                margin: 8px 0;
+            }
+            .team-card strong {
+                font-size: 18px;
+            }
+            .team-card small {
+                font-size: 14px;
+                line-height: 1.4;
+            }
+            .selection-indicator {
+                left: 10px;
+            }
+            .team-info {
+                padding-left: 45px !important;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            /* Large screen optimizations */
+            .team-card {
+                max-width: 600px; /* Prevent cards from becoming too wide */
+            }
+        }
+
         /* Tab Styles */
         .tab-container {
             width: 100%;
