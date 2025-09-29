@@ -32,16 +32,16 @@
   - [x] 2.5 Configure Jest to output coverage reports compatible with SonarQube (added cobertura format)
   - [x] 2.6 Test local coverage report generation configuration (configs verified, actual tests in comprehensive-testing-PLANNED)
 
-- [ ] 3.0 Create GitHub Actions Workflow for SonarQube Scanning
-  - [ ] 3.1 Create .github/workflows/sonarqube.yml workflow file
-  - [ ] 3.2 Configure workflow triggers (push to main, pull_request events)
-  - [ ] 3.3 Add Python 3.12 setup step in workflow
-  - [ ] 3.4 Add Node.js setup step for JavaScript analysis
-  - [ ] 3.5 Add step to install Python dependencies and run pytest with coverage
-  - [ ] 3.6 Add step to install Node dependencies and run Jest with coverage (if applicable)
-  - [ ] 3.7 Add SonarSource/sonarqube-scan-action@v5 step with SONAR_TOKEN and SONAR_HOST_URL
-  - [ ] 3.8 Add sonarqube-quality-gate-action step to enforce quality gate checks
-  - [ ] 3.9 Configure workflow to fail PR if quality gate fails
+- [x] 3.0 Create GitHub Actions Workflow for SonarQube Scanning
+  - [x] 3.1 Create .github/workflows/sonarqube.yml workflow file
+  - [x] 3.2 Configure workflow triggers (push to main, pull_request events)
+  - [x] 3.3 Add Python 3.12 setup step in workflow
+  - [x] 3.4 Add Node.js setup step for JavaScript analysis (Node 18)
+  - [x] 3.5 Add step to install Python dependencies and run pytest with coverage (continue-on-error for missing tests)
+  - [x] 3.6 Add step to install Node dependencies and run Jest with coverage (continue-on-error for missing tests)
+  - [x] 3.7 Add SonarSource/sonarqube-scan-action@v5 step with SONAR_TOKEN and SONAR_HOST_URL
+  - [x] 3.8 Add sonarqube-quality-gate-action@v1 step to enforce quality gate checks (5 min timeout)
+  - [x] 3.9 Configure workflow to fail PR if quality gate fails (continue-on-error: false)
 
 - [ ] 4.0 Configure SonarQube Project and Quality Gates
   - [ ] 4.1 Verify SONAR_TOKEN and SONAR_HOST_URL secrets exist in GitHub repository settings
