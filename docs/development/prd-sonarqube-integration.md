@@ -1,17 +1,17 @@
-# PRD: SonarQube Integration for Google Workspace MCP
+# PRD: SonarQube Integration for Baseball Lineup App
 
 ## Overview
 
-Integrate the Google Workspace MCP server project with SonarQube for continuous code quality monitoring, following the same configuration patterns as the existing claude-memory-mcp project.
+Integrate the Baseball Lineup App project with SonarQube for continuous code quality monitoring, following the same configuration patterns as the existing claude-memory-mcp project.
 
 ## Problem Statement
 
-The Google Workspace MCP project currently lacks automated code quality monitoring and analysis. To maintain consistency with other MCP projects and ensure high code quality standards, we need to integrate this project with the existing SonarQube instance.
+The Baseball Lineup App project currently lacks automated code quality monitoring and analysis. To maintain consistency with other projects and ensure high code quality standards, we need to integrate this project with the existing SonarQube instance.
 
 ## Goals
 
 ### Primary Goals
-- **Code Quality Monitoring**: Implement continuous code quality analysis for Python codebase
+- **Code Quality Monitoring**: Implement continuous code quality analysis for Python (98.7%) and JavaScript (0.1%) codebase
 - **CI/CD Integration**: Automate SonarQube scanning in GitHub Actions workflow
 - **Quality Gates**: Enforce quality standards before code merges
 - **Coverage Tracking**: Monitor test coverage and maintain quality thresholds
@@ -20,6 +20,7 @@ The Google Workspace MCP project currently lacks automated code quality monitori
 - **Consistency**: Match configuration patterns from claude-memory-mcp project
 - **Security Analysis**: Detect potential security vulnerabilities in code
 - **Technical Debt**: Track and monitor technical debt accumulation
+- **Visual Quality Dashboard**: Display comprehensive quality metrics in README with SonarQube badges
 
 ## Success Criteria
 
@@ -35,8 +36,9 @@ The Google Workspace MCP project currently lacks automated code quality monitori
 
 1. **Project Configuration**
    - Create sonar-project.properties with appropriate settings
-   - Configure Python version (3.11+) and source paths
-   - Set appropriate exclusions for generated files and test artifacts
+   - Configure Python version (3.12) and source paths
+   - Set appropriate exclusions for generated files, test artifacts, virtual environments, and documentation
+   - Add comprehensive README badges matching claude-memory-mcp format (11 badges total)
 
 2. **CI/CD Integration**
    - Integrate SonarQube scanning into existing GitHub Actions workflow
@@ -51,19 +53,23 @@ The Google Workspace MCP project currently lacks automated code quality monitori
 ### Technical Requirements
 
 1. **Environment Configuration**
-   - Use existing SonarQube instance (same as claude-memory-mcp)
+   - Use existing SonarQube Community instance
    - Leverage existing SONAR_TOKEN and SONAR_HOST_URL secrets
-   - Support Python 3.11+ analysis
+   - Support Python 3.12 analysis
+   - Support JavaScript analysis for frontend components
 
 2. **Test Integration**
-   - Configure pytest for coverage reporting
+   - Configure pytest for backend Python coverage reporting (targeting 80%+ coverage)
+   - Configure Jest for frontend JavaScript coverage reporting (targeting 85%+ coverage)
    - Generate XML coverage reports compatible with SonarQube
    - Exclude test files from coverage analysis where appropriate
 
 3. **Project Structure Compatibility**
-   - Work with existing src/ directory structure
-   - Handle MCP-specific file patterns
-   - Exclude configuration files with potential secrets
+   - Work with root-level app.py structure (not src/ directory)
+   - Handle Flask application patterns
+   - Exclude virtual environment (baseball-venv/), test results, and coverage directories
+   - Exclude documentation (docs/), development tasks (ai-dev-tasks/), and scripts
+   - Exclude node_modules and frontend build artifacts
 
 ### Non-Functional Requirements
 
@@ -95,12 +101,26 @@ The Google Workspace MCP project currently lacks automated code quality monitori
 
 ### SonarQube Configuration
 ```properties
-sonar.projectKey=Google-Workspace-MCP
-sonar.python.version=3.11
+sonar.projectKey=baseball-lineup-app
+sonar.python.version=3.12
 sonar.python.coverage.reportPaths=coverage.xml
 sonar.sources=.
-sonar.exclusions=**/*test*/**,**/__pycache__/**,venv/**,config/**,scripts/**,logs/**,archive/**
+sonar.exclusions=**/*test*/**,**/__pycache__/**,baseball-venv/**,venv/**,htmlcov/**,test-results/**,scripts/**,docs/**,ai-dev-tasks/**,node_modules/**
 ```
+
+### README Badge Configuration
+Add comprehensive SonarQube badges to README.md following claude-memory-mcp pattern:
+- Quality Gate Status
+- Coverage
+- Bugs
+- Vulnerabilities
+- Code Smells
+- Security Rating
+- Maintainability Rating
+- Reliability Rating
+- Lines of Code
+- Duplicated Lines (%)
+- Technical Debt
 
 ### GitHub Actions Integration
 - Integrate with existing workflow or create new build.yml
@@ -109,9 +129,11 @@ sonar.exclusions=**/*test*/**,**/__pycache__/**,venv/**,config/**,scripts/**,log
 - Generate coverage reports before SonarQube scan
 
 ### Test Coverage Setup
-- Configure pytest-cov for XML coverage output
-- Set appropriate coverage targets (80%+ for new code)
-- Exclude test files and configuration from coverage metrics
+- Configure pytest-cov for Python/Flask backend XML coverage output (80%+ target)
+- Configure Jest for JavaScript frontend XML coverage output (85%+ target)
+- Set up test infrastructure following testing-infrastructure-template.mdc
+- Exclude test files, virtual environments, and configuration from coverage metrics
+- Generate timestamped test results in test-results/ directory
 
 ## Dependencies
 
@@ -121,16 +143,20 @@ sonar.exclusions=**/*test*/**,**/__pycache__/**,venv/**,config/**,scripts/**,log
 - pytest and pytest-cov packages
 
 ### Internal Dependencies
-- Current project structure (src/, tests/, config/)
-- Existing testing framework and patterns
+- Current project structure (root-level app.py, templates/, static/)
+- Planned testing framework from comprehensive-testing-PLANNED feature
 - GitHub Actions workflow capability
+- Flask application backend
+- JavaScript frontend components
 
 ## Timeline
 
-### Phase 1: Basic Integration (Day 1)
-- Create sonar-project.properties
-- Set up basic GitHub Actions workflow
-- Configure project in SonarQube
+### Phase 1: Basic Integration (Day 1) ✅
+- ✅ Create sonar-project.properties with baseball-lineup-app configuration
+- ✅ Add .scannerwork/ to .gitignore
+- ✅ Add comprehensive SonarQube badges to README.md (11 badges)
+- ⏳ Set up GitHub Actions workflow
+- ⏳ Configure project in SonarQube instance
 
 ### Phase 2: Quality Gates (Day 1)
 - Configure quality gate thresholds
@@ -166,9 +192,10 @@ sonar.exclusions=**/*test*/**,**/__pycache__/**,venv/**,config/**,scripts/**,log
 ## Acceptance Criteria
 
 1. **Configuration Complete**
-   - sonar-project.properties created with correct settings
-   - Project appears in SonarQube dashboard
-   - All exclusions properly configured
+   - ✅ sonar-project.properties created with correct settings (baseball-lineup-app, Python 3.12)
+   - ✅ .gitignore updated with .scannerwork/
+   - ✅ All exclusions properly configured (tests, venvs, docs, ai-dev-tasks, node_modules, test-results, htmlcov)
+   - ⏳ Project appears in SonarQube dashboard
 
 2. **CI/CD Integration Working**
    - GitHub Actions runs SonarQube scan successfully
@@ -181,6 +208,7 @@ sonar.exclusions=**/*test*/**,**/__pycache__/**,venv/**,config/**,scripts/**,log
    - Security hotspots identified and reviewed
 
 4. **Documentation Updated**
-   - README updated with SonarQube information
-   - Development workflow includes quality checks
-   - Troubleshooting guide for common issues
+   - ✅ README updated with comprehensive SonarQube badge suite (11 badges)
+   - ⏳ Badge URLs updated with actual SonarQube instance domain
+   - ⏳ Development workflow documentation includes quality checks
+   - ⏳ Troubleshooting guide for common issues

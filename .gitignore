@@ -56,3 +56,6 @@ certs/*.pem
 
 # Virtual environment
 baseball-venv/
+
+# SonarQube
+.scannerwork/
