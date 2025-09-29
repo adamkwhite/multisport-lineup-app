@@ -1,0 +1,17 @@
+{
+  "name": "baseball-lineup-app",
+  "version": "1.0.0",
+  "description": "Baseball team lineup management application with comprehensive testing infrastructure",
+  "main": "app.py",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --coverage --watchAll=false"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@testing-library/jest-dom": "^6.1.4",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
