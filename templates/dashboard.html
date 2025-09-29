@@ -757,6 +757,11 @@
                     }
                 });
 
+                // Restore selection state if this team was previously selected
+                if (selectedTeam && selectedTeam == teamData.id) {
+                    radioInput.checked = true;
+                }
+
                 teamsList.appendChild(teamContainer);
             });
             
@@ -767,10 +772,9 @@
 
         async function selectTeam(teamId, teamName) {
             selectedTeam = teamId;
-            
-            // Highlight selected team
-            document.querySelectorAll('.game-item').forEach(item => item.classList.remove('selected'));
-            event.target.classList.add('selected');
+
+            // Radio button selection is handled by CSS automatically
+            // No need to manually manage selection classes
             
             // Show games section and load games
             document.getElementById('games-section').style.display = 'block';
