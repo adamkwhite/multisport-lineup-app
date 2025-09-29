@@ -602,6 +602,102 @@
     </div>
 
     <script>
+        // Enhanced state management structure
+        const appState = {
+            // Team selection state
+            selectedTeam: {
+                id: null,
+                name: null,
+                data: null,
+                selectedAt: null
+            },
+
+            // Game selection state
+            selectedGame: {
+                id: null,
+                name: null,
+                data: null,
+                selectedAt: null
+            },
+
+            // Players state
+            attendingPlayers: [],
+
+            // Data cache
+            allTeams: [],
+            allGames: [],
+
+            // UI state
+            ui: {
+                currentFilter: 'all',
+                gamesVisible: false,
+                playersVisible: false
+            }
+        };
+
+        // State management helper functions
+        const StateManager = {
+            // Team selection methods
+            setSelectedTeam(teamId, teamName, teamData = null) {
+                console.log('StateManager: Setting selected team:', teamId, teamName);
+                appState.selectedTeam = {
+                    id: teamId,
+                    name: teamName,
+                    data: teamData,
+                    selectedAt: new Date().toISOString()
+                };
+                // Update legacy variable for backward compatibility
+                selectedTeam = teamId;
+                this.updateUI();
+            },
+
+            getSelectedTeam() {
+                return appState.selectedTeam;
+            },
+
+            clearSelectedTeam() {
+                console.log('StateManager: Clearing selected team');
+                appState.selectedTeam = { id: null, name: null, data: null, selectedAt: null };
+                selectedTeam = null;
+                this.updateUI();
+            },
+
+            // Game selection methods
+            setSelectedGame(gameId, gameName, gameData = null) {
+                console.log('StateManager: Setting selected game:', gameId, gameName);
+                appState.selectedGame = {
+                    id: gameId,
+                    name: gameName,
+                    data: gameData,
+                    selectedAt: new Date().toISOString()
+                };
+                selectedGame = gameId;
+                this.updateUI();
+            },
+
+            // UI state methods
+            updateUI() {
+                appState.ui.gamesVisible = appState.selectedTeam.id !== null;
+                appState.ui.playersVisible = appState.selectedGame.id !== null;
+                console.log('StateManager: UI state updated:', appState.ui);
+            },
+
+            // Validation methods
+            isTeamSelected() {
+                return appState.selectedTeam.id !== null;
+            },
+
+            isGameSelected() {
+                return appState.selectedGame.id !== null;
+            },
+
+            // Debug method
+            logCurrentState() {
+                console.log('Current App State:', JSON.stringify(appState, null, 2));
+            }
+        };
+
+        // Legacy variables for backward compatibility (will be removed gradually)
         let selectedTeam = null;
         let selectedGame = null;
         let attendingPlayers = [];
