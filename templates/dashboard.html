@@ -1812,7 +1812,7 @@
                 });
                 
                 // Populate bench
-                const benchList = document.getElementById(`bench-list-${index}`);
+                const currentBenchList = document.getElementById(`bench-list-${index}`);
                 if (lineupData.bench.length > 0) {
                     lineupData.bench.forEach(player => {
                         const benchPlayer = document.createElement('div');
@@ -1827,12 +1827,12 @@
                         playerNameSpan.setAttribute('data-original-name', player.name);
                         playerNameSpan.textContent = displayName;
                         benchPlayer.appendChild(playerNameSpan);
-                        benchList.appendChild(benchPlayer);
+                        currentBenchList.appendChild(benchPlayer);
                     });
                 } else {
                     const noBenchMsg = document.createElement('em');
                     noBenchMsg.textContent = 'No bench players';
-                    benchList.appendChild(noBenchMsg);
+                    currentBenchList.appendChild(noBenchMsg);
                 }
             });
         }
