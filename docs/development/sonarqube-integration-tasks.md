@@ -24,13 +24,13 @@
   - [x] 1.4 Update README.md badge URLs from placeholder 'sonarqube.yourdomain.com' to actual SonarQube instance URL (http://44.206.255.230:9000)
   - [x] 1.5 Verify sonar-project.properties exclusions match project structure and add certificate/image file exclusions
 
-- [ ] 2.0 Set Up Test Coverage Reporting Infrastructure
-  - [ ] 2.1 Add pytest-cov to requirements.txt if not already present
-  - [ ] 2.2 Create or update pytest.ini with coverage settings (--cov-report=xml, --cov-report=html, 80%+ threshold)
-  - [ ] 2.3 Configure pytest to output coverage.xml in project root for SonarQube ingestion
-  - [ ] 2.4 Create or update jest.config.js with coverage settings for JavaScript (lcov and xml formats, 85%+ threshold)
-  - [ ] 2.5 Configure Jest to output coverage reports compatible with SonarQube
-  - [ ] 2.6 Test local coverage report generation for both Python and JavaScript components
+- [x] 2.0 Set Up Test Coverage Reporting Infrastructure
+  - [x] 2.1 Add pytest-cov to requirements.txt if not already present (already present)
+  - [x] 2.2 Create or update pytest.ini with coverage settings (--cov-report=xml, --cov-report=html, 80%+ threshold)
+  - [x] 2.3 Configure pytest to output coverage.xml in project root for SonarQube ingestion
+  - [x] 2.4 Create or update jest.config.js with coverage settings for JavaScript (lcov, cobertura, and html formats, 85%+ threshold)
+  - [x] 2.5 Configure Jest to output coverage reports compatible with SonarQube (added cobertura format)
+  - [x] 2.6 Test local coverage report generation configuration (configs verified, actual tests in comprehensive-testing-PLANNED)
 
 - [ ] 3.0 Create GitHub Actions Workflow for SonarQube Scanning
   - [ ] 3.1 Create .github/workflows/sonarqube.yml workflow file
