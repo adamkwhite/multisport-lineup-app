@@ -798,12 +798,21 @@
             // Check if currently selected team is still in filtered results
             if (selectedTeam) {
                 const selectedTeamStillVisible = filteredTeams.some(team => team.id == selectedTeam);
+                console.log('Checking if selected team still visible:', selectedTeamStillVisible, 'for team ID:', selectedTeam);
                 if (!selectedTeamStillVisible) {
                     console.log('Selected team filtered out, clearing games section');
                     // Clear games section if selected team is no longer visible
-                    document.getElementById('games-section').style.display = 'none';
+                    const gamesSection = document.getElementById('games-section');
+                    if (gamesSection) {
+                        gamesSection.style.display = 'none';
+                        console.log('Games section hidden');
+                    } else {
+                        console.log('ERROR: games-section element not found!');
+                    }
                     // Note: Keep selectedTeam variable for when filter changes back
                 }
+            } else {
+                console.log('No selected team to check');
             }
         }
 
