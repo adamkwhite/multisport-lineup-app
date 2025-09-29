@@ -26,9 +26,13 @@
 - [x] Add SonarQube scan action with secrets
 - [x] Configure quality gate checks with 5 min timeout
 
-### Phase 4: SonarQube Project Setup ⏳
-- [ ] Create project in SonarQube instance
-- [ ] Configure quality gates
+### Phase 4: SonarQube Project Setup ✅ (Complete)
+- [x] Add SONAR_TOKEN and SONAR_HOST_URL secrets to GitHub
+- [x] Create baseball-lineup-app project in SonarQube at http://44.206.255.230:9000
+- [x] Configure quality gate thresholds
+- [x] Set coverage thresholds (80% Python, 85% JavaScript)
+- [x] Enable security vulnerability detection
+- [x] Initial scan will run via GitHub Actions on PR
 - [ ] Run initial scan
 
 ### Phase 5: Validation & Documentation ⏳

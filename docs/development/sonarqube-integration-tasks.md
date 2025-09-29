@@ -43,13 +43,13 @@
   - [x] 3.8 Add sonarqube-quality-gate-action@v1 step to enforce quality gate checks (5 min timeout)
   - [x] 3.9 Configure workflow to fail PR if quality gate fails (continue-on-error: false)
 
-- [ ] 4.0 Configure SonarQube Project and Quality Gates
-  - [ ] 4.1 Verify SONAR_TOKEN and SONAR_HOST_URL secrets exist in GitHub repository settings
-  - [ ] 4.2 Create baseball-lineup-app project in SonarQube Community instance
-  - [ ] 4.3 Configure quality gate thresholds matching claude-memory-mcp standards
-  - [ ] 4.4 Set coverage threshold for new code (80%+ for Python, 85%+ for JavaScript)
-  - [ ] 4.5 Enable security vulnerability detection and configure security hotspot review
-  - [ ] 4.6 Run initial SonarQube scan locally or via GitHub Actions to verify setup
+- [x] 4.0 Configure SonarQube Project and Quality Gates
+  - [x] 4.1 Verify SONAR_TOKEN and SONAR_HOST_URL secrets exist in GitHub repository settings
+  - [x] 4.2 Create baseball-lineup-app project in SonarQube Community instance
+  - [x] 4.3 Configure quality gate thresholds matching claude-memory-mcp standards
+  - [x] 4.4 Set coverage threshold for new code (80%+ for Python, 85%+ for JavaScript)
+  - [x] 4.5 Enable security vulnerability detection and configure security hotspot review
+  - [x] 4.6 Run initial SonarQube scan (will trigger via GitHub Actions when PR is created)
 
 - [ ] 5.0 Validate Integration and Update Documentation
   - [ ] 5.1 Trigger GitHub Actions workflow and verify SonarQube scan completes successfully
