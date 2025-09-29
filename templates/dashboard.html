@@ -729,9 +729,11 @@
         function filterTeams() {
             const teamsList = document.getElementById('teams-list');
             const filter = document.getElementById('team-status-filter').value;
-            
+
+            console.log('Filtering teams with filter:', filter, 'Current selection:', selectedTeam);
+
             teamsList.innerHTML = '';
-            
+
             let filteredTeams = allTeams;
             
             // Apply filter
@@ -779,6 +781,11 @@
                 // Restore selection state if this team was previously selected
                 if (selectedTeam && selectedTeam == teamData.id) {
                     radioInput.checked = true;
+                    console.log('Restored selection for team:', teamData.name);
+                    // Ensure games section is visible if we have a selected team
+                    if (document.getElementById('games-section').style.display === 'none') {
+                        document.getElementById('games-section').style.display = 'block';
+                    }
                 }
 
                 teamsList.appendChild(teamContainer);
@@ -786,6 +793,17 @@
             
             if (filteredTeams.length === 0) {
                 teamsList.innerHTML = '<p>No teams found for the selected filter.</p>';
+            }
+
+            // Check if currently selected team is still in filtered results
+            if (selectedTeam) {
+                const selectedTeamStillVisible = filteredTeams.some(team => team.id == selectedTeam);
+                if (!selectedTeamStillVisible) {
+                    console.log('Selected team filtered out, clearing games section');
+                    // Clear games section if selected team is no longer visible
+                    document.getElementById('games-section').style.display = 'none';
+                    // Note: Keep selectedTeam variable for when filter changes back
+                }
             }
         }
 
