@@ -1157,9 +1157,13 @@
                 const data = await response.json();
                 
                 if (response.ok) {
+                    // Store in both legacy and enhanced state
                     attendingPlayers = data.attending_players;
+                    appState.attendingPlayers = data.attending_players;
+                    console.log('Players loaded successfully:', data.attending_players.length, 'players');
                     displayPlayers(attendingPlayers);
                 } else {
+                    console.error('Failed to load player availability:', data.error);
                     showError('Failed to load player availability: ' + data.error);
                 }
             } catch (error) {
@@ -1172,6 +1176,7 @@
         }
 
         function displayPlayers(players) {
+            console.log('displayPlayers called with:', players?.length, 'players');
             const playersList = document.getElementById('players-list');
             if (!playersList) {
                 console.error('players-list element not found!');
