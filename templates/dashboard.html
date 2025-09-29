@@ -77,6 +77,90 @@
             background-color: #e3f2fd;
             border-color: #2196f3;
         }
+
+        /* Team Selection Radio Button Styles */
+        .team-card-container {
+            position: relative;
+            margin: 5px 0;
+        }
+        .team-radio {
+            display: none;
+        }
+        .team-radio:focus + .team-card {
+            outline: 2px solid #3498db;
+            outline-offset: 2px;
+        }
+        .team-card {
+            display: block;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: white;
+            transition: all 0.2s ease;
+            position: relative;
+            margin: 0;
+        }
+        .team-card:hover {
+            background-color: #f8f9fa;
+            border-color: #3498db;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+            cursor: pointer;
+        }
+        .team-card:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+        }
+        .team-radio:checked + .team-card {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            border-width: 2px;
+            box-shadow: 0 2px 10px rgba(33, 150, 243, 0.2);
+        }
+        .team-radio:checked + .team-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.25);
+        }
+        .selection-indicator {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            width: 20px;
+            height: 20px;
+            transform: translateY(-50%);
+        }
+        .radio-visual {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            background-color: white;
+            transition: all 0.2s ease;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .team-card:hover .radio-visual {
+            border-color: #3498db;
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+        .team-radio:checked + .team-card .radio-visual {
+            border-color: #2196f3;
+            background-color: white;
+        }
+        .team-radio:checked + .team-card .radio-visual::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #2196f3;
+            transform: translate(-50%, -50%);
+        }
         .lineup-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -171,6 +255,60 @@
             text-align: center;
             color: #666;
             font-style: italic;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ffebee, #fce4ec);
+            border: 1px solid #f48fb1;
+            border-left: 4px solid #e91e63;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #880e4f;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            border: 1px solid #81c784;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #2e7d32;
+        }
+
+        .retry-button {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
+        .retry-button:hover {
+            background: #e64a19;
         }
         .error {
             color: #e74c3c;
@@ -220,8 +358,59 @@
             .lineup-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            /* Mobile team card optimizations */
+            .team-card {
+                padding: 12px;
+                font-size: 16px; /* Larger touch targets */
+                min-height: 44px; /* iOS recommended touch target size */
+            }
+            .selection-indicator {
+                left: 12px;
+                width: 24px;
+                height: 24px;
+            }
+            .radio-visual {
+                width: 22px;
+                height: 22px;
+            }
+            .team-info {
+                padding-left: 50px !important; /* More space for larger radio button */
+            }
+            .team-card:hover {
+                transform: none; /* Disable hover animations on mobile */
+                box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+            }
         }
-        
+
+        @media (max-width: 480px) {
+            /* Small mobile optimizations */
+            .team-card {
+                padding: 15px 10px;
+                margin: 8px 0;
+            }
+            .team-card strong {
+                font-size: 18px;
+            }
+            .team-card small {
+                font-size: 14px;
+                line-height: 1.4;
+            }
+            .selection-indicator {
+                left: 10px;
+            }
+            .team-info {
+                padding-left: 45px !important;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            /* Large screen optimizations */
+            .team-card {
+                max-width: 600px; /* Prevent cards from becoming too wide */
+            }
+        }
+
         /* Tab Styles */
         .tab-container {
             width: 100%;
@@ -357,7 +546,7 @@
             <strong>Baseball Lineup Manager{% if session.demo_mode %} <span class="demo-indicator">(DEMO)</span>{% endif %}</strong>
         </div>
         <div style="position: relative;">
-            <button class="btn" onclick="loadTeams()">Refresh Teams</button>
+            <button class="btn" onclick="resetUserGuidance(); loadTeams()">Refresh Teams</button>
             <a href="/logout" class="btn danger">Logout</a>
             <button class="hamburger-menu" onclick="toggleMenu()">☰</button>
 
@@ -384,7 +573,26 @@
         <!-- Tab Content: Teams and Games -->
         <div id="teams-tab" class="tab-content active">
             <h3>Select Team & Game</h3>
-            
+
+            <!-- User Guidance -->
+            <div id="user-guidance" style="background: linear-gradient(135deg, #e3f2fd, #f8f9fa); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 20px; margin-right: 8px;">📋</span>
+                    <strong style="color: #1976d2;">Getting Started</strong>
+                </div>
+                <ol style="margin: 0; padding-left: 20px; color: #555;">
+                    <li id="step-1" style="margin-bottom: 5px;">
+                        <span style="font-weight: 500;">Select your team</span> by clicking on a team card below
+                    </li>
+                    <li id="step-2" style="margin-bottom: 5px; opacity: 0.5;">
+                        <span style="font-weight: 500;">Choose a game</span> from the available games
+                    </li>
+                    <li id="step-3" style="margin-bottom: 5px; opacity: 0.5;">
+                        <span style="font-weight: 500;">Continue</span> to view players and create lineup
+                    </li>
+                </ol>
+            </div>
+
             <!-- Team Status Filter -->
             <div style="margin-bottom: 20px;">
                 <label for="team-status-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Filter Teams:</label>
@@ -395,7 +603,10 @@
                 </select>
             </div>
             
-            <div id="teams-loading" class="loading">Loading teams...</div>
+            <div id="teams-loading" class="loading">
+                <div class="loading-spinner"></div>
+                Loading teams...
+            </div>
             <div id="teams-list" style="display:none;"></div>
             
             <div id="games-section" style="display:none;">
@@ -412,13 +623,25 @@
                     </select>
                 </div>
                 
-                <div id="games-loading" class="loading">Loading games...</div>
+                <div id="games-loading" class="loading">
+                    <div class="loading-spinner"></div>
+                    Loading games...
+                </div>
                 <div id="games-list" class="games-list"></div>
                 
-                <div style="margin-top: 20px;">
-                    <button class="btn" onclick="openTab('players-tab')" id="next-to-players-btn" style="display:none;">
-                        Next: View Players →
-                    </button>
+                <!-- Enhanced Continue Button -->
+                <div id="continue-section" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #e8f5e8, #f0f8f0); border-radius: 8px; border-left: 4px solid #4caf50; display: none;">
+                    <div style="text-align: center;">
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 24px;">✅</span>
+                            <div style="margin-top: 8px; font-weight: 600; color: #2e7d32;">Ready to Continue!</div>
+                            <div style="color: #555; font-size: 14px;">You've selected your team and game</div>
+                        </div>
+                        <button class="btn success" onclick="openTab('players-tab')" id="next-to-players-btn" style="font-size: 16px; padding: 12px 24px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none;">
+                            <span style="margin-right: 8px;">👥</span>
+                            Continue to View Players
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -431,7 +654,10 @@
                 <small id="selected-game-details"></small>
             </div>
             
-            <div id="players-loading" class="loading">Loading players...</div>
+            <div id="players-loading" class="loading">
+                <div class="loading-spinner"></div>
+                Loading players...
+            </div>
             <div id="players-list" class="players-list"></div>
             
             <div style="margin-top: 20px;">
@@ -467,14 +693,125 @@
     </div>
 
     <script>
+        // Enhanced state management structure
+        const appState = {
+            // Team selection state
+            selectedTeam: {
+                id: null,
+                name: null,
+                data: null,
+                selectedAt: null
+            },
+
+            // Game selection state
+            selectedGame: {
+                id: null,
+                name: null,
+                data: null,
+                selectedAt: null
+            },
+
+            // Players state
+            attendingPlayers: [],
+
+            // Data cache
+            allTeams: [],
+            allGames: [],
+
+            // UI state
+            ui: {
+                currentFilter: 'all',
+                gamesVisible: false,
+                playersVisible: false
+            }
+        };
+
+        // State management helper functions
+        const StateManager = {
+            // Team selection methods
+            setSelectedTeam(teamId, teamName, teamData = null) {
+                console.log('StateManager: Setting selected team:', teamId, teamName);
+                appState.selectedTeam = {
+                    id: teamId,
+                    name: teamName,
+                    data: teamData,
+                    selectedAt: new Date().toISOString()
+                };
+                // Update legacy variable for backward compatibility
+                selectedTeam = teamId;
+                this.updateUI();
+            },
+
+            getSelectedTeam() {
+                return appState.selectedTeam;
+            },
+
+            clearSelectedTeam() {
+                console.log('StateManager: Clearing selected team');
+                appState.selectedTeam = { id: null, name: null, data: null, selectedAt: null };
+                selectedTeam = null;
+                this.updateUI();
+            },
+
+            // Game selection methods
+            setSelectedGame(gameId, gameName, gameData = null) {
+                console.log('StateManager: Setting selected game:', gameId, gameName);
+                appState.selectedGame = {
+                    id: gameId,
+                    name: gameName,
+                    data: gameData,
+                    selectedAt: new Date().toISOString()
+                };
+                selectedGame = gameId;
+                this.updateUI();
+            },
+
+            getSelectedGame() {
+                return appState.selectedGame;
+            },
+
+            clearSelectedGame() {
+                console.log('StateManager: Clearing selected game');
+                appState.selectedGame = { id: null, name: null, data: null, selectedAt: null };
+                selectedGame = null;
+                this.updateUI();
+            },
+
+            // UI state methods
+            updateUI() {
+                appState.ui.gamesVisible = appState.selectedTeam.id !== null;
+                appState.ui.playersVisible = appState.selectedGame.id !== null;
+                console.log('StateManager: UI state updated:', appState.ui);
+            },
+
+            // Validation methods
+            isTeamSelected() {
+                return appState.selectedTeam.id !== null;
+            },
+
+            isGameSelected() {
+                return appState.selectedGame.id !== null;
+            },
+
+            // Debug method
+            logCurrentState() {
+                console.log('Current App State:', JSON.stringify(appState, null, 2));
+            }
+        };
+
+        // Legacy variables for backward compatibility (will be removed gradually)
         let selectedTeam = null;
         let selectedGame = null;
         let attendingPlayers = [];
         let allTeams = []; // Store all teams for filtering
         let allGames = []; // Store all games for filtering
+        let isRefreshing = false; // Flag to prevent state restoration during refresh
 
         // Load teams on page load
         window.onload = function() {
+            // Reset user guidance to initial state
+            resetUserGuidance();
+
             // Initialize toggle state first
             loadToggleState();
 
@@ -508,6 +845,73 @@
                 menu.style.display = 'none';
             }
         });
+
+        // Reset user guidance to initial state
+        function resetUserGuidance() {
+            console.log('resetUserGuidance called');
+
+            // Set flag to prevent state restoration
+            isRefreshing = true;
+
+            const stepTexts = {
+                1: '<span style="font-weight: 500;">Select your team</span> by clicking on a team card below',
+                2: '<span style="font-weight: 500;">Choose a game</span> from the available games',
+                3: '<span style="font-weight: 500;">Continue</span> to view players and create lineup'
+            };
+
+            for (let i = 1; i <= 3; i++) {
+                const step = document.getElementById(`step-${i}`);
+                if (step) {
+                    // Reset to original text and styling
+                    step.innerHTML = stepTexts[i];
+                    step.style.opacity = i === 1 ? '1' : '0.5';
+                    step.style.color = '#555';
+                    step.style.fontWeight = 'normal';
+                    console.log(`Reset step ${i} to initial state`);
+                }
+            }
+
+            // Hide continue section
+            const continueSection = document.getElementById('continue-section');
+            if (continueSection) {
+                continueSection.style.display = 'none';
+                console.log('Hidden continue section');
+            }
+
+            // Hide games section too
+            const gamesSection = document.getElementById('games-section');
+            if (gamesSection) {
+                gamesSection.style.display = 'none';
+                console.log('Hidden games section');
+            }
+
+            // Clear state management selections
+            StateManager.clearSelectedTeam();
+            StateManager.clearSelectedGame();
+            console.log('Cleared state management selections');
+        }
+
+        // Update user guidance progress
+        function updateUserGuidanceProgress(completedStep) {
+            for (let i = 1; i <= 3; i++) {
+                const step = document.getElementById(`step-${i}`);
+                if (step) {
+                    if (i <= completedStep) {
+                        step.style.opacity = '1';
+                        step.style.color = '#2e7d32';
+                        step.style.fontWeight = '600';
+                        // Add checkmark for completed steps (but not current step)
+                        if (i < completedStep && !step.innerHTML.startsWith('✅')) {
+                            step.innerHTML = '✅ ' + step.innerHTML;
+                        }
+                    } else {
+                        step.style.opacity = '0.5';
+                        step.style.color = '#555';
+                        step.style.fontWeight = 'normal';
+                    }
+                }
+            }
+        }
 
         // Name obfuscation functionality
         function obfuscateName(fullName) {
@@ -614,11 +1018,12 @@
                 
                 if (response.ok) {
                     displayTeams(data);
+                    showSuccess(`${data.teams ? data.teams.length : 0} teams loaded successfully`);
                 } else {
-                    showError('Failed to load teams: ' + data.error);
+                    showError('Failed to load teams: ' + data.error, loadTeams);
                 }
             } catch (error) {
-                showError('Failed to load teams: ' + error.message);
+                showError('Failed to load teams: ' + error.message, loadTeams);
             }
             
             document.getElementById('teams-loading').style.display = 'none';
@@ -645,9 +1050,11 @@
         function filterTeams() {
             const teamsList = document.getElementById('teams-list');
             const filter = document.getElementById('team-status-filter').value;
-            
+
+            console.log('Filtering teams with filter:', filter, 'Current selection:', selectedTeam);
+
             teamsList.innerHTML = '';
-            
+
             let filteredTeams = allTeams;
             
             // Apply filter
@@ -661,38 +1068,114 @@
                 );
             }
             
-            // Display filtered teams
+            // Display filtered teams with radio button selection
             filteredTeams.forEach(teamData => {
-                const teamDiv = document.createElement('div');
-                teamDiv.className = 'game-item';
-                
+                const teamContainer = document.createElement('div');
+                teamContainer.className = 'team-card-container';
+
                 // Show more team info for better selection
                 const statusBadge = teamData.is_archived ? '<span style="color: #666; font-size: 12px;">[ARCHIVED]</span>' : '<span style="color: #27ae60; font-size: 12px;">[ACTIVE]</span>';
-                
-                teamDiv.innerHTML = `
-                    <strong>${teamData.name}</strong> ${statusBadge}<br>
-                    <small>Division: ${teamData.division_name || 'N/A'}</small><br>
-                    <small>Season: ${teamData.season_name || 'N/A'}</small>
+
+                teamContainer.innerHTML = `
+                    <input type="radio" name="team-selection" value="${teamData.id}" id="team-${teamData.id}" class="team-radio">
+                    <label for="team-${teamData.id}" class="team-card">
+                        <div class="selection-indicator">
+                            <span class="radio-visual"></span>
+                        </div>
+                        <div class="team-info" style="padding-left: 45px;">
+                            <strong>${teamData.name}</strong> ${statusBadge}<br>
+                            <small>Division: ${teamData.division_name || 'N/A'}</small><br>
+                            <small>Season: ${teamData.season_name || 'N/A'}</small>
+                        </div>
+                    </label>
                 `;
-                teamDiv.onclick = () => selectTeam(teamData.id, teamData.name);
-                teamsList.appendChild(teamDiv);
+
+                // Add event listener to radio button
+                const radioInput = teamContainer.querySelector('.team-radio');
+                radioInput.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        console.log('Radio button clicked for team:', teamData.name, 'ID:', teamData.id);
+                        selectTeam(teamData.id, teamData.name);
+                    }
+                });
+
+                // Restore selection state if this team was previously selected (but not during refresh)
+                if (!isRefreshing) {
+                    const currentSelectedTeam = StateManager.getSelectedTeam();
+                    if (currentSelectedTeam.id && currentSelectedTeam.id == teamData.id) {
+                        radioInput.checked = true;
+                        console.log('Restored selection for team:', teamData.name, 'selected at:', currentSelectedTeam.selectedAt);
+                        // Ensure games section is visible if we have a selected team
+                        if (document.getElementById('games-section').style.display === 'none') {
+                            document.getElementById('games-section').style.display = 'block';
+                        }
+                    }
+                }
+
+                teamsList.appendChild(teamContainer);
             });
             
             if (filteredTeams.length === 0) {
                 teamsList.innerHTML = '<p>No teams found for the selected filter.</p>';
             }
+
+            // Check if currently selected team is still in filtered results (but not during refresh)
+            if (!isRefreshing) {
+                const currentSelectedTeam = StateManager.getSelectedTeam();
+                if (currentSelectedTeam.id) {
+                    const selectedTeamStillVisible = filteredTeams.some(team => team.id == currentSelectedTeam.id);
+                    console.log('Checking if selected team still visible:', selectedTeamStillVisible, 'for team ID:', currentSelectedTeam.id);
+                    if (!selectedTeamStillVisible) {
+                        console.log('Selected team filtered out, clearing games section');
+                        // Clear games section if selected team is no longer visible
+                        const gamesSection = document.getElementById('games-section');
+                        if (gamesSection) {
+                            gamesSection.style.display = 'none';
+                            console.log('Games section hidden');
+                        } else {
+                            console.log('ERROR: games-section element not found!');
+                        }
+                        // Note: Keep selectedTeam variable for when filter changes back
+                    }
+                } else {
+                    console.log('No selected team to check');
+                }
+            }
+
+            // Reset the refresh flag after teams are displayed
+            isRefreshing = false;
         }
 
         async function selectTeam(teamId, teamName) {
-            selectedTeam = teamId;
-            
-            // Highlight selected team
-            document.querySelectorAll('.game-item').forEach(item => item.classList.remove('selected'));
-            event.target.classList.add('selected');
-            
+            console.log('selectTeam called with:', teamId, teamName);
+
+            // Find full team data from allTeams for enhanced state
+            const teamData = allTeams.find(team => team.id === teamId) || null;
+
+            // Use enhanced state management
+            StateManager.setSelectedTeam(teamId, teamName, teamData);
+
+            // Update user guidance progress - step 1 completed
+            updateUserGuidanceProgress(1);
+
+            // Log state for analytics foundation
+            console.log('Team selection analytics:', {
+                teamId,
+                teamName,
+                selectedAt: StateManager.getSelectedTeam().selectedAt,
+                filterUsed: document.getElementById('team-status-filter').value
+            });
+
+            // Radio button selection is handled by CSS automatically
+            // No need to manually manage selection classes
+
             // Show games section and load games
+            console.log('Showing games section...');
             document.getElementById('games-section').style.display = 'block';
             document.getElementById('games-loading').style.display = 'block';
+
+            // Update user guidance progress - step 2 available
+            updateUserGuidanceProgress(2);
             
             try {
                 // Check if we need all games regardless of state
@@ -700,12 +1183,15 @@
                 const url = gameFilter === 'all-states' ? 
                     `/api/games/${teamId}?include_all_states=true` : 
                     `/api/games/${teamId}`;
+                console.log('Fetching games from:', url);
                 const response = await fetch(url);
                 const data = await response.json();
-                
+                console.log('Games API response:', data);
+
                 if (response.ok) {
                     displayGames(data.games);
                 } else {
+                    console.error('Games API error:', data);
                     showError('Failed to load games: ' + data.error);
                 }
             } catch (error) {
@@ -716,9 +1202,10 @@
         }
 
         function displayGames(games) {
+            console.log('displayGames called with:', games);
             // Store all games for filtering
-            allGames = games;
-            
+            allGames = games || [];  // Ensure it's always an array
+
             // Apply current filter
             filterGames();
         }
@@ -768,12 +1255,12 @@
                 document.getElementById('games-loading').style.display = 'none';
             }
             
-            let filteredGames = allGames;
-            
+            let filteredGames = allGames || [];
+
             // Apply filter
-            if (filter === 'next' && allGames.length > 0) {
+            if (filter === 'next' && filteredGames.length > 0) {
                 // Sort games by date and take only the first one
-                const sortedGames = [...allGames].sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+                const sortedGames = [...filteredGames].sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
                 filteredGames = [sortedGames[0]];
             }
             
@@ -799,14 +1286,35 @@
         }
 
         async function selectGame(gameId, gameName) {
-            selectedGame = gameId;
-            
+            // Find full game data from allGames
+            const gameData = allGames.find(game => game.id === gameId) || null;
+
+            // Use enhanced state management
+            StateManager.setSelectedGame(gameId, gameName, gameData);
+
+            // Log analytics data for the team → game flow
+            const teamState = StateManager.getSelectedTeam();
+            const gameState = StateManager.getSelectedGame();
+            if (teamState.selectedAt && gameState.selectedAt) {
+                const selectionTimeMs = new Date(gameState.selectedAt) - new Date(teamState.selectedAt);
+                console.log('Team → Game selection analytics:', {
+                    teamId: teamState.id,
+                    gameId: gameState.id,
+                    selectionTimeMs,
+                    selectionTimeSeconds: (selectionTimeMs / 1000).toFixed(2)
+                });
+            }
+
             // Highlight selected game
             document.querySelectorAll('#games-list .game-item').forEach(item => item.classList.remove('selected'));
             event.target.classList.add('selected');
             
-            // Show navigation button
+            // Show enhanced continue section
+            document.getElementById('continue-section').style.display = 'block';
             document.getElementById('next-to-players-btn').style.display = 'block';
+
+            // Update user guidance steps
+            updateUserGuidanceProgress(3);
             
             // Update game info in players tab
             const selectedGameElement = allGames.find(game => game.id == gameId);
@@ -829,9 +1337,14 @@
                 const data = await response.json();
                 
                 if (response.ok) {
+                    // Store in both legacy and enhanced state
                     attendingPlayers = data.attending_players;
+                    appState.attendingPlayers = data.attending_players;
+                    console.log('Players loaded successfully:', data.attending_players.length, 'players');
                     displayPlayers(attendingPlayers);
+                    showSuccess(`${data.attending_players.length} players loaded for the selected game`);
                 } else {
+                    console.error('Failed to load player availability:', data.error);
                     showError('Failed to load player availability: ' + data.error);
                 }
             } catch (error) {
@@ -844,6 +1357,7 @@
         }
 
         function displayPlayers(players) {
+            console.log('displayPlayers called with:', players?.length, 'players');
             const playersList = document.getElementById('players-list');
             if (!playersList) {
                 console.error('players-list element not found!');
@@ -1205,27 +1719,46 @@
             // The generateLineup function already switches to the lineup tab
         }
 
-        function showError(message) {
+        function showError(message, retryFunction = null) {
             // Remove existing messages
-            document.querySelectorAll('.error, .success').forEach(el => el.remove());
-            
+            document.querySelectorAll('.error-message, .success-message').forEach(el => el.remove());
+
             const errorDiv = document.createElement('div');
-            errorDiv.className = 'error no-print';
-            errorDiv.textContent = message;
-            
+            errorDiv.className = 'error-message no-print';
+
+            let content = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 18px; margin-right: 8px;">⚠️</span>
+                    <strong>Error</strong>
+                </div>
+                <div>${message}</div>
+            `;
+
+            if (retryFunction) {
+                content += `<button class="retry-button" onclick="this.parentElement.remove(); (${retryFunction.toString()})()">Retry</button>`;
+            }
+
+            errorDiv.innerHTML = content;
             document.body.insertBefore(errorDiv, document.body.firstChild);
-            
-            // Auto-remove after 5 seconds
-            setTimeout(() => errorDiv.remove(), 5000);
+
+            // Auto-remove after 8 seconds
+            setTimeout(() => errorDiv.remove(), 8000);
         }
 
         function showSuccess(message) {
             // Remove existing messages
-            document.querySelectorAll('.error, .success').forEach(el => el.remove());
-            
+            document.querySelectorAll('.error-message, .success-message').forEach(el => el.remove());
+
             const successDiv = document.createElement('div');
-            successDiv.className = 'success no-print';
-            successDiv.textContent = message;
+            successDiv.className = 'success-message no-print';
+
+            successDiv.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 18px; margin-right: 8px;">✅</span>
+                    <strong>Success</strong>
+                </div>
+                <div>${message}</div>
+            `;
             
             document.body.insertBefore(successDiv, document.body.firstChild);
             
