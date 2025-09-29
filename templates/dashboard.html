@@ -255,6 +255,60 @@
             text-align: center;
             color: #666;
             font-style: italic;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ffebee, #fce4ec);
+            border: 1px solid #f48fb1;
+            border-left: 4px solid #e91e63;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #880e4f;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            border: 1px solid #81c784;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #2e7d32;
+        }
+
+        .retry-button {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
+        .retry-button:hover {
+            background: #e64a19;
         }
         .error {
             color: #e74c3c;
@@ -492,7 +546,7 @@
             <strong>Baseball Lineup Manager{% if session.demo_mode %} <span class="demo-indicator">(DEMO)</span>{% endif %}</strong>
         </div>
         <div style="position: relative;">
-            <button class="btn" onclick="loadTeams()">Refresh Teams</button>
+            <button class="btn" onclick="resetUserGuidance(); loadTeams()">Refresh Teams</button>
             <a href="/logout" class="btn danger">Logout</a>
             <button class="hamburger-menu" onclick="toggleMenu()">☰</button>
 
@@ -519,7 +573,26 @@
         <!-- Tab Content: Teams and Games -->
         <div id="teams-tab" class="tab-content active">
             <h3>Select Team & Game</h3>
-            
+
+            <!-- User Guidance -->
+            <div id="user-guidance" style="background: linear-gradient(135deg, #e3f2fd, #f8f9fa); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 20px; margin-right: 8px;">📋</span>
+                    <strong style="color: #1976d2;">Getting Started</strong>
+                </div>
+                <ol style="margin: 0; padding-left: 20px; color: #555;">
+                    <li id="step-1" style="margin-bottom: 5px;">
+                        <span style="font-weight: 500;">Select your team</span> by clicking on a team card below
+                    </li>
+                    <li id="step-2" style="margin-bottom: 5px; opacity: 0.5;">
+                        <span style="font-weight: 500;">Choose a game</span> from the available games
+                    </li>
+                    <li id="step-3" style="margin-bottom: 5px; opacity: 0.5;">
+                        <span style="font-weight: 500;">Continue</span> to view players and create lineup
+                    </li>
+                </ol>
+            </div>
+
             <!-- Team Status Filter -->
             <div style="margin-bottom: 20px;">
                 <label for="team-status-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Filter Teams:</label>
@@ -530,7 +603,10 @@
                 </select>
             </div>
             
-            <div id="teams-loading" class="loading">Loading teams...</div>
+            <div id="teams-loading" class="loading">
+                <div class="loading-spinner"></div>
+                Loading teams...
+            </div>
             <div id="teams-list" style="display:none;"></div>
             
             <div id="games-section" style="display:none;">
@@ -547,13 +623,25 @@
                     </select>
                 </div>
                 
-                <div id="games-loading" class="loading">Loading games...</div>
+                <div id="games-loading" class="loading">
+                    <div class="loading-spinner"></div>
+                    Loading games...
+                </div>
                 <div id="games-list" class="games-list"></div>
                 
-                <div style="margin-top: 20px;">
-                    <button class="btn" onclick="openTab('players-tab')" id="next-to-players-btn" style="display:none;">
-                        Next: View Players →
-                    </button>
+                <!-- Enhanced Continue Button -->
+                <div id="continue-section" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #e8f5e8, #f0f8f0); border-radius: 8px; border-left: 4px solid #4caf50; display: none;">
+                    <div style="text-align: center;">
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 24px;">✅</span>
+                            <div style="margin-top: 8px; font-weight: 600; color: #2e7d32;">Ready to Continue!</div>
+                            <div style="color: #555; font-size: 14px;">You've selected your team and game</div>
+                        </div>
+                        <button class="btn success" onclick="openTab('players-tab')" id="next-to-players-btn" style="font-size: 16px; padding: 12px 24px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none;">
+                            <span style="margin-right: 8px;">👥</span>
+                            Continue to View Players
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -566,7 +654,10 @@
                 <small id="selected-game-details"></small>
             </div>
             
-            <div id="players-loading" class="loading">Loading players...</div>
+            <div id="players-loading" class="loading">
+                <div class="loading-spinner"></div>
+                Loading players...
+            </div>
             <div id="players-list" class="players-list"></div>
             
             <div style="margin-top: 20px;">
@@ -714,9 +805,13 @@
         let attendingPlayers = [];
         let allTeams = []; // Store all teams for filtering
         let allGames = []; // Store all games for filtering
+        let isRefreshing = false; // Flag to prevent state restoration during refresh
 
         // Load teams on page load
         window.onload = function() {
+            // Reset user guidance to initial state
+            resetUserGuidance();
+
             // Initialize toggle state first
             loadToggleState();
 
@@ -750,6 +845,73 @@
                 menu.style.display = 'none';
             }
         });
+
+        // Reset user guidance to initial state
+        function resetUserGuidance() {
+            console.log('resetUserGuidance called');
+
+            // Set flag to prevent state restoration
+            isRefreshing = true;
+
+            const stepTexts = {
+                1: '<span style="font-weight: 500;">Select your team</span> by clicking on a team card below',
+                2: '<span style="font-weight: 500;">Choose a game</span> from the available games',
+                3: '<span style="font-weight: 500;">Continue</span> to view players and create lineup'
+            };
+
+            for (let i = 1; i <= 3; i++) {
+                const step = document.getElementById(`step-${i}`);
+                if (step) {
+                    // Reset to original text and styling
+                    step.innerHTML = stepTexts[i];
+                    step.style.opacity = i === 1 ? '1' : '0.5';
+                    step.style.color = '#555';
+                    step.style.fontWeight = 'normal';
+                    console.log(`Reset step ${i} to initial state`);
+                }
+            }
+
+            // Hide continue section
+            const continueSection = document.getElementById('continue-section');
+            if (continueSection) {
+                continueSection.style.display = 'none';
+                console.log('Hidden continue section');
+            }
+
+            // Hide games section too
+            const gamesSection = document.getElementById('games-section');
+            if (gamesSection) {
+                gamesSection.style.display = 'none';
+                console.log('Hidden games section');
+            }
+
+            // Clear state management selections
+            StateManager.clearSelectedTeam();
+            StateManager.clearSelectedGame();
+            console.log('Cleared state management selections');
+        }
+
+        // Update user guidance progress
+        function updateUserGuidanceProgress(completedStep) {
+            for (let i = 1; i <= 3; i++) {
+                const step = document.getElementById(`step-${i}`);
+                if (step) {
+                    if (i <= completedStep) {
+                        step.style.opacity = '1';
+                        step.style.color = '#2e7d32';
+                        step.style.fontWeight = '600';
+                        // Add checkmark for completed steps (but not current step)
+                        if (i < completedStep && !step.innerHTML.startsWith('✅')) {
+                            step.innerHTML = '✅ ' + step.innerHTML;
+                        }
+                    } else {
+                        step.style.opacity = '0.5';
+                        step.style.color = '#555';
+                        step.style.fontWeight = 'normal';
+                    }
+                }
+            }
+        }
 
         // Name obfuscation functionality
         function obfuscateName(fullName) {
@@ -856,11 +1018,12 @@
                 
                 if (response.ok) {
                     displayTeams(data);
+                    showSuccess(`${data.teams ? data.teams.length : 0} teams loaded successfully`);
                 } else {
-                    showError('Failed to load teams: ' + data.error);
+                    showError('Failed to load teams: ' + data.error, loadTeams);
                 }
             } catch (error) {
-                showError('Failed to load teams: ' + error.message);
+                showError('Failed to load teams: ' + error.message, loadTeams);
             }
             
             document.getElementById('teams-loading').style.display = 'none';
@@ -936,14 +1099,16 @@
                     }
                 });
 
-                // Restore selection state if this team was previously selected
-                const currentSelectedTeam = StateManager.getSelectedTeam();
-                if (currentSelectedTeam.id && currentSelectedTeam.id == teamData.id) {
-                    radioInput.checked = true;
-                    console.log('Restored selection for team:', teamData.name, 'selected at:', currentSelectedTeam.selectedAt);
-                    // Ensure games section is visible if we have a selected team
-                    if (document.getElementById('games-section').style.display === 'none') {
-                        document.getElementById('games-section').style.display = 'block';
+                // Restore selection state if this team was previously selected (but not during refresh)
+                if (!isRefreshing) {
+                    const currentSelectedTeam = StateManager.getSelectedTeam();
+                    if (currentSelectedTeam.id && currentSelectedTeam.id == teamData.id) {
+                        radioInput.checked = true;
+                        console.log('Restored selection for team:', teamData.name, 'selected at:', currentSelectedTeam.selectedAt);
+                        // Ensure games section is visible if we have a selected team
+                        if (document.getElementById('games-section').style.display === 'none') {
+                            document.getElementById('games-section').style.display = 'block';
+                        }
                     }
                 }
 
@@ -954,26 +1119,31 @@
                 teamsList.innerHTML = '<p>No teams found for the selected filter.</p>';
             }
 
-            // Check if currently selected team is still in filtered results
-            const currentSelectedTeam = StateManager.getSelectedTeam();
-            if (currentSelectedTeam.id) {
-                const selectedTeamStillVisible = filteredTeams.some(team => team.id == currentSelectedTeam.id);
-                console.log('Checking if selected team still visible:', selectedTeamStillVisible, 'for team ID:', currentSelectedTeam.id);
-                if (!selectedTeamStillVisible) {
-                    console.log('Selected team filtered out, clearing games section');
-                    // Clear games section if selected team is no longer visible
-                    const gamesSection = document.getElementById('games-section');
-                    if (gamesSection) {
-                        gamesSection.style.display = 'none';
-                        console.log('Games section hidden');
-                    } else {
-                        console.log('ERROR: games-section element not found!');
+            // Check if currently selected team is still in filtered results (but not during refresh)
+            if (!isRefreshing) {
+                const currentSelectedTeam = StateManager.getSelectedTeam();
+                if (currentSelectedTeam.id) {
+                    const selectedTeamStillVisible = filteredTeams.some(team => team.id == currentSelectedTeam.id);
+                    console.log('Checking if selected team still visible:', selectedTeamStillVisible, 'for team ID:', currentSelectedTeam.id);
+                    if (!selectedTeamStillVisible) {
+                        console.log('Selected team filtered out, clearing games section');
+                        // Clear games section if selected team is no longer visible
+                        const gamesSection = document.getElementById('games-section');
+                        if (gamesSection) {
+                            gamesSection.style.display = 'none';
+                            console.log('Games section hidden');
+                        } else {
+                            console.log('ERROR: games-section element not found!');
+                        }
+                        // Note: Keep selectedTeam variable for when filter changes back
                     }
-                    // Note: Keep selectedTeam variable for when filter changes back
+                } else {
+                    console.log('No selected team to check');
                 }
-            } else {
-                console.log('No selected team to check');
             }
+
+            // Reset the refresh flag after teams are displayed
+            isRefreshing = false;
         }
 
         async function selectTeam(teamId, teamName) {
@@ -984,6 +1154,9 @@
 
             // Use enhanced state management
             StateManager.setSelectedTeam(teamId, teamName, teamData);
+
+            // Update user guidance progress - step 1 completed
+            updateUserGuidanceProgress(1);
 
             // Log state for analytics foundation
             console.log('Team selection analytics:', {
@@ -1000,6 +1173,9 @@
             console.log('Showing games section...');
             document.getElementById('games-section').style.display = 'block';
             document.getElementById('games-loading').style.display = 'block';
+
+            // Update user guidance progress - step 2 available
+            updateUserGuidanceProgress(2);
             
             try {
                 // Check if we need all games regardless of state
@@ -1133,8 +1309,12 @@
             document.querySelectorAll('#games-list .game-item').forEach(item => item.classList.remove('selected'));
             event.target.classList.add('selected');
             
-            // Show navigation button
+            // Show enhanced continue section
+            document.getElementById('continue-section').style.display = 'block';
             document.getElementById('next-to-players-btn').style.display = 'block';
+
+            // Update user guidance steps
+            updateUserGuidanceProgress(3);
             
             // Update game info in players tab
             const selectedGameElement = allGames.find(game => game.id == gameId);
@@ -1162,6 +1342,7 @@
                     appState.attendingPlayers = data.attending_players;
                     console.log('Players loaded successfully:', data.attending_players.length, 'players');
                     displayPlayers(attendingPlayers);
+                    showSuccess(`${data.attending_players.length} players loaded for the selected game`);
                 } else {
                     console.error('Failed to load player availability:', data.error);
                     showError('Failed to load player availability: ' + data.error);
@@ -1538,27 +1719,46 @@
             // The generateLineup function already switches to the lineup tab
         }
 
-        function showError(message) {
+        function showError(message, retryFunction = null) {
             // Remove existing messages
-            document.querySelectorAll('.error, .success').forEach(el => el.remove());
-            
+            document.querySelectorAll('.error-message, .success-message').forEach(el => el.remove());
+
             const errorDiv = document.createElement('div');
-            errorDiv.className = 'error no-print';
-            errorDiv.textContent = message;
-            
+            errorDiv.className = 'error-message no-print';
+
+            let content = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 18px; margin-right: 8px;">⚠️</span>
+                    <strong>Error</strong>
+                </div>
+                <div>${message}</div>
+            `;
+
+            if (retryFunction) {
+                content += `<button class="retry-button" onclick="this.parentElement.remove(); (${retryFunction.toString()})()">Retry</button>`;
+            }
+
+            errorDiv.innerHTML = content;
             document.body.insertBefore(errorDiv, document.body.firstChild);
-            
-            // Auto-remove after 5 seconds
-            setTimeout(() => errorDiv.remove(), 5000);
+
+            // Auto-remove after 8 seconds
+            setTimeout(() => errorDiv.remove(), 8000);
         }
 
         function showSuccess(message) {
             // Remove existing messages
-            document.querySelectorAll('.error, .success').forEach(el => el.remove());
-            
+            document.querySelectorAll('.error-message, .success-message').forEach(el => el.remove());
+
             const successDiv = document.createElement('div');
-            successDiv.className = 'success no-print';
-            successDiv.textContent = message;
+            successDiv.className = 'success-message no-print';
+
+            successDiv.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 18px; margin-right: 8px;">✅</span>
+                    <strong>Success</strong>
+                </div>
+                <div>${message}</div>
+            `;
             
             document.body.insertBefore(successDiv, document.body.firstChild);
             
