@@ -227,7 +227,25 @@ def get_games(team_id):
     if session.get('demo_mode'):
         demo_data = load_demo_data()
         if demo_data and team_id == demo_data['team']['id']:
-            return jsonify(demo_data['games'])
+            # Transform demo games to match expected format
+            transformed_games = []
+            for game in demo_data['games']:
+                # Convert time format (e.g., "10:00 AM" to "10:00")
+                time_str = game['time']
+                if 'AM' in time_str or 'PM' in time_str:
+                    from datetime import datetime
+                    time_obj = datetime.strptime(time_str, '%I:%M %p')
+                    time_24h = time_obj.strftime('%H:%M')
+                else:
+                    time_24h = time_str
+
+                transformed_games.append({
+                    'id': game['id'],
+                    'name': f"vs {game['opponent']}",
+                    'starts_at': f"{game['date']}T{time_24h}:00Z",
+                    'location': 'Demo Stadium'
+                })
+            return jsonify({'games': transformed_games})
         else:
             return jsonify({'error': 'Demo team not found'}), 404
 
@@ -378,7 +396,7 @@ def get_availability(event_id):
             for game in demo_data['games']:
                 if game['id'] == event_id:
                     # Return all demo players as attending
-                    return jsonify(demo_data['players'])
+                    return jsonify({'attending_players': demo_data['players']})
             return jsonify({'error': 'Demo game not found'}), 404
         else:
             return jsonify({'error': 'Demo data not available'}), 500
