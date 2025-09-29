@@ -396,7 +396,7 @@ def get_availability(event_id):
             for game in demo_data['games']:
                 if game['id'] == event_id:
                     # Return all demo players as attending
-                    return jsonify(demo_data['players'])
+                    return jsonify({'attending_players': demo_data['players']})
             return jsonify({'error': 'Demo game not found'}), 404
         else:
             return jsonify({'error': 'Demo data not available'}), 500
