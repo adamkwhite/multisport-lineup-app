@@ -753,6 +753,7 @@
                 const radioInput = teamContainer.querySelector('.team-radio');
                 radioInput.addEventListener('change', (e) => {
                     if (e.target.checked) {
+                        console.log('Radio button clicked for team:', teamData.name, 'ID:', teamData.id);
                         selectTeam(teamData.id, teamData.name);
                     }
                 });
@@ -771,12 +772,14 @@
         }
 
         async function selectTeam(teamId, teamName) {
+            console.log('selectTeam called with:', teamId, teamName);
             selectedTeam = teamId;
 
             // Radio button selection is handled by CSS automatically
             // No need to manually manage selection classes
-            
+
             // Show games section and load games
+            console.log('Showing games section...');
             document.getElementById('games-section').style.display = 'block';
             document.getElementById('games-loading').style.display = 'block';
             
@@ -786,12 +789,15 @@
                 const url = gameFilter === 'all-states' ? 
                     `/api/games/${teamId}?include_all_states=true` : 
                     `/api/games/${teamId}`;
+                console.log('Fetching games from:', url);
                 const response = await fetch(url);
                 const data = await response.json();
-                
+                console.log('Games API response:', data);
+
                 if (response.ok) {
                     displayGames(data.games);
                 } else {
+                    console.error('Games API error:', data);
                     showError('Failed to load games: ' + data.error);
                 }
             } catch (error) {
@@ -802,9 +808,10 @@
         }
 
         function displayGames(games) {
+            console.log('displayGames called with:', games);
             // Store all games for filtering
-            allGames = games;
-            
+            allGames = games || [];  // Ensure it's always an array
+
             // Apply current filter
             filterGames();
         }
@@ -854,12 +861,12 @@
                 document.getElementById('games-loading').style.display = 'none';
             }
             
-            let filteredGames = allGames;
-            
+            let filteredGames = allGames || [];
+
             // Apply filter
-            if (filter === 'next' && allGames.length > 0) {
+            if (filter === 'next' && filteredGames.length > 0) {
                 // Sort games by date and take only the first one
-                const sortedGames = [...allGames].sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+                const sortedGames = [...filteredGames].sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
                 filteredGames = [sortedGames[0]];
             }
             
