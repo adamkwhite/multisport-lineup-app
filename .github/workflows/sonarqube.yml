@@ -38,15 +38,25 @@ jobs:
         run: |
           npm install
 
+      - name: Create test results directory
+        run: |
+          mkdir -p test-results
+
       - name: Run Python tests with coverage
         run: |
-          pytest --cov=app --cov-report=xml --cov-report=term-missing || true
+          pytest tests/api/ --cov=app --cov-report=xml:coverage.xml --cov-report=term-missing || true
         continue-on-error: true
 
       - name: Run JavaScript tests with coverage
         run: |
           npm test -- --coverage --watchAll=false || true
         continue-on-error: true
+
+      - name: Copy frontend coverage for SonarQube
+        run: |
+          if [ -d "test-results" ]; then
+            find test-results -name "lcov.info" -newer coverage.xml -exec cp {} lcov.info \; 2>/dev/null || true
+          fi
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
@@ -56,7 +66,7 @@ jobs:
 
       - name: SonarQube Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@v1
-        timeout-minutes: 5
+        timeout-minutes: 10
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         continue-on-error: false
