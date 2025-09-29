@@ -854,16 +854,30 @@
             isRefreshing = true;
 
             const stepTexts = {
-                1: '<span style="font-weight: 500;">Select your team</span> by clicking on a team card below',
-                2: '<span style="font-weight: 500;">Choose a game</span> from the available games',
-                3: '<span style="font-weight: 500;">Continue</span> to view players and create lineup'
+                1: { action: 'Select your team', description: ' by clicking on a team card below' },
+                2: { action: 'Choose a game', description: ' from the available games' },
+                3: { action: 'Continue', description: ' to view players and create lineup' }
             };
 
             for (let i = 1; i <= 3; i++) {
                 const step = document.getElementById(`step-${i}`);
                 if (step) {
-                    // Reset to original text and styling
-                    step.innerHTML = stepTexts[i];
+                    // Reset to original text and styling (XSS safe)
+                    // Clear first using safe DOM method
+                    while (step.firstChild) {
+                        step.removeChild(step.firstChild);
+                    }
+
+                    // Create safe DOM elements
+                    const actionSpan = document.createElement('span');
+                    actionSpan.style.fontWeight = '500';
+                    actionSpan.textContent = stepTexts[i].action;
+
+                    const descText = document.createTextNode(stepTexts[i].description);
+
+                    step.appendChild(actionSpan);
+                    step.appendChild(descText);
+
                     step.style.opacity = i === 1 ? '1' : '0.5';
                     step.style.color = '#555';
                     step.style.fontWeight = 'normal';
@@ -891,7 +905,7 @@
             console.log('Cleared state management selections');
         }
 
-        // Update user guidance progress
+        // Update user guidance progress (XSS safe)
         function updateUserGuidanceProgress(completedStep) {
             for (let i = 1; i <= 3; i++) {
                 const step = document.getElementById(`step-${i}`);
@@ -901,8 +915,10 @@
                         step.style.color = '#2e7d32';
                         step.style.fontWeight = '600';
                         // Add checkmark for completed steps (but not current step)
-                        if (i < completedStep && !step.innerHTML.startsWith('✅')) {
-                            step.innerHTML = '✅ ' + step.innerHTML;
+                        if (i < completedStep && !step.textContent.startsWith('✅')) {
+                            // Safely prepend checkmark
+                            const checkmark = document.createTextNode('✅ ');
+                            step.insertBefore(checkmark, step.firstChild);
                         }
                     } else {
                         step.style.opacity = '0.5';
@@ -1053,45 +1069,90 @@
 
             console.log('Filtering teams with filter:', filter, 'Current selection:', selectedTeam);
 
-            teamsList.innerHTML = '';
+            // Clear teams list safely
+            while (teamsList.firstChild) {
+                teamsList.removeChild(teamsList.firstChild);
+            }
 
             let filteredTeams = allTeams;
-            
+
             // Apply filter
             if (filter === 'active') {
                 filteredTeams = allTeams.filter(team => team.is_archived !== true && team.season_name !== 'Archived');
             } else if (filter === 'archived') {
                 filteredTeams = allTeams.filter(team => team.is_archived === true || team.season_name === 'Archived');
             } else if (filter === 'cobs') {
-                filteredTeams = allTeams.filter(team => 
+                filteredTeams = allTeams.filter(team =>
                     team.name && team.name.toLowerCase().includes('cobs')
                 );
             }
-            
+
             // Display filtered teams with radio button selection
             filteredTeams.forEach(teamData => {
                 const teamContainer = document.createElement('div');
                 teamContainer.className = 'team-card-container';
 
-                // Show more team info for better selection
-                const statusBadge = teamData.is_archived ? '<span style="color: #666; font-size: 12px;">[ARCHIVED]</span>' : '<span style="color: #27ae60; font-size: 12px;">[ACTIVE]</span>';
+                // Create radio input
+                const radioInput = document.createElement('input');
+                radioInput.type = 'radio';
+                radioInput.name = 'team-selection';
+                radioInput.value = teamData.id;
+                radioInput.id = `team-${teamData.id}`;
+                radioInput.className = 'team-radio';
 
-                teamContainer.innerHTML = `
-                    <input type="radio" name="team-selection" value="${teamData.id}" id="team-${teamData.id}" class="team-radio">
-                    <label for="team-${teamData.id}" class="team-card">
-                        <div class="selection-indicator">
-                            <span class="radio-visual"></span>
-                        </div>
-                        <div class="team-info" style="padding-left: 45px;">
-                            <strong>${teamData.name}</strong> ${statusBadge}<br>
-                            <small>Division: ${teamData.division_name || 'N/A'}</small><br>
-                            <small>Season: ${teamData.season_name || 'N/A'}</small>
-                        </div>
-                    </label>
-                `;
+                // Create label
+                const label = document.createElement('label');
+                label.setAttribute('for', `team-${teamData.id}`);
+                label.className = 'team-card';
+
+                // Create selection indicator
+                const selectionIndicator = document.createElement('div');
+                selectionIndicator.className = 'selection-indicator';
+                const radioVisual = document.createElement('span');
+                radioVisual.className = 'radio-visual';
+                selectionIndicator.appendChild(radioVisual);
+
+                // Create team info container
+                const teamInfo = document.createElement('div');
+                teamInfo.className = 'team-info';
+                teamInfo.style.paddingLeft = '45px';
+
+                // Create team name
+                const teamName = document.createElement('strong');
+                teamName.textContent = teamData.name;
+
+                // Create status badge
+                const statusBadge = document.createElement('span');
+                statusBadge.style.color = teamData.is_archived ? '#666' : '#27ae60';
+                statusBadge.style.fontSize = '12px';
+                statusBadge.textContent = teamData.is_archived ? '[ARCHIVED]' : '[ACTIVE]';
+
+                // Create division info
+                const divisionInfo = document.createElement('small');
+                divisionInfo.textContent = `Division: ${teamData.division_name || 'N/A'}`;
+
+                // Create season info
+                const seasonInfo = document.createElement('small');
+                seasonInfo.textContent = `Season: ${teamData.season_name || 'N/A'}`;
+
+                // Assemble team info
+                teamInfo.appendChild(teamName);
+                teamInfo.appendChild(document.createTextNode(' '));
+                teamInfo.appendChild(statusBadge);
+                teamInfo.appendChild(document.createElement('br'));
+                teamInfo.appendChild(divisionInfo);
+                teamInfo.appendChild(document.createElement('br'));
+                teamInfo.appendChild(seasonInfo);
+
+                // Assemble label
+                label.appendChild(selectionIndicator);
+                label.appendChild(teamInfo);
+
+                // Assemble container
+                teamContainer.appendChild(radioInput);
+                teamContainer.appendChild(label);
 
                 // Add event listener to radio button
-                const radioInput = teamContainer.querySelector('.team-radio');
                 radioInput.addEventListener('change', (e) => {
                     if (e.target.checked) {
                         console.log('Radio button clicked for team:', teamData.name, 'ID:', teamData.id);
@@ -1114,9 +1175,11 @@
 
                 teamsList.appendChild(teamContainer);
             });
-            
+
             if (filteredTeams.length === 0) {
-                teamsList.innerHTML = '<p>No teams found for the selected filter.</p>';
+                const noTeamsMsg = document.createElement('p');
+                noTeamsMsg.textContent = 'No teams found for the selected filter.';
+                teamsList.appendChild(noTeamsMsg);
             }
 
             // Check if currently selected team is still in filtered results (but not during refresh)
@@ -1214,7 +1277,10 @@
             const gamesList = document.getElementById('games-list');
             const filter = document.getElementById('game-filter').value;
             
-            gamesList.innerHTML = '';
+            // Clear games list safely
+            while (gamesList.firstChild) {
+                gamesList.removeChild(gamesList.firstChild);
+            }
             
             // If "all-states" is selected and we have a team selected, reload data
             if (filter === 'all-states' && selectedTeam) {
@@ -1222,16 +1288,20 @@
                 try {
                     const response = await fetch(`/api/games/${selectedTeam}?include_all_states=true`);
                     const data = await response.json();
-                    
+
                     if (response.ok) {
                         allGames = data.games;
                     } else {
-                        gamesList.innerHTML = '<p>Error loading games</p>';
+                        const errorMsg = document.createElement('p');
+                        errorMsg.textContent = 'Error loading games';
+                        gamesList.appendChild(errorMsg);
                         document.getElementById('games-loading').style.display = 'none';
                         return;
                     }
                 } catch (error) {
-                    gamesList.innerHTML = '<p>Error loading games</p>';
+                    const errorMsg = document.createElement('p');
+                    errorMsg.textContent = 'Error loading games';
+                    gamesList.appendChild(errorMsg);
                     document.getElementById('games-loading').style.display = 'none';
                     return;
                 }
@@ -1243,12 +1313,14 @@
                 try {
                     const response = await fetch(`/api/games/${selectedTeam}`);
                     const data = await response.json();
-                    
+
                     if (response.ok) {
                         allGames = data.games;
                     }
                 } catch (error) {
-                    gamesList.innerHTML = '<p>Error loading games</p>';
+                    const errorMsg = document.createElement('p');
+                    errorMsg.textContent = 'Error loading games';
+                    gamesList.appendChild(errorMsg);
                     document.getElementById('games-loading').style.display = 'none';
                     return;
                 }
@@ -1265,7 +1337,9 @@
             }
             
             if (filteredGames.length === 0) {
-                gamesList.innerHTML = '<p>No upcoming games found.</p>';
+                const noGamesMsg = document.createElement('p');
+                noGamesMsg.textContent = 'No upcoming games found.';
+                gamesList.appendChild(noGamesMsg);
                 return;
             }
             
@@ -1275,11 +1349,24 @@
                 const gameDate = new Date(game.starts_at).toLocaleDateString();
                 const gameTime = new Date(game.starts_at).toLocaleTimeString();
                 
-                gameDiv.innerHTML = `
-                    <strong>${game.name}</strong><br>
-                    <small>${gameDate} at ${gameTime}</small><br>
-                    <small>📍 ${game.location}</small>
-                `;
+                // Create game name
+                const gameName = document.createElement('strong');
+                gameName.textContent = game.name;
+
+                // Create game date/time
+                const gameDateTime = document.createElement('small');
+                gameDateTime.textContent = `${gameDate} at ${gameTime}`;
+
+                // Create game location
+                const gameLocation = document.createElement('small');
+                gameLocation.textContent = `📍 ${game.location}`;
+
+                // Assemble game div
+                gameDiv.appendChild(gameName);
+                gameDiv.appendChild(document.createElement('br'));
+                gameDiv.appendChild(gameDateTime);
+                gameDiv.appendChild(document.createElement('br'));
+                gameDiv.appendChild(gameLocation);
                 gameDiv.onclick = () => selectGame(game.id, game.name);
                 gamesList.appendChild(gameDiv);
             });
@@ -1367,12 +1454,17 @@
             // Ensure toggle state is loaded
             loadToggleState();
 
-            playersList.innerHTML = '';
+            // Clear players list safely
+            while (playersList.firstChild) {
+                playersList.removeChild(playersList.firstChild);
+            }
 
             console.log(`Displaying ${players.length} players`);
 
             if (players.length === 0) {
-                playersList.innerHTML = '<p>No players marked as attending.</p>';
+                const noPlayersMsg = document.createElement('p');
+                noPlayersMsg.textContent = 'No players marked as attending.';
+                playersList.appendChild(noPlayersMsg);
                 return;
             }
             
@@ -1388,21 +1480,49 @@
                 const hideNames = toggle ? toggle.checked : false;
                 const displayName = hideNames ? (player.obfuscated_name || obfuscateName(player.name)) : player.name;
 
-                playerDiv.innerHTML = `
-                    <strong class="player-name" data-original-name="${player.name}" data-obfuscated-name="${player.obfuscated_name || obfuscateName(player.name)}">${displayName}</strong>
-                    <div class="position-checkboxes" data-player-id="${player.id}">
-                        <label><input type="checkbox" value="1"> P</label>
-                        <label><input type="checkbox" value="2"> C</label>
-                        <label><input type="checkbox" value="3"> 1B</label>
-                        <label><input type="checkbox" value="4"> 2B</label>
-                        <label><input type="checkbox" value="5"> 3B</label>
-                        <label><input type="checkbox" value="6"> SS</label>
-                        <label><input type="checkbox" value="7"> LF</label>
-                        <label><input type="checkbox" value="8"> CF</label>
-                        <label><input type="checkbox" value="9"> RF</label>
-                        <label><input type="checkbox" value="0" class="any-position"> Any</label>
-                    </div>
-                `;
+                // Create player name element
+                const playerName = document.createElement('strong');
+                playerName.className = 'player-name';
+                playerName.setAttribute('data-original-name', player.name);
+                playerName.setAttribute('data-obfuscated-name', player.obfuscated_name || obfuscateName(player.name));
+                playerName.textContent = displayName;
+
+                // Create position checkboxes container
+                const positionCheckboxes = document.createElement('div');
+                positionCheckboxes.className = 'position-checkboxes';
+                positionCheckboxes.setAttribute('data-player-id', player.id);
+
+                // Define positions
+                const positions = [
+                    { value: '1', label: ' P' },
+                    { value: '2', label: ' C' },
+                    { value: '3', label: ' 1B' },
+                    { value: '4', label: ' 2B' },
+                    { value: '5', label: ' 3B' },
+                    { value: '6', label: ' SS' },
+                    { value: '7', label: ' LF' },
+                    { value: '8', label: ' CF' },
+                    { value: '9', label: ' RF' },
+                    { value: '0', label: ' Any', className: 'any-position' }
+                ];
+
+                // Create each position checkbox with label
+                positions.forEach(position => {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = position.value;
+                    if (position.className) {
+                        checkbox.className = position.className;
+                    }
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(position.label));
+                    positionCheckboxes.appendChild(label);
+                });
+
+                // Assemble player div
+                playerDiv.appendChild(playerName);
+                playerDiv.appendChild(positionCheckboxes);
                 playersList.appendChild(playerDiv);
             });
             
@@ -1536,49 +1656,105 @@
         function displayMultipleLineups(data) {
             const lineupDisplay = document.getElementById('lineup-display');
             
-            lineupDisplay.innerHTML = `
-                <div style="text-align: center; margin-bottom: 10px;" class="no-print">
-                    <p style="color: #666; margin: 5px 0;">${data.lineups.length} Lineup${data.lineups.length > 1 ? 's' : ''} Available • One Per Pitcher</p>
-                </div>
-                <div style="text-align: center; margin-bottom: 10px;" class="no-print">
-                    <button onclick="window.print()" class="btn" style="margin: 10px;">🖨️ Print All Lineups</button>
-                </div>
-                <div id="all-lineups"></div>
-            `;
-            
-            const allLineupsDiv = document.getElementById('all-lineups');
-            allLineupsDiv.innerHTML = ''; // Clear any existing content
+            // Clear lineup display safely
+            while (lineupDisplay.firstChild) {
+                lineupDisplay.removeChild(lineupDisplay.firstChild);
+            }
+
+            // Create header section
+            const headerDiv = document.createElement('div');
+            headerDiv.style.textAlign = 'center';
+            headerDiv.style.marginBottom = '10px';
+            headerDiv.className = 'no-print';
+
+            const headerText = document.createElement('p');
+            headerText.style.color = '#666';
+            headerText.style.margin = '5px 0';
+            headerText.textContent = `${data.lineups.length} Lineup${data.lineups.length > 1 ? 's' : ''} Available • One Per Pitcher`;
+
+            headerDiv.appendChild(headerText);
+
+            // Create print button section
+            const buttonDiv = document.createElement('div');
+            buttonDiv.style.textAlign = 'center';
+            buttonDiv.style.marginBottom = '10px';
+            buttonDiv.className = 'no-print';
+
+            const printButton = document.createElement('button');
+            printButton.className = 'btn';
+            printButton.style.margin = '10px';
+            printButton.textContent = '🖨️ Print All Lineups';
+            printButton.onclick = () => window.print();
+
+            buttonDiv.appendChild(printButton);
+
+            // Create all-lineups container
+            const allLineupsDiv = document.createElement('div');
+            allLineupsDiv.id = 'all-lineups';
+
+            // Assemble the main structure
+            lineupDisplay.appendChild(headerDiv);
+            lineupDisplay.appendChild(buttonDiv);
+            lineupDisplay.appendChild(allLineupsDiv);
             
             data.lineups.forEach((lineupData, index) => {
                 const lineupSection = document.createElement('div');
                 lineupSection.className = 'lineup-container';
                 lineupSection.style.marginBottom = '40px';
                 
-                lineupSection.innerHTML = `
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h3>Lineup ${index + 1}</h3>
-                    </div>
-                    
-                    <!-- Baseball diamond graphic -->
-                    <div class="baseball-diamond" id="diamond-${index}">
-                        <!-- Home plate and bases -->
-                        <div class="home-plate"></div>
-                        <div class="base first-base-marker"></div>
-                        <div class="base second-base-marker"></div>
-                        <div class="base third-base-marker"></div>
-                        <div class="pitchers-mound"></div>
-                    </div>
-                    
-                    <!-- Bench section -->
-                    <div id="bench-section-${index}" class="bench-section" style="margin-top: 10px; text-align: center;">
-                        <div id="bench-list-${index}" class="bench-list"></div>
-                    </div>
-                `;
+                // Create lineup title section
+                const titleDiv = document.createElement('div');
+                titleDiv.style.textAlign = 'center';
+                titleDiv.style.marginBottom = '20px';
+
+                const titleHeader = document.createElement('h3');
+                titleHeader.textContent = `Lineup ${index + 1}`;
+                titleDiv.appendChild(titleHeader);
+
+                // Create baseball diamond
+                const diamond = document.createElement('div');
+                diamond.className = 'baseball-diamond';
+                diamond.id = `diamond-${index}`;
+
+                // Create diamond elements
+                const homePlate = document.createElement('div');
+                homePlate.className = 'home-plate';
+                diamond.appendChild(homePlate);
+
+                const firstBase = document.createElement('div');
+                firstBase.className = 'base first-base-marker';
+                diamond.appendChild(firstBase);
+
+                const secondBase = document.createElement('div');
+                secondBase.className = 'base second-base-marker';
+                diamond.appendChild(secondBase);
+
+                const thirdBase = document.createElement('div');
+                thirdBase.className = 'base third-base-marker';
+                diamond.appendChild(thirdBase);
+
+                const pitchersMound = document.createElement('div');
+                pitchersMound.className = 'pitchers-mound';
+                diamond.appendChild(pitchersMound);
+
+                // Create bench section
+                const benchSection = document.createElement('div');
+                benchSection.id = `bench-section-${index}`;
+                benchSection.className = 'bench-section';
+                benchSection.style.marginTop = '10px';
+                benchSection.style.textAlign = 'center';
+
+                const benchList = document.createElement('div');
+                benchList.id = `bench-list-${index}`;
+                benchList.className = 'bench-list';
+                benchSection.appendChild(benchList);
+
+                // Assemble lineup section
+                lineupSection.appendChild(titleDiv);
+                lineupSection.appendChild(diamond);
+                lineupSection.appendChild(benchSection);
                 
                 allLineupsDiv.appendChild(lineupSection);
-                
-                // Get the diamond for this lineup
-                const diamond = document.getElementById(`diamond-${index}`);
                 
                 // Position class mapping
                 const positionClasses = {
@@ -1607,11 +1783,30 @@
                     const hideNames = toggle ? toggle.checked : false;
                     const displayName = hideNames ? obfuscateName(playerInfo.player_name) : playerInfo.player_name;
 
-                    positionCard.innerHTML = `
-                        <div class="position-number">${position}</div>
-                        <div class="position-name" style="font-size: 10px; margin: 2px 0;">${playerInfo.position_name}</div>
-                        <div class="player-name" data-original-name="${playerInfo.player_name}" style="font-size: 11px; font-weight: bold;">${displayName}</div>
-                    `;
+                    // Create position number
+                    const positionNumber = document.createElement('div');
+                    positionNumber.className = 'position-number';
+                    positionNumber.textContent = position;
+
+                    // Create position name
+                    const positionName = document.createElement('div');
+                    positionName.className = 'position-name';
+                    positionName.style.fontSize = '10px';
+                    positionName.style.margin = '2px 0';
+                    positionName.textContent = playerInfo.position_name;
+
+                    // Create player name
+                    const playerNameDiv = document.createElement('div');
+                    playerNameDiv.className = 'player-name';
+                    playerNameDiv.setAttribute('data-original-name', playerInfo.player_name);
+                    playerNameDiv.style.fontSize = '11px';
+                    playerNameDiv.style.fontWeight = 'bold';
+                    playerNameDiv.textContent = displayName;
+
+                    // Assemble position card
+                    positionCard.appendChild(positionNumber);
+                    positionCard.appendChild(positionName);
+                    positionCard.appendChild(playerNameDiv);
                     
                     diamond.appendChild(positionCard);
                 });
@@ -1626,11 +1821,18 @@
                         const toggle = document.getElementById('name-toggle');
                         const hideNames = toggle ? toggle.checked : false;
                         const displayName = hideNames ? obfuscateName(player.name) : player.name;
-                        benchPlayer.innerHTML = `<span class="player-name" data-original-name="${player.name}">${displayName}</span>`;
+                        // Create player name element safely
+                        const playerNameSpan = document.createElement('span');
+                        playerNameSpan.className = 'player-name';
+                        playerNameSpan.setAttribute('data-original-name', player.name);
+                        playerNameSpan.textContent = displayName;
+                        benchPlayer.appendChild(playerNameSpan);
                         benchList.appendChild(benchPlayer);
                     });
                 } else {
-                    benchList.innerHTML = '<em>No bench players</em>';
+                    const noBenchMsg = document.createElement('em');
+                    noBenchMsg.textContent = 'No bench players';
+                    benchList.appendChild(noBenchMsg);
                 }
             });
         }
@@ -1638,17 +1840,37 @@
         function displaySingleLineup(data) {
             const lineupDisplay = document.getElementById('lineup-display');
             
-            // Create baseball diamond
-            lineupDisplay.innerHTML = `
-                <div class="baseball-diamond">
-                    <!-- Home plate and bases -->
-                    <div class="home-plate"></div>
-                    <div class="base first-base-marker"></div>
-                    <div class="base second-base-marker"></div>
-                    <div class="base third-base-marker"></div>
-                    <div class="pitchers-mound"></div>
-                </div>
-            `;
+            // Clear lineup display safely
+            while (lineupDisplay.firstChild) {
+                lineupDisplay.removeChild(lineupDisplay.firstChild);
+            }
+
+            // Create baseball diamond structure safely
+            const baseballDiamond = document.createElement('div');
+            baseballDiamond.className = 'baseball-diamond';
+
+            // Create home plate and bases
+            const homePlate = document.createElement('div');
+            homePlate.className = 'home-plate';
+            baseballDiamond.appendChild(homePlate);
+
+            const firstBase = document.createElement('div');
+            firstBase.className = 'base first-base-marker';
+            baseballDiamond.appendChild(firstBase);
+
+            const secondBase = document.createElement('div');
+            secondBase.className = 'base second-base-marker';
+            baseballDiamond.appendChild(secondBase);
+
+            const thirdBase = document.createElement('div');
+            thirdBase.className = 'base third-base-marker';
+            baseballDiamond.appendChild(thirdBase);
+
+            const pitchersMound = document.createElement('div');
+            pitchersMound.className = 'pitchers-mound';
+            baseballDiamond.appendChild(pitchersMound);
+
+            lineupDisplay.appendChild(baseballDiamond);
             
             const diamond = lineupDisplay.querySelector('.baseball-diamond');
             
@@ -1679,11 +1901,30 @@
                 const hideNames = toggle ? toggle.checked : false;
                 const displayName = hideNames ? obfuscateName(playerInfo.player_name) : playerInfo.player_name;
 
-                positionCard.innerHTML = `
-                    <div class="position-number">${position}</div>
-                    <div class="position-name" style="font-size: 10px; margin: 2px 0;">${playerInfo.position_name}</div>
-                    <div class="player-name" data-original-name="${playerInfo.player_name}" style="font-size: 11px; font-weight: bold;">${displayName}</div>
-                `;
+                // Create position number
+                const positionNumber = document.createElement('div');
+                positionNumber.className = 'position-number';
+                positionNumber.textContent = position;
+
+                // Create position name
+                const positionName = document.createElement('div');
+                positionName.className = 'position-name';
+                positionName.style.fontSize = '10px';
+                positionName.style.margin = '2px 0';
+                positionName.textContent = playerInfo.position_name;
+
+                // Create player name
+                const playerNameDiv = document.createElement('div');
+                playerNameDiv.className = 'player-name';
+                playerNameDiv.setAttribute('data-original-name', playerInfo.player_name);
+                playerNameDiv.style.fontSize = '11px';
+                playerNameDiv.style.fontWeight = 'bold';
+                playerNameDiv.textContent = displayName;
+
+                // Assemble position card
+                positionCard.appendChild(positionNumber);
+                positionCard.appendChild(positionName);
+                positionCard.appendChild(playerNameDiv);
                 
                 diamond.appendChild(positionCard);
             });
@@ -1693,15 +1934,27 @@
                 const benchSection = document.getElementById('bench-section');
                 const benchList = document.getElementById('bench-list');
                 
-                benchList.innerHTML = '';
+                // Clear bench list safely
+                while (benchList.firstChild) {
+                    benchList.removeChild(benchList.firstChild);
+                }
+
                 data.bench.forEach(player => {
                     const benchPlayer = document.createElement('div');
                     benchPlayer.className = 'player-item';
+
                     // Determine what name to display based on current toggle state
                     const toggle = document.getElementById('name-toggle');
                     const hideNames = toggle ? toggle.checked : false;
                     const displayName = hideNames ? obfuscateName(player.name) : player.name;
-                    benchPlayer.innerHTML = `<strong class="player-name" data-original-name="${player.name}">${displayName}</strong>`;
+
+                    // Create player name element safely
+                    const playerNameStrong = document.createElement('strong');
+                    playerNameStrong.className = 'player-name';
+                    playerNameStrong.setAttribute('data-original-name', player.name);
+                    playerNameStrong.textContent = displayName;
+
+                    benchPlayer.appendChild(playerNameStrong);
                     benchList.appendChild(benchPlayer);
                 });
                 
@@ -1726,19 +1979,42 @@
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error-message no-print';
 
-            let content = `
-                <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 18px; margin-right: 8px;">⚠️</span>
-                    <strong>Error</strong>
-                </div>
-                <div>${message}</div>
-            `;
+            // Create header safely
+            const headerDiv = document.createElement('div');
+            headerDiv.style.display = 'flex';
+            headerDiv.style.alignItems = 'center';
+            headerDiv.style.marginBottom = '8px';
 
+            const iconSpan = document.createElement('span');
+            iconSpan.style.fontSize = '18px';
+            iconSpan.style.marginRight = '8px';
+            iconSpan.textContent = '⚠️';
+
+            const titleStrong = document.createElement('strong');
+            titleStrong.textContent = 'Error';
+
+            headerDiv.appendChild(iconSpan);
+            headerDiv.appendChild(titleStrong);
+
+            // Create message safely
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message; // XSS safe
+
+            errorDiv.appendChild(headerDiv);
+            errorDiv.appendChild(messageDiv);
+
+            // Add retry button if provided
             if (retryFunction) {
-                content += `<button class="retry-button" onclick="this.parentElement.remove(); (${retryFunction.toString()})()">Retry</button>`;
+                const retryButton = document.createElement('button');
+                retryButton.className = 'retry-button';
+                retryButton.textContent = 'Retry';
+                retryButton.onclick = function() {
+                    errorDiv.remove();
+                    retryFunction();
+                };
+                errorDiv.appendChild(retryButton);
             }
 
-            errorDiv.innerHTML = content;
             document.body.insertBefore(errorDiv, document.body.firstChild);
 
             // Auto-remove after 8 seconds
@@ -1752,16 +2028,32 @@
             const successDiv = document.createElement('div');
             successDiv.className = 'success-message no-print';
 
-            successDiv.innerHTML = `
-                <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 18px; margin-right: 8px;">✅</span>
-                    <strong>Success</strong>
-                </div>
-                <div>${message}</div>
-            `;
-            
+            // Create header safely
+            const headerDiv = document.createElement('div');
+            headerDiv.style.display = 'flex';
+            headerDiv.style.alignItems = 'center';
+            headerDiv.style.marginBottom = '8px';
+
+            const iconSpan = document.createElement('span');
+            iconSpan.style.fontSize = '18px';
+            iconSpan.style.marginRight = '8px';
+            iconSpan.textContent = '✅';
+
+            const titleStrong = document.createElement('strong');
+            titleStrong.textContent = 'Success';
+
+            headerDiv.appendChild(iconSpan);
+            headerDiv.appendChild(titleStrong);
+
+            // Create message safely
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message; // XSS safe
+
+            successDiv.appendChild(headerDiv);
+            successDiv.appendChild(messageDiv);
+
             document.body.insertBefore(successDiv, document.body.firstChild);
-            
+
             // Auto-remove after 3 seconds
             setTimeout(() => successDiv.remove(), 3000);
         }
