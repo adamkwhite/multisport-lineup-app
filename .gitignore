@@ -59,3 +59,16 @@ baseball-venv/
 
 # SonarQube
 .scannerwork/
+
+# Test results and coverage
+test-results/
+htmlcov/
+.coverage
+coverage.xml
+.pytest_cache/
+
+# Playwright
+.playwright/
+playwright-report/
+tests/visual/*-snapshots/
+test-results/
