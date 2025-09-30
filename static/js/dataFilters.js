@@ -26,22 +26,10 @@ const DataFilters = {
             return teams.filter(team => {
                 if (!team) return false;
 
-                // Search in team name
-                if (team.name && team.name.toLowerCase().includes(term)) {
-                    return true;
-                }
-
-                // Search in team ID
-                if (team.id && team.id.toString().toLowerCase().includes(term)) {
-                    return true;
-                }
-
-                // Search in team division or league
-                if (team.division && team.division.toLowerCase().includes(term)) {
-                    return true;
-                }
-
-                return false;
+                // Search in team name, ID, or division/league
+                return team.name?.toLowerCase().includes(term) ||
+                       team.id?.toString().toLowerCase().includes(term) ||
+                       team.division?.toLowerCase().includes(term);
             });
         } catch (error) {
             console.error('Error filtering teams:', error);
@@ -72,22 +60,10 @@ const DataFilters = {
                 filtered = filtered.filter(game => {
                     if (!game) return false;
 
-                    // Search in opponent name
-                    if (game.opponent && game.opponent.toLowerCase().includes(term)) {
-                        return true;
-                    }
-
-                    // Search in game location
-                    if (game.location && game.location.toLowerCase().includes(term)) {
-                        return true;
-                    }
-
-                    // Search in game date
-                    if (game.start_date && game.start_date.includes(term)) {
-                        return true;
-                    }
-
-                    return false;
+                    // Search in opponent name, location, or date
+                    return game.opponent?.toLowerCase().includes(term) ||
+                           game.location?.toLowerCase().includes(term) ||
+                           game.start_date?.includes(term);
                 });
             }
 
@@ -151,25 +127,11 @@ const DataFilters = {
                 filtered = filtered.filter(player => {
                     if (!player) return false;
 
-                    // Search in player name
-                    if (player.first_name && player.first_name.toLowerCase().includes(term)) {
-                        return true;
-                    }
-                    if (player.last_name && player.last_name.toLowerCase().includes(term)) {
-                        return true;
-                    }
-
-                    // Search in position
-                    if (player.position && player.position.toLowerCase().includes(term)) {
-                        return true;
-                    }
-
-                    // Search in jersey number
-                    if (player.jersey_number && player.jersey_number.toString().includes(term)) {
-                        return true;
-                    }
-
-                    return false;
+                    // Search in player name, position, or jersey number
+                    return player.first_name?.toLowerCase().includes(term) ||
+                           player.last_name?.toLowerCase().includes(term) ||
+                           player.position?.toLowerCase().includes(term) ||
+                           player.jersey_number?.toString().includes(term);
                 });
             }
 
