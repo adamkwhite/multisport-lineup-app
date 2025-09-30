@@ -61,6 +61,43 @@ The app allows you to:
 - Configure position rotation strategies
 - Save and reuse lineup templates
 
+## Testing
+
+The project has comprehensive test coverage (94%+):
+
+### Run Unit and Edge Case Tests
+```bash
+./baseball-venv/bin/pytest tests/unit/ tests/edge_cases/ -v
+```
+
+### Run with Coverage Report
+```bash
+./baseball-venv/bin/pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=html --cov-report=term-missing
+```
+
+View HTML coverage report: `htmlcov/index.html`
+
+### Run Visual Regression Tests
+Visual tests require the Flask app to be running:
+```bash
+# Terminal 1: Start app
+./start.sh
+
+# Terminal 2: Run visual tests
+./baseball-venv/bin/pytest tests/visual/ -v
+```
+
+**Note**: Visual tests are skipped by default. Remove `@pytest.mark.skip` decorator or run with `-m "not skip"`.
+
+### Test Organization
+- `tests/unit/` - Unit tests for core functionality
+- `tests/edge_cases/` - Edge case and error handling tests
+- `tests/visual/` - Playwright visual regression tests (20 tests)
+- `tests/fixtures/` - Reusable test data and helpers
+- `docs/testing/` - Comprehensive testing documentation
+
+See `docs/testing/guidelines.md` for detailed testing documentation.
+
 ## Deployment
 
 Can be deployed to:
