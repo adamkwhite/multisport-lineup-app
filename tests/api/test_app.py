@@ -92,7 +92,7 @@ def test_required_modules_importable():
         import flask
         import os
         import dotenv
-        assert True
+        # If we reach here, all imports succeeded
     except ImportError as e:
         pytest.fail(f"Required module not available: {e}")
 
@@ -103,7 +103,6 @@ def test_environment_loading():
     from dotenv import load_dotenv
     try:
         load_dotenv()
-        # Just test that it doesn't throw an error
-        assert True
+        # If we reach here, load_dotenv() succeeded without error
     except Exception as e:
         pytest.fail(f"Environment loading failed: {e}")
