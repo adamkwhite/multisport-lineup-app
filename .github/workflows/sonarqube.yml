@@ -40,7 +40,7 @@ jobs:
 
       - name: Run Python tests with coverage
         run: |
-          pytest tests/api/ --cov=app --cov-report=xml:coverage.xml --cov-report=term-missing || true
+          pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=xml:coverage.xml --cov-report=term-missing || true
         continue-on-error: true
 
       - name: Run JavaScript tests with coverage
