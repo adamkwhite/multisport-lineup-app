@@ -519,7 +519,7 @@ Set up SonarQube notifications for:
 For a full working example, see:
 - **Repository:** https://github.com/adamkwhite/baseball-lineup-app
 - **PR:** https://github.com/adamkwhite/baseball-lineup-app/pull/28
-- **SonarQube Dashboard:** http://44.206.255.230:9000/dashboard?id=baseball-lineup-app
+- **SonarQube Dashboard:** <YOUR_SONARQUBE_URL>/dashboard?id=baseball-lineup-app
 
 ---
 

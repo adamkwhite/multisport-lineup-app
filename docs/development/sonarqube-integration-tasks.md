@@ -21,7 +21,7 @@
   - [x] 1.1 Create sonar-project.properties with baseball-lineup-app, Python 3.12, and appropriate exclusions
   - [x] 1.2 Add .scannerwork/ directory to .gitignore
   - [x] 1.3 Add 11 comprehensive SonarQube badges to README.md (Quality Gate, Coverage, Bugs, Vulnerabilities, Code Smells, Security Rating, Maintainability Rating, Reliability Rating, Lines of Code, Duplicated Lines, Technical Debt)
-  - [x] 1.4 Update README.md badge URLs from placeholder 'sonarqube.yourdomain.com' to actual SonarQube instance URL (http://44.206.255.230:9000)
+  - [x] 1.4 Update README.md badge URLs from placeholder 'sonarqube.yourdomain.com' to actual SonarQube instance URL (<YOUR_SONARQUBE_URL>)
   - [x] 1.5 Verify sonar-project.properties exclusions match project structure and add certificate/image file exclusions
 
 - [x] 2.0 Set Up Test Coverage Reporting Infrastructure

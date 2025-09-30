@@ -72,3 +72,6 @@ coverage.xml
 playwright-report/
 tests/visual/*-snapshots/
 test-results/
+
+# Local Claude settings (may contain internal URLs)
+.claude/settings.local.json

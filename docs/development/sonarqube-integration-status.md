@@ -10,7 +10,7 @@
 - [x] Create sonar-project.properties
 - [x] Update .gitignore with .scannerwork/
 - [x] Add SonarQube badges to README.md
-- [x] Update badge URLs with actual SonarQube instance (http://44.206.255.230:9000)
+- [x] Update badge URLs with actual SonarQube instance (<YOUR_SONARQUBE_URL>)
 - [x] Verify exclusions match project structure and add certificate/image exclusions
 
 ### Phase 2: Test Coverage Infrastructure ✅ (Complete)
@@ -28,7 +28,7 @@
 
 ### Phase 4: SonarQube Project Setup ✅ (Complete)
 - [x] Add SONAR_TOKEN and SONAR_HOST_URL secrets to GitHub
-- [x] Create baseball-lineup-app project in SonarQube at http://44.206.255.230:9000
+- [x] Create baseball-lineup-app project in SonarQube at <YOUR_SONARQUBE_URL>
 - [x] Configure quality gate thresholds
 - [x] Set coverage thresholds (80% Python, 85% JavaScript)
 - [x] Enable security vulnerability detection
