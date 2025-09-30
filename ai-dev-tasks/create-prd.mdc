@@ -16,14 +16,21 @@ To guide an AI assistant in creating a detailed Product Requirements Document (P
 5. **Generate PRD:** Based on the initial prompt and the user's answers to the clarifying questions, generate a PRD using the structure outlined below.
 6. **Save PRD:** Create a new feature directory `docs/features/[feature-name]-PLANNED/` and save the generated document as `prd.md` inside that directory.
 7. **Create GitHub Issues:** Immediately after saving the PRD:
-   - Create GitHub issue(s) using `gh issue create` with clear titles and descriptions
+   - Create ALL issues sequentially using `gh issue create` with clear titles and descriptions
    - Each issue should include: Problem, Solution, Implementation Steps, Files Affected, Acceptance Criteria
    - Add placeholder text for PRD and related issues (e.g., "Related issues: #TBD")
+   - **Batching Strategy**: Create issues one at a time to capture issue numbers for cross-referencing
 8. **Cross-Reference Everything:**
    - Update the PRD's "Related Work" section with all created issue numbers
    - Update each GitHub issue's description to reference the PRD location and other related issues
    - Use `gh issue edit` to add the cross-references
-9. **Verify Links:** Ensure all cross-references are bidirectional (PRD → Issues, Issues → PRD, Issues ↔ Issues)
+   - **Automation Note**: Steps 7-9 can be scripted to reduce manual effort and errors (see Automation section below)
+9. **Verify Links:** Run validation checklist to ensure all cross-references are bidirectional:
+   - [ ] All issues link back to PRD location
+   - [ ] PRD "Related Work" section lists all created issues
+   - [ ] Inter-issue references are complete (each issue links to related issues)
+   - [ ] All issue URLs in PRD are valid and clickable
+   - [ ] Test by clicking through each link to verify they work
 
 ## Status Management
 - **PLANNED**: Feature is documented but not yet started
@@ -121,8 +128,8 @@ Each issue should follow this structure:
 ## Acceptance Criteria
 - [ ] Criterion 1
 - [ ] Criterion 2
-- [ ] Full test suite passes (pytest exit code 0)
-- [ ] Test coverage remains at X%+
+- [ ] Full test suite passes (adapt for project: pytest/jest/npm test/etc.)
+- [ ] Test coverage remains at X%+ (if applicable)
 
 ## Related
 - PRD: `docs/features/[feature-name]-PLANNED/prd.md`
@@ -151,12 +158,44 @@ Each issue should follow this structure:
 - Related issues: #XX (description), #YY (description)
 ```
 
+## Automation Considerations
+
+While steps 7-9 (issue creation and cross-referencing) are currently manual, they can be automated to reduce effort and errors:
+
+**Potential Script Approach:**
+```bash
+#!/bin/bash
+# prd-to-issues.sh - Automate PRD → GitHub Issues workflow
+
+PRD_FILE="$1"
+FEATURE_NAME="$2"
+
+# Extract issue definitions from PRD
+# Create issues sequentially and capture numbers
+# Update PRD with issue numbers
+# Update each issue with cross-references
+# Run validation checklist
+```
+
+**Benefits of Automation:**
+- Reduces manual effort and copy-paste errors
+- Ensures consistent formatting across all issues
+- Guarantees all cross-references are bidirectional
+- Can be integrated into CI/CD or pre-commit hooks
+
+**Trade-offs:**
+- Manual approach allows for nuanced issue descriptions and context
+- Automation requires PRD structure to be machine-parseable
+- Human review still needed for quality and accuracy
+
+**Recommendation:** Start with manual workflow to establish patterns, then automate once the pattern is stable and proven across multiple PRDs.
+
 ## Final Instructions
 1. Do NOT start implementing the PRD
 2. Make sure to ask the user clarifying questions
 3. Ask about issue strategy (single/multiple PRD and issues)
 4. Take the user's answers to the clarifying questions and improve the PRD
-5. Create GitHub issues immediately after saving PRD
+5. Create GitHub issues immediately after saving PRD (sequential creation for numbering)
 6. Cross-reference everything (PRD ↔ Issues, Issues ↔ Issues)
-7. Verify all links are bidirectional and working
+7. **Run validation checklist** to verify all links are bidirectional and working
 8. Ask the user if they want to break the PRD down into dev tasks using generate-tasks.mdc (Reply "yes" or "y" to continue)
