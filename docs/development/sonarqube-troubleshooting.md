@@ -1,0 +1,65 @@
+# SonarQube Integration - Troubleshooting
+
+## Common Issues
+
+### SonarQube Scan Fails
+
+**Check workflow logs:**
+```bash
+gh pr checks <PR_NUMBER>
+gh run view <RUN_ID> --log-failed
+```
+
+**Common causes:**
+- Missing secrets (SONAR_TOKEN, SONAR_HOST_URL)
+- SonarQube instance unavailable
+- Invalid coverage files
+
+### Quality Gate Fails
+
+1. View results: http://44.206.255.230:9000/dashboard?id=baseball-lineup-app
+2. Common failures:
+   - Coverage too low - add tests
+   - New bugs - fix code issues
+   - Code smells - refactor code
+   - Duplications - remove duplicate code
+
+### Coverage Not Showing
+
+**Verify coverage files:**
+```bash
+pytest tests/api/ --cov=app --cov-report=xml
+npm test -- --coverage
+ls -la coverage.xml test-results/coverage-*/lcov.info
+```
+
+### Tests Fail in CI
+
+**Run locally:**
+```bash
+source baseball-venv/bin/activate
+pytest tests/api/ -v
+npm test
+```
+
+### Badges Not Displaying
+
+**Test badge endpoint:**
+```bash
+curl -I "http://44.206.255.230:9000/api/project_badges/measure?project=baseball-lineup-app&metric=alert_status"
+```
+
+Should return 200 OK
+
+### Main Branch Not Analyzed
+
+Trigger analysis by:
+- Merge a PR to main
+- Push directly to main
+- GitHub Actions will run automatically
+
+## Getting Help
+
+- View logs: `gh run view <RUN_ID> --log`
+- Check SonarQube: http://44.206.255.230:9000
+- See usage guide: [sonarqube-usage.md](sonarqube-usage.md)
