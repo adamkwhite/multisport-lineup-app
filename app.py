@@ -233,7 +233,6 @@ def get_games(team_id):
                 # Convert time format (e.g., "10:00 AM" to "10:00")
                 time_str = game['time']
                 if 'AM' in time_str or 'PM' in time_str:
-                    from datetime import datetime
                     time_obj = datetime.strptime(time_str, '%I:%M %p')
                     time_24h = time_obj.strftime('%H:%M')
                 else:
