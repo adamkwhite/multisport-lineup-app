@@ -4,14 +4,8 @@ Covers date parsing, error handling, and deep API scenarios
 """
 
 import pytest
-import sys
-import os
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta, timezone
-
-# Add the parent directory to sys.path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 
 class TestTeamSnapGamesEdgeCases:
     """Edge cases for /api/games route date parsing and filtering"""
@@ -293,6 +287,8 @@ class TestAvailabilityDemoMode:
         assert response.status_code == 404
         data = response.get_json()
         assert 'error' in data
+        # TODO(#34): Replace with error code assertion once implemented
+        # assert data['code'] == 'DEMO_GAME_NOT_FOUND'
         assert 'Demo game not found' in data['error']
 
     @patch('app.load_demo_data')
@@ -310,6 +306,8 @@ class TestAvailabilityDemoMode:
         assert response.status_code == 500
         data = response.get_json()
         assert 'error' in data
+        # TODO(#34): Replace with error code assertion once implemented
+        # assert data['code'] == 'DEMO_DATA_UNAVAILABLE'
         assert 'Demo data not available' in data['error']
 
 
