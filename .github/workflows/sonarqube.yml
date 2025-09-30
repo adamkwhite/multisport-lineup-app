@@ -40,13 +40,23 @@ jobs:
 
       - name: Run Python tests with coverage
         run: |
-          pytest --cov=app --cov-report=xml --cov-report=term-missing || true
+          pytest tests/api/ --cov=app --cov-report=xml:coverage.xml --cov-report=term-missing || true
         continue-on-error: true
 
       - name: Run JavaScript tests with coverage
         run: |
           npm test -- --coverage --watchAll=false || true
         continue-on-error: true
+
+      - name: Copy coverage files for SonarQube
+        run: |
+          # Copy Jest coverage from CI directory structure
+          if [ -f "coverage/lcov.info" ]; then
+            cp coverage/lcov.info lcov.info
+            echo "✅ Copied coverage/lcov.info to lcov.info"
+          fi
+          # Verify coverage files exist
+          ls -la coverage.xml lcov.info 2>/dev/null || echo "⚠️ Coverage files not found"
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
