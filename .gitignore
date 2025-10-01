@@ -66,6 +66,8 @@ htmlcov/
 .coverage
 coverage.xml
 .pytest_cache/
+coverage/
+lcov.info
 
 # Playwright
 .playwright/
