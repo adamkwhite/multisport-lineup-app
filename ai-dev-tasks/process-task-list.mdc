@@ -34,3 +34,14 @@ When working with task lists, the AI must:
 6. After implementing a sub‑task, update the file, 
 7. Pause for user approval to commit to gh. (Reply "yes" or "y" to continue)
 8. Commit code code to git. 
+
+## Vibe Coding Quality Checks
+
+After each subtask completion, run these checks:
+
+### Automatic Reviews
+- **Bloat Check:** If generated code >400 lines, prompt: "Optimize this code and extract components"
+- **Package Audit:** Verify all npm packages against known vulnerabilities
+- **Secret Scan:** Search for hardcoded: API keys, passwords, tokens, connection strings
+- **Input Validation:** Confirm all user inputs have sanitization (use Zod or similar)
+- **Mobile Ready:** Check responsive design, especially tables → cards conversion

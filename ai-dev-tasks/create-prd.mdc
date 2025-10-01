@@ -54,6 +54,17 @@ The AI should adapt its questions based on the prompt, but here are some common 
 *   **Edge Cases:** "Are there any potential edge cases or error conditions we should consider?"
 *   **Platforms:** Will this be used on desktop, phone and tablet?
 
+## Vibe Coding Assessment (New Section)
+
+Ask the user:
+## Vibe Coding Assessment Questions (New)
+*   **Development Speed:** "Is rapid prototyping more important than detailed planning for this feature?"
+*   **Prototype First:** "Would you like to create a working prototype using natural language generation before full implementation?"
+*   **Component Granularity:** "Should we generate complete features at once, or build individual components iteratively?"
+*   **Iteration Style:** "Do you prefer quick iterations with frequent review, or complete implementation per task?"
+*   **Code Quality vs Speed:** "For this feature, what's the balance between getting something working quickly vs. production-ready code?"
+*   **Refinement Approach:** "Would you like to start with a functional prototype and refine through specific prompts?"
+
 ## PRD Structure Options
 
 ### Option 1: Standard PRD Structure
@@ -90,22 +101,72 @@ For complex technical features or when requested by the user, use this more deta
 11. **Out of Scope:** Clear exclusions and boundaries
 12. **Acceptance Criteria:** Grouped validation criteria
 
+### Option 3: Vibe-Coded Prototype Structure (New)
+For features suitable for rapid prototyping:
+
+1. **Prototype Requirements:** Natural language description of desired behavior
+2. **Refinement Prompts:** List of specific iterations to improve the prototype
+3. **Quality Gates:** 
+   - [ ] No exposed API keys/secrets
+   - [ ] Input validation present
+   - [ ] Mobile responsive
+   - [ ] Under 400 lines per component
+   - [ ] No untrusted npm packages
+4. **Production Migration Path:** How to move from prototype to production code
+
 ### When to Use Each Structure
 
 - **Use Option 1** for simple features, UI changes, or when working with product managers
 - **Use Option 2** for complex technical features, integrations, infrastructure changes, or when the user requests "comprehensive" or "detailed" PRDs
+- **Use Option 3 (Vibe-Coded)** for:
+  - UI-heavy components with clear visual requirements
+  - Standard CRUD operations
+  - Form-based interfaces
+  - Rapid prototypes for user testing
+  - Features where iteration speed matters more than initial perfection
+  - **NOT suitable for:** Authentication, payment processing, complex algorithms, data migrations, security-critical code
 - **Ask the user** which structure they prefer if unclear from the prompt
+
+# Vibe Coding Suitability Matrix (New)
+
+When the user chooses vibe coding approach, assess suitability:
+
+| Feature Type | Suitability | Approach |
+|-------------|-------------|----------|
+| UI Components | ✅ High | Vibe with iterations |
+| CRUD Operations | ✅ High | Vibe with validation focus |
+| Forms & Data Entry | ✅ High | Vibe with Zod validation |
+| Dashboards | ✅ High | Vibe with responsive focus |
+| API Integration | ⚠️ Medium | Vibe with careful testing |
+| Business Logic | ⚠️ Medium | Hybrid approach |
+| Authentication | ❌ Low | Traditional only |
+| Payment Processing | ❌ Low | Traditional only |
+| Data Migrations | ❌ Low | Traditional only |
+| Security Features | ❌ Low | Traditional only |
 
 ## Target Audience
 
 Assume the primary reader of the PRD is a **junior developer**. Therefore, requirements should be explicit, unambiguous, and avoid jargon where possible. Provide enough detail for them to understand the feature's purpose and core logic.
 
+For vibe-coded features, include:
+- Example prompts they can use
+- Expected iteration count (typically 3-5 refinements)
+- Clear quality gates they must verify
+
 ## Output
 *   **Format:** Markdown (`.md`)
 *   **Location:** `docs/features/[feature-name]-PLANNED/`
 *   **Filename:** `[feature-name]-prd.md`
+*   **Additional Files (for vibe coding):**
+    - `prompts.md` - Collection of generation and refinement prompts
+    - `quality-checklist.md` - Specific quality gates for this feature
 
 ## GitHub Issue Template
+
+
+Choose the appropriate template based on implementation approach selected in Step 5:
+
+### Standard Issue Template (Traditional Implementation)
 
 Each issue should follow this structure:
 
@@ -137,6 +198,48 @@ Each issue should follow this structure:
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
+```markdown
+## Problem
+[Describe the issue with code examples if applicable]
+## Feature to Generate
+[Natural language description of desired functionality]
+
+## Generation Approach
+- **Initial Prompt:** [Primary generation prompt]
+- **Expected Iterations:** [3-5 typically]
+- **Review Points:** [When to pause for human review]
+
+## Quality Gates (Must Pass Before Closing)
+- [ ] No hardcoded secrets or API keys
+- [ ] All inputs validated with Zod
+- [ ] Mobile responsive verified
+- [ ] Code under 400 lines per file
+- [ ] npm packages security-audited
+- [ ] Error states handled
+- [ ] Loading states implemented
+
+## Refinement Prompts
+1. [First refinement focus]
+2. [Second refinement focus]
+3. [Production-ready refinement]
+
+## Files to Generate
+- `path/to/component.tsx` (under 200 lines)
+- `path/to/component.test.tsx`
+- `path/to/styles.css`
+
+## Production Migration
+- [ ] Add comprehensive tests
+- [ ] Add TypeScript types
+- [ ] Document API surface
+- [ ] Performance audit
+
+## Related
+- PRD: `docs/features/[feature-name]-PLANNED/prd.md`
+- Related issues: #XX, #YY
+
+🤖 Generated with vibe coding approach
+```
 
 ## Cross-Referencing Pattern
 
@@ -147,6 +250,11 @@ Each issue should follow this structure:
 - **Issue #YY**: Brief description
 - **PR #ZZ**: Related pull request
 
+## Implementation Approach
+- **Method**: [Traditional/Vibe-coded/Hybrid]
+- **Estimated Iterations**: [If vibe-coded]
+- **Review Checkpoints**: [If vibe-coded]
+
 ## References
 - GitHub Issues: [#XX](url), [#YY](url)
 ```
@@ -154,8 +262,10 @@ Each issue should follow this structure:
 **In GitHub Issues:**
 ```markdown
 ## Related
+## Related
 - PRD: `docs/features/[feature-name]-PLANNED/prd.md`
 - Related issues: #XX (description), #YY (description)
+- Implementation approach: [Traditional/Vibe-coded]
 ```
 
 ## Automation Considerations
