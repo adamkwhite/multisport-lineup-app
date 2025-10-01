@@ -3,10 +3,9 @@ Get project context
 ## Task
 - Check git status and update local if needed
 - Read last PR from yesterday
-- Read FILE /home/adam/Code/CLAUDE.md
 - Read FILE /<project>/CLAUDE.MD
 - Read FILE /<project>/readme.md 
-- Read FILE /<project>/todo.md
+- Read FILES in /<project>/docs/
 
 Do not create these files if they don't exist
 
