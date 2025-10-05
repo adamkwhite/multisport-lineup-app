@@ -128,9 +128,7 @@ class TestAssignPositionsSmart:
         must_play = []
         position_candidates = {pos: players for pos in range(1, 10)}
 
-        result = assign_positions_smart(
-            players, positions, must_play, position_candidates
-        )
+        result = assign_positions_smart(players, positions, must_play)
 
         assert result is not None
         assert len(result) == 9
@@ -225,7 +223,7 @@ class TestAssignPositionsSmart:
         }
 
         result = assign_positions_smart(
-            players, positions, must_play, position_candidates, player_position_history
+            players, positions, must_play, player_position_history
         )
 
         assert result is not None

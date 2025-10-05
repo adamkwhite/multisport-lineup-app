@@ -113,6 +113,9 @@ FIELDING_POSITIONS = {
     9: "Right Field",
 }
 
+# Error messages
+ERROR_NOT_AUTHENTICATED = "Not authenticated"
+
 
 @app.route("/")
 def index():
@@ -171,7 +174,7 @@ def auth_callback():
 def get_teams():
     """Get user's teams from TeamSnap or demo data"""
     if "access_token" not in session:
-        return jsonify({"error": "Not authenticated"}), 401
+        return jsonify({"error": ERROR_NOT_AUTHENTICATED}), 401
 
     # Demo mode handling
     if session.get("demo_mode"):
@@ -251,7 +254,7 @@ def get_teams():
 def get_games(team_id):
     """Get recent games for a team or demo data"""
     if "access_token" not in session:
-        return jsonify({"error": "Not authenticated"}), 401
+        return jsonify({"error": ERROR_NOT_AUTHENTICATED}), 401
 
     # Demo mode handling
     if session.get("demo_mode"):
@@ -436,7 +439,7 @@ def get_games(team_id):
 def get_availability(event_id):
     """Get player availability for a specific game or demo data"""
     if "access_token" not in session:
-        return jsonify({"error": "Not authenticated"}), 401
+        return jsonify({"error": ERROR_NOT_AUTHENTICATED}), 401
 
     # Demo mode handling
     if session.get("demo_mode"):
@@ -613,11 +616,47 @@ def can_fill_all_positions(players, positions_to_fill, assignments=None):
     return False
 
 
+def _get_candidates_for_position(position, players):
+    """Helper: Get list of players who can play a specific position"""
+    candidates = []
+    for player in players:
+        prefs = player.get("position_preferences", [])
+        if not prefs or position in prefs:
+            candidates.append(player)
+    return candidates
+
+
+def _calculate_position_scarcity(positions, players):
+    """Helper: Calculate scarcity (number of candidates) for each position"""
+    position_scarcity = []
+    for pos in positions:
+        candidates = _get_candidates_for_position(pos, players)
+        position_scarcity.append((pos, len(candidates)))
+    position_scarcity.sort(key=lambda x: x[1])
+    return position_scarcity
+
+
+def _create_candidate_sort_key(position, player_position_history):
+    """Helper: Create a sort key function for candidate prioritization"""
+
+    def candidate_sort_key(player):
+        player_id = player["id"]
+        position_count = 0
+        if player_position_history and player_id in player_position_history:
+            position_count = player_position_history[player_id].count(position)
+
+        prefs = player.get("position_preferences", [])
+        flexibility = len(prefs) if prefs else 9
+
+        return (position_count, flexibility)
+
+    return candidate_sort_key
+
+
 def assign_positions_smart(
     available_players,
     available_positions,
     must_play_players,
-    position_candidates,
     player_position_history=None,
 ):
     """
@@ -634,54 +673,26 @@ def assign_positions_smart(
     # First, ensure we can fill all positions
     if not can_fill_all_positions(remaining_players, remaining_positions):
         print("  ⚠️  WARNING: Cannot fill all positions with current constraints!")
-        # Fall back to simple assignment
         return None
 
     # Sort positions by scarcity (fewest candidates first)
-    position_scarcity = []
-    for pos in remaining_positions:
-        candidates = []
-        for p in remaining_players:
-            prefs = p.get("position_preferences", [])
-            if not prefs:  # Can play any position
-                candidates.append(p)
-            elif pos in prefs:  # Can ONLY play specified positions
-                candidates.append(p)
-        position_scarcity.append((pos, len(candidates)))
-    position_scarcity.sort(key=lambda x: x[1])
+    position_scarcity = _calculate_position_scarcity(
+        remaining_positions, remaining_players
+    )
 
     # Assign positions in order of scarcity
     for position, _ in position_scarcity:
-        # Get candidates for this position
-        candidates = []
-        for p in remaining_players:
-            prefs = p.get("position_preferences", [])
-            if not prefs:  # Can play any position
-                candidates.append(p)
-            elif position in prefs:  # Can ONLY play specified positions
-                candidates.append(p)
+        candidates = _get_candidates_for_position(position, remaining_players)
 
         # Prioritize must-play players
         must_play_candidates = [p for p in candidates if p in must_play_players]
         if must_play_candidates:
             candidates = must_play_candidates
 
-        # Sort candidates by:
-        # 1. How many times they've played this position (prefer rotation)
-        # 2. Their flexibility (less flexible players first)
-        def candidate_sort_key(player):
-            player_id = player["id"]
-            position_count = 0
-            if player_position_history and player_id in player_position_history:
-                position_count = player_position_history[player_id].count(position)
-
-            prefs = player.get("position_preferences", [])
-            flexibility = len(prefs) if prefs else 9
-
-            # Return tuple: (times played this position, flexibility)
-            return (position_count, flexibility)
-
-        candidates.sort(key=candidate_sort_key)
+        # Sort candidates by rotation history and flexibility
+        candidates.sort(
+            key=_create_candidate_sort_key(position, player_position_history)
+        )
 
         if candidates:
             chosen_player = candidates[0]
@@ -839,7 +850,6 @@ def generate_lineup():
             remaining_players,
             available_positions,
             remaining_must_play,
-            position_candidates,
             player_position_history,
         )
 
