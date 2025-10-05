@@ -11,6 +11,16 @@ permissions:
   issues: read
   id-token: write
 
+# Global defaults to ensure test failures block the pipeline
+defaults:
+  run:
+    shell: bash
+    # Fail fast on any error
+    # pipefail: ensures pipeline commands fail on first error
+    # errexit: exit immediately on error
+    # nounset: treat unset variables as error
+    bash: bash --noprofile --norc -eo pipefail {0}
+
 jobs:
   # Stage 1: Quick Python validation (30-60 seconds)
   quick-checks:
@@ -46,6 +56,8 @@ jobs:
     name: Tests & SonarQube Analysis
     needs: quick-checks  # Only run if quick checks pass
     runs-on: ubuntu-latest
+    # Explicitly prevent this job from continuing on error
+    continue-on-error: false
 
     steps:
       - name: Checkout code
@@ -73,12 +85,18 @@ jobs:
           npm install
 
       - name: Run Python tests with coverage
+        id: python-tests
+        # Explicitly fail on test failure (no continue-on-error, no || true)
         run: |
           pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=xml:coverage.xml --cov-report=term-missing
+        continue-on-error: false
 
       - name: Run JavaScript tests with coverage
+        id: js-tests
+        # Explicitly fail on test failure (no continue-on-error, no || true)
         run: |
           npm test -- --coverage --watchAll=false
+        continue-on-error: false
 
       - name: Copy coverage files for SonarQube
         run: |
@@ -97,16 +115,39 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: SonarQube Quality Gate Check
+        id: sonar-gate
         uses: SonarSource/sonarqube-quality-gate-action@v1
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # Explicitly fail on quality gate failure
         continue-on-error: false
+
+      # Verify all critical steps succeeded
+      - name: Verify test and quality gate success
+        if: always()
+        run: |
+          if [ "${{ steps.python-tests.outcome }}" != "success" ]; then
+            echo "❌ Python tests failed"
+            exit 1
+          fi
+          if [ "${{ steps.js-tests.outcome }}" != "success" ]; then
+            echo "❌ JavaScript tests failed"
+            exit 1
+          fi
+          if [ "${{ steps.sonar-gate.outcome }}" != "success" ]; then
+            echo "❌ SonarQube quality gate failed"
+            exit 1
+          fi
+          echo "✅ All tests and quality checks passed"
 
   # Stage 3: Claude Code Review (only after SonarQube passes)
   claude-review:
     name: Claude Code Review
-    needs: sonarqube  # Only run if SonarQube quality gate passes
+    # CRITICAL: Only run if sonarqube job fully succeeds
+    # This prevents Claude review from running if ANY test fails
+    needs: sonarqube
+    if: success()  # Explicit check that previous job succeeded
     runs-on: ubuntu-latest
 
     steps:
