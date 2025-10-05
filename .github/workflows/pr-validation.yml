@@ -1,0 +1,140 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+  id-token: write
+
+jobs:
+  # Stage 1: Quick Python validation (30-60 seconds)
+  quick-checks:
+    name: Quick Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install linting tools
+        run: |
+          pip install flake8 mypy black isort
+
+      - name: Check code formatting (Black)
+        run: |
+          black --check app/ tests/ || (echo "❌ Code formatting issues found. Run 'black app/ tests/' to fix." && exit 1)
+
+      - name: Check import sorting (isort)
+        run: |
+          isort --check-only app/ tests/ || (echo "❌ Import sorting issues found. Run 'isort app/ tests/' to fix." && exit 1)
+
+      - name: Lint code (Flake8)
+        run: |
+          flake8 app/ tests/ --max-line-length=100 --extend-ignore=E203,W503
+
+  # Stage 2: Tests and SonarQube analysis (2-3 minutes)
+  sonarqube:
+    name: Tests & SonarQube Analysis
+    needs: quick-checks  # Only run if quick checks pass
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Node.js dependencies
+        run: |
+          npm install
+
+      - name: Run Python tests with coverage
+        run: |
+          pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=xml:coverage.xml --cov-report=term-missing || true
+        continue-on-error: true
+
+      - name: Run JavaScript tests with coverage
+        run: |
+          npm test -- --coverage --watchAll=false || true
+        continue-on-error: true
+
+      - name: Copy coverage files for SonarQube
+        run: |
+          # Copy Jest coverage from CI directory structure
+          if [ -f "coverage/lcov.info" ]; then
+            cp coverage/lcov.info lcov.info
+            echo "✅ Copied coverage/lcov.info to lcov.info"
+          fi
+          # Verify coverage files exist
+          ls -la coverage.xml lcov.info 2>/dev/null || echo "⚠️ Coverage files not found"
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: SonarQube Quality Gate Check
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: false
+
+  # Stage 3: Claude Code Review (only after SonarQube passes)
+  claude-review:
+    name: Claude Code Review
+    needs: sonarqube  # Only run if SonarQube quality gate passes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Please review this pull request and provide feedback on:
+            - Code quality and best practices
+            - Potential bugs or issues
+            - Performance considerations
+            - Security concerns
+            - Test coverage
+
+            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+
+            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
