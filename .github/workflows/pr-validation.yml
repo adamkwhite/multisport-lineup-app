@@ -39,15 +39,15 @@ jobs:
 
       - name: Check code formatting (Black)
         run: |
-          black --check app/ tests/ || (echo "❌ Code formatting issues found. Run 'black app/ tests/' to fix." && exit 1)
+          black --check app.py tests/ || (echo "❌ Code formatting issues found. Run 'black app.py tests/' to fix." && exit 1)
 
       - name: Check import sorting (isort)
         run: |
-          isort --check-only app/ tests/ || (echo "❌ Import sorting issues found. Run 'isort app/ tests/' to fix." && exit 1)
+          isort --check-only app.py tests/ || (echo "❌ Import sorting issues found. Run 'isort app.py tests/' to fix." && exit 1)
 
       - name: Lint code (Flake8)
         run: |
-          flake8 app/ tests/ --max-line-length=100 --extend-ignore=E203,W503
+          flake8 app.py tests/ --max-line-length=100 --extend-ignore=E203,W503
 
   # Stage 2: Tests and SonarQube analysis (2-3 minutes)
   sonarqube:
