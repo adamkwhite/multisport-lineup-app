@@ -14,12 +14,10 @@ permissions:
 # Global defaults to ensure test failures block the pipeline
 defaults:
   run:
-    shell: bash
     # Fail fast on any error
-    # pipefail: ensures pipeline commands fail on first error
-    # errexit: exit immediately on error
-    # nounset: treat unset variables as error
-    bash: bash --noprofile --norc -eo pipefail {0}
+    # -e (errexit): exit immediately on error
+    # -o pipefail: pipeline commands fail on first error
+    shell: bash --noprofile --norc -eo pipefail {0}
 
 jobs:
   # Stage 1: Quick Python validation (30-60 seconds)
