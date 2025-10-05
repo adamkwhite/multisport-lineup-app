@@ -5,14 +5,9 @@ Reusable test data for games
 from datetime import datetime, timedelta
 
 
-def create_game(game_id, name, starts_at, location='Test Stadium'):
+def create_game(game_id, name, starts_at, location="Test Stadium"):
     """Create a game dictionary for testing"""
-    return {
-        'id': game_id,
-        'name': name,
-        'starts_at': starts_at,
-        'location': location
-    }
+    return {"id": game_id, "name": name, "starts_at": starts_at, "location": location}
 
 
 def create_upcoming_games(count=3):
@@ -21,11 +16,13 @@ def create_upcoming_games(count=3):
     for i in range(count):
         game_date = datetime.now() + timedelta(days=i + 1)
         game_time = game_date.replace(hour=18, minute=0, second=0)
-        games.append(create_game(
-            game_id=f'game_{i+1}',
-            name=f'vs Opponent {i+1}',
-            starts_at=game_time.isoformat() + 'Z'
-        ))
+        games.append(
+            create_game(
+                game_id=f"game_{i+1}",
+                name=f"vs Opponent {i+1}",
+                starts_at=game_time.isoformat() + "Z",
+            )
+        )
     return games
 
 
@@ -35,11 +32,13 @@ def create_past_games(count=3):
     for i in range(count):
         game_date = datetime.now() - timedelta(days=count - i)
         game_time = game_date.replace(hour=18, minute=0, second=0)
-        games.append(create_game(
-            game_id=f'past_game_{i+1}',
-            name=f'vs Past Opponent {i+1}',
-            starts_at=game_time.isoformat() + 'Z'
-        ))
+        games.append(
+            create_game(
+                game_id=f"past_game_{i+1}",
+                name=f"vs Past Opponent {i+1}",
+                starts_at=game_time.isoformat() + "Z",
+            )
+        )
     return games
 
 
