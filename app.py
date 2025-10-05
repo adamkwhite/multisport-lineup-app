@@ -7,6 +7,7 @@ Main Flask application for managing baseball fielding positions
 import os
 import random
 from datetime import datetime, timedelta
+from urllib.parse import urlencode
 
 import requests
 from dotenv import load_dotenv
@@ -53,13 +54,23 @@ load_dotenv()
 
 app = Flask(__name__)
 # Generate secure secret key for production if not provided
-if os.getenv("SECRET_KEY"):
-    app.secret_key = os.getenv("SECRET_KEY")
-else:
-    # For development only - generate a secure key for production
-    import secrets
+import secrets
 
-    app.secret_key = os.getenv("SECRET_KEY", secrets.token_hex(32))
+app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
+
+# Detect environment
+is_development = not (os.getenv("RENDER") or os.getenv("FLASK_ENV") == "production")
+
+# Session security configuration
+if not is_development:
+    app.config["SESSION_COOKIE_SECURE"] = True  # HTTPS only in production
+    app.config["SESSION_COOKIE_HTTPONLY"] = True  # Prevent XSS access
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # CSRF protection
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=24)  # 24-hour timeout
+else:
+    # Development: Allow HTTP, but still protect from XSS
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 # Configure CORS for production
 if os.getenv("RENDER") or os.getenv("FLASK_ENV") == "production":
@@ -123,7 +134,7 @@ def login():
         "scope": "read write",
     }
 
-    auth_redirect = f"{auth_url}?{'&'.join([f'{k}={v}' for k, v in params.items()])}"
+    auth_redirect = f"{auth_url}?{urlencode(params)}"
     return redirect(auth_redirect)
 
 

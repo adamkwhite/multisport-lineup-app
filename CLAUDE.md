@@ -131,6 +131,7 @@ baseball-lineup-app/
 │   ├── models/            # Database models
 │   ├── services/          # Business logic
 │   └── templates/         # HTML templates
+├── ai-dev-tasks/
 ├── docs/
 │   ├── archive            # 
 │   ├── deployement/       #
