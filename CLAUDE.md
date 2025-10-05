@@ -131,6 +131,13 @@ baseball-lineup-app/
 │   ├── models/            # Database models
 │   ├── services/          # Business logic
 │   └── templates/         # HTML templates
+├── docs/
+│   ├── archive            # 
+│   ├── deployement/       #
+│   ├── development/       #
+│   ├── features/          # 
+│   ├── screenshots/       #  
+│   └── testing/           # 
 ├── static/                # CSS, JS, images
 ├── tests/                 # Test suite
 ├── .env.example           # Environment template
