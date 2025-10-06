@@ -10,12 +10,8 @@ import pytest
 # Add the parent directory to sys.path so we can import app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import (
-    FIELDING_POSITIONS,
-    assign_positions_smart,
-    can_fill_all_positions,
-    obfuscate_name,
-)
+from app import (FIELDING_POSITIONS, assign_positions_smart,
+                 can_fill_all_positions, obfuscate_name)
 
 
 class TestObfuscateName:
