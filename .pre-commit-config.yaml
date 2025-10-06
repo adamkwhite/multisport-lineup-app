@@ -1,0 +1,51 @@
+# Pre-commit hooks for multisport-lineup-app
+# Matches Quick Validation stage in .github/workflows/pr-validation.yml
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Black - Python code formatter (auto-fixes)
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3.12
+        args: [--line-length=88]
+        files: ^(app\.py|tests/|scripts/)
+
+  # isort - Import statement organizer (auto-fixes)
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile=black, --line-length=88]
+        files: ^(app\.py|tests/|scripts/)
+
+  # Flake8 - Python linter (warnings only, won't block commits)
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args:
+          - --max-line-length=88
+          - --extend-ignore=E203,W503
+          - --exclude=lineup-venv/,venv/,env/,.git,__pycache__
+        files: ^(app\.py|tests/|scripts/)
+        # Warning only - don't block commits
+        verbose: true
+        stages: [manual]
+
+  # Built-in hooks for common issues
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+
+# Global settings
+default_language_version:
+  python: python3.12
