@@ -88,18 +88,39 @@ python3 manage.py db migrate
 python3 manage.py db upgrade
 ```
 
+## CI/CD Pipeline
+
+**3-Stage GitHub Actions Workflow** (`.github/workflows/pr-validation.yml`):
+
+1. **Quick Validation** (15-30s) - Code formatting, import sorting, linting
+2. **Tests & SonarQube** (2-3min) - Unit tests, coverage, quality gate
+3. **Claude Review** (3-5min) - AI-powered code review
+
+**Key Features:**
+- 6 layers of safeguards ensure test failures block pipeline
+- SonarQube integration for code quality tracking
+- isort configured with Black profile (`.isort.cfg`)
+- See `docs/development/ci-cd-pipeline.md` for full documentation
+
 ## Testing
 
 ```bash
-# Run test suite (if implemented)
-pytest
+# Run unit and edge case tests
+./baseball-venv/bin/pytest tests/unit/ tests/edge_cases/ -v
 
 # Run with coverage
-pytest --cov=app
+./baseball-venv/bin/pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=term-missing
 
 # Run specific test file
-pytest tests/test_lineup_generation.py
+./baseball-venv/bin/pytest tests/unit/test_lineup_generation.py -v
+
+# Run visual regression tests (requires app running)
+./baseball-venv/bin/pytest tests/visual/ -v
 ```
+
+**Test Coverage:** 94%+ (151/153 tests passing)
+**Test Organization:** Unit, edge cases, visual regression
+**Documentation:** `docs/testing/guidelines.md`
 
 ## API Integration
 
