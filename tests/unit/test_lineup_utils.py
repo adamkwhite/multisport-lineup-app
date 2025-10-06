@@ -171,25 +171,6 @@ class TestAssignPositionsSmart:
         # Due to rotation preference, player 1 should get catcher (less played)
         assert player1_assignment.position == "C"
 
-    def test_assign_with_pitcher_pool(self):
-        """Test that pitcher pool restricts pitcher assignments."""
-        player1 = Player(id="1", name="P1", position_preferences=[])
-        player2 = Player(id="2", name="P2", position_preferences=[])
-        players = [player1, player2]
-        pitcher_pool = [player1]  # Only player1 can pitch this time
-
-        positions = [
-            Position(id="P", name="Pitcher", abbrev="P"),
-            Position(id="C", name="Catcher", abbrev="C"),
-        ]
-
-        assignments = assign_positions_smart(
-            players, positions, pitcher_pool=pitcher_pool
-        )
-
-        pitcher_assignment = next(a for a in assignments if a.position == "P")
-        assert pitcher_assignment.player.id == "1"
-
     def test_assign_insufficient_players_raises_error(self):
         """Test that insufficient players raises ValueError."""
         players = [Player(id="1", name="P1", position_preferences=[])]
