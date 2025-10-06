@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+  # Pull requests use pr-validation.yml instead to avoid duplicate test runs
 
 jobs:
   sonarqube:

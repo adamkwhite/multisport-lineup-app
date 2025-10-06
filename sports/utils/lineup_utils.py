@@ -16,7 +16,6 @@ def assign_positions_smart(
     available_positions: List[Position],
     must_play_players: Optional[List[Player]] = None,
     player_position_history: Optional[Dict[str, List[str]]] = None,
-    pitcher_pool: Optional[List[Player]] = None,
 ) -> List[PositionAssignment]:
     """
     Assign players to positions using smart algorithm.
@@ -26,14 +25,12 @@ def assign_positions_smart(
     2. Position scarcity - positions with fewer candidates are filled first
     3. Player flexibility - less flexible players assigned first
     4. Position rotation - prefer positions players haven't played recently
-    5. Pitcher pool - if provided, only use these players for pitcher position
 
     Args:
         available_players: Players available for assignment
         available_positions: Positions to fill
         must_play_players: Players who must be included (high priority)
         player_position_history: Dict of player_id -> [position_ids played]
-        pitcher_pool: If provided, only use these players for pitcher position
 
     Returns:
         List of PositionAssignment objects
@@ -60,17 +57,13 @@ def assign_positions_smart(
 
     # Calculate position scarcity (positions with fewest candidates first)
     position_scarcity = _calculate_position_scarcity(
-        remaining_positions, remaining_players, pitcher_pool
+        remaining_positions, remaining_players
     )
 
     # Assign positions in order of scarcity
     for position, _ in position_scarcity:
         # Get candidates who can play this position
-        if position.id == "P" and pitcher_pool:
-            # Special handling for pitcher position
-            candidates = [p for p in remaining_players if p in pitcher_pool]
-        else:
-            candidates = _get_candidates_for_position(position, remaining_players)
+        candidates = _get_candidates_for_position(position, remaining_players)
 
         # Prioritize must-play players
         must_play_candidates = [p for p in candidates if p in must_play_players]
@@ -82,14 +75,42 @@ def assign_positions_smart(
             key=_create_candidate_sort_key(position.id, player_position_history)
         )
 
-        if candidates:
-            chosen_player = candidates[0]
-            assignment = PositionAssignment(
-                player=chosen_player,
-                position=position.id,
+        if not candidates:
+            raise ValueError(
+                f"No candidates available for position {position.name} ({position.id}). "
+                f"Remaining players: {len(remaining_players)}."
             )
-            assignments.append(assignment)
-            remaining_players.remove(chosen_player)
+
+        # Try candidates in order until we find one that doesn't block future assignments
+        # Use look-ahead to avoid painting ourselves into a corner
+        chosen_player = None
+        for candidate in candidates:
+            # Temporarily assign this candidate
+            temp_remaining = [p for p in remaining_players if p.id != candidate.id]
+            temp_remaining_positions = [
+                pos for pos, _ in position_scarcity
+                if pos.id != position.id
+            ]
+
+            # Check if remaining positions can still be filled
+            remaining_position_ids = [p.id for p in temp_remaining_positions]
+            if not remaining_position_ids or can_fill_all_positions(
+                temp_remaining, remaining_position_ids
+            ):
+                # This assignment won't block future positions
+                chosen_player = candidate
+                break
+
+        if not chosen_player:
+            # All candidates would block future positions - use first one anyway
+            chosen_player = candidates[0]
+
+        assignment = PositionAssignment(
+            player=chosen_player,
+            position=position.id,
+        )
+        assignments.append(assignment)
+        remaining_players.remove(chosen_player)
 
     return assignments
 
@@ -250,7 +271,6 @@ def _get_candidates_for_position(
 def _calculate_position_scarcity(
     positions: List[Position],
     players: List[Player],
-    pitcher_pool: Optional[List[Player]] = None,
 ) -> List[tuple]:
     """
     Calculate scarcity (number of candidates) for each position.
@@ -260,7 +280,6 @@ def _calculate_position_scarcity(
     Args:
         positions: Positions to evaluate
         players: Available players
-        pitcher_pool: If provided, use for pitcher position candidates
 
     Returns:
         List of (Position, candidate_count) tuples, sorted by count
@@ -268,12 +287,7 @@ def _calculate_position_scarcity(
     position_scarcity = []
 
     for pos in positions:
-        if pos.id == "P" and pitcher_pool:
-            # Special handling for pitcher
-            candidates = [p for p in players if p in pitcher_pool]
-        else:
-            candidates = _get_candidates_for_position(pos, players)
-
+        candidates = _get_candidates_for_position(pos, players)
         position_scarcity.append((pos, len(candidates)))
 
     # Sort by candidate count (fewest first)
