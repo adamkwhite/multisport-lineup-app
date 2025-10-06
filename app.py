@@ -11,8 +11,7 @@ from urllib.parse import urlencode
 
 import requests
 from dotenv import load_dotenv
-from flask import (Flask, jsonify, redirect, render_template, request, session,
-                   url_for)
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from flask_cors import CORS
 
 
