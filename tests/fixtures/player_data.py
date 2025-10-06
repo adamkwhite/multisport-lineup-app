@@ -24,29 +24,31 @@ def create_flexible_players(count=9, start_id=1):
 def create_pitchers(count=3, start_id=1):
     """Create players who can only pitch"""
     return [
-        create_player(i, f"Pitcher {i}", [1]) for i in range(start_id, start_id + count)
+        create_player(i, f"Pitcher {i}", ["P"])
+        for i in range(start_id, start_id + count)
     ]
 
 
 def create_catchers(count=2, start_id=1):
     """Create players who can only catch"""
     return [
-        create_player(i, f"Catcher {i}", [2]) for i in range(start_id, start_id + count)
+        create_player(i, f"Catcher {i}", ["C"])
+        for i in range(start_id, start_id + count)
     ]
 
 
 def create_infielders(count=4, start_id=1):
-    """Create players who can play infield positions (3, 4, 5, 6)"""
+    """Create players who can play infield positions (1B, 2B, 3B, SS)"""
     return [
-        create_player(i, f"Infielder {i}", [3, 4, 5, 6])
+        create_player(i, f"Infielder {i}", ["1B", "2B", "3B", "SS"])
         for i in range(start_id, start_id + count)
     ]
 
 
 def create_outfielders(count=3, start_id=1):
-    """Create players who can play outfield positions (7, 8, 9)"""
+    """Create players who can play outfield positions (LF, CF, RF)"""
     return [
-        create_player(i, f"Outfielder {i}", [7, 8, 9])
+        create_player(i, f"Outfielder {i}", ["LF", "CF", "RF"])
         for i in range(start_id, start_id + count)
     ]
 

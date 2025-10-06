@@ -289,7 +289,7 @@ class TestBoundaryConditions:
             json={
                 "players": [
                     {
-                        "id": 999999999999,
+                        "id": 999999999999 + i,
                         "name": f"Player {i}",
                         "position_preferences": [],
                     }

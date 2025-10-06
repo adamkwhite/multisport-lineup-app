@@ -48,7 +48,16 @@ class TestLineupGeneration:
                 {
                     "id": i,
                     "name": f"Player {i}",
-                    "position_preferences": [2, 3, 4, 5, 6, 7, 8, 9],
+                    "position_preferences": [
+                        "C",
+                        "1B",
+                        "2B",
+                        "3B",
+                        "SS",
+                        "LF",
+                        "CF",
+                        "RF",
+                    ],
                 }
                 for i in range(1, 10)
             ]
@@ -76,34 +85,37 @@ class TestLineupGeneration:
         data = response.get_json()
 
         assert "lineups" in data
-        assert "positions" in data
-        assert "game_format" in data
+        assert "sport" in data
+        assert "num_periods" in data
+        assert "total_players" in data
 
         # Should generate lineups based on available pitchers
         assert len(data["lineups"]) > 0
+        assert data["sport"] == "baseball"
+        assert data["total_players"] == 9
 
         # Check first lineup structure
         lineup = data["lineups"][0]
-        assert "lineup" in lineup
-        assert "bench" in lineup
-        assert "pitcher" in lineup
+        assert "assignments" in lineup
+        assert "bench_players" in lineup
+        assert "period" in lineup
+        assert "period_name" in lineup
 
-        # Check all positions are filled (lineup is dict with position numbers as string keys in JSON)
-        lineup_positions = lineup["lineup"]
-        assert len(lineup_positions) == 9
-        for pos in range(1, 10):
-            # JSON converts int keys to strings
-            pos_key = str(pos)
-            assert pos_key in lineup_positions
-            assert "player_name" in lineup_positions[pos_key]
-            assert "position_name" in lineup_positions[pos_key]
+        # Check all positions are filled (9 assignments)
+        assignments = lineup["assignments"]
+        assert len(assignments) == 9
+        for assignment in assignments:
+            assert "player" in assignment
+            assert "position" in assignment
+            assert "id" in assignment["player"]
+            assert "name" in assignment["player"]
 
     def test_generate_lineup_with_position_preferences(self, client):
         """Test lineup generation respects position preferences"""
         payload = {
             "players": [
-                {"id": 1, "name": "Pitcher Only", "position_preferences": [1]},
-                {"id": 2, "name": "Catcher Only", "position_preferences": [2]},
+                {"id": 1, "name": "Pitcher Only", "position_preferences": ["P"]},
+                {"id": 2, "name": "Catcher Only", "position_preferences": ["C"]},
                 {"id": 3, "name": "Player 3", "position_preferences": []},
                 {"id": 4, "name": "Player 4", "position_preferences": []},
                 {"id": 5, "name": "Player 5", "position_preferences": []},
@@ -124,16 +136,18 @@ class TestLineupGeneration:
 
         # Check that first lineup has the dedicated pitcher
         lineup = data["lineups"][0]
-        assert lineup["lineup"]["1"]["player_name"] == "Pitcher Only"
-        assert lineup["lineup"]["1"]["position_name"] == "Pitcher"
+        pitcher_assignment = next(
+            a for a in lineup["assignments"] if a["position"] == "P"
+        )
+        assert pitcher_assignment["player"]["name"] == "Pitcher Only"
 
     def test_generate_lineup_with_multiple_pitchers(self, client):
         """Test lineup generation with multiple pitchers"""
         payload = {
             "players": [
-                {"id": 1, "name": "Pitcher 1", "position_preferences": [1]},
-                {"id": 2, "name": "Pitcher 2", "position_preferences": [1]},
-                {"id": 3, "name": "Pitcher 3", "position_preferences": [1]},
+                {"id": 1, "name": "Pitcher 1", "position_preferences": ["P"]},
+                {"id": 2, "name": "Pitcher 2", "position_preferences": ["P"]},
+                {"id": 3, "name": "Pitcher 3", "position_preferences": ["P"]},
                 {"id": 4, "name": "Player 4", "position_preferences": []},
                 {"id": 5, "name": "Player 5", "position_preferences": []},
                 {"id": 6, "name": "Player 6", "position_preferences": []},
@@ -155,7 +169,14 @@ class TestLineupGeneration:
         assert len(data["lineups"]) >= 3
 
         # Each of the dedicated pitchers should appear as a pitcher in some lineup
-        pitchers = [lineup["pitcher"] for lineup in data["lineups"]]
+        pitchers = []
+        for lineup in data["lineups"]:
+            pitcher_assignment = next(
+                (a for a in lineup["assignments"] if a["position"] == "P"), None
+            )
+            if pitcher_assignment:
+                pitchers.append(pitcher_assignment["player"]["name"])
+
         assert "Pitcher 1" in pitchers
         assert "Pitcher 2" in pitchers
         assert "Pitcher 3" in pitchers
@@ -177,9 +198,9 @@ class TestLineupGeneration:
 
         # Check that bench players are tracked
         for lineup in data["lineups"]:
-            assert "bench" in lineup
+            assert "bench_players" in lineup
             # 12 players - 9 positions = 3 on bench
-            assert len(lineup["bench"]) == 3
+            assert len(lineup["bench_players"]) == 3
 
     def test_generate_lineup_empty_payload(self, client):
         """Test lineup generation with empty payload"""
@@ -195,7 +216,7 @@ class TestLineupGeneration:
         assert response.status_code in [400, 415]
 
     def test_generate_lineup_positions_constant(self, client):
-        """Test that FIELDING_POSITIONS constant is returned"""
+        """Test that position names are correctly returned in assignments"""
         payload = {
             "players": [
                 {"id": i, "name": f"Player {i}", "position_preferences": []}
@@ -208,9 +229,16 @@ class TestLineupGeneration:
         assert response.status_code == 200
         data = response.get_json()
 
-        assert "positions" in data
-        # Positions should be strings, not ints in JSON
-        positions = data["positions"]
-        assert positions["1"] == "Pitcher"
-        assert positions["2"] == "Catcher"
-        assert positions["9"] == "Right Field"
+        # Check position codes are present in lineup assignments
+        lineup = data["lineups"][0]
+        assignments = lineup["assignments"]
+
+        # Find specific position assignments and verify position codes
+        pitcher = next(a for a in assignments if a["position"] == "P")
+        assert pitcher["position"] == "P"
+
+        catcher = next(a for a in assignments if a["position"] == "C")
+        assert catcher["position"] == "C"
+
+        right_field = next(a for a in assignments if a["position"] == "RF")
+        assert right_field["position"] == "RF"
