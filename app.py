@@ -381,7 +381,7 @@ def get_games(team_id):
                     if include_all_states:
                         # Include all games regardless of date or state
                         should_include = True
-                        print(f"    ✅ Including (ALL STATES mode)")
+                        print("    ✅ Including (ALL STATES mode)")
                     else:
                         # Only include future games within 30 days
                         is_future = start_time > now
@@ -402,7 +402,7 @@ def get_games(team_id):
                                 "location": event_data.get("location_name", "TBD"),
                             }
                         )
-                        print(f"    ✅ ADDED TO LINEUP LIST!")
+                        print("    ✅ ADDED TO LINEUP LIST!")
                     else:
                         is_future = start_time > now
                         reason = "Past event" if not is_future else "Too far in future"
@@ -413,14 +413,14 @@ def get_games(team_id):
                     continue
             else:
                 if not is_game:
-                    print(f"    ⚠️  SKIPPED: Not marked as a game")
+                    print("    ⚠️  SKIPPED: Not marked as a game")
                 else:
-                    print(f"    ⚠️  SKIPPED: No start time")
+                    print("    ⚠️  SKIPPED: No start time")
 
             print()  # Blank line between events
 
         print("=" * 80)
-        print(f"📊 SUMMARY:")
+        print("📊 SUMMARY:")
         print(f"   Total Events: {len(all_events)}")
         game_type = "Games (All States)" if include_all_states else "Upcoming Games"
         print(f"   {game_type}: {len(games)}")
@@ -520,7 +520,7 @@ def get_availability(event_id):
                             is_manager = member_info.get("is_manager", False)
                             is_owner = member_info.get("is_owner", False)
 
-                            print(f"  📋 Member Details:")
+                            print("  📋 Member Details:")
                             print(f"    Name: {player_name}")
                             print(f"    Type: {member_type}")
                             print(f"    Is Manager: {is_manager}")
@@ -739,7 +739,7 @@ def generate_lineup():
         return jsonify({"error": "Need at least 1 player who can pitch"}), 400
 
     # Log position availability
-    print(f"🥎 Position availability:")
+    print("🥎 Position availability:")
     for pos, candidates in position_candidates.items():
         pos_name = FIELDING_POSITIONS[pos]
         print(f"  {pos}. {pos_name}: {len(candidates)} players")
@@ -884,14 +884,8 @@ def generate_lineup():
                     assigned = False
                     for i, player in enumerate(all_remaining):
                         prefs = player.get("position_preferences", [])
-                        can_play = False
-
-                        if not prefs:  # Empty list = can play any position
-                            can_play = True
-                        elif (
-                            position in prefs
-                        ):  # Has preferences and this position is one of them
-                            can_play = True
+                        # Empty list = can play any position, or position is in preferences
+                        can_play = not prefs or position in prefs
 
                         if can_play:
                             lineup[position] = {
