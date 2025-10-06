@@ -2,14 +2,20 @@
 Tests for utility functions in app.py
 """
 
-import pytest
-import sys
 import os
+import sys
+
+import pytest
 
 # Add the parent directory to sys.path so we can import app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import obfuscate_name, can_fill_all_positions, assign_positions_smart, FIELDING_POSITIONS
+from app import (
+    FIELDING_POSITIONS,
+    assign_positions_smart,
+    can_fill_all_positions,
+    obfuscate_name,
+)
 
 
 class TestObfuscateName:
@@ -61,18 +67,15 @@ class TestCanFillAllPositions:
 
     def test_enough_flexible_players(self):
         """Test with enough flexible players for all positions"""
-        players = [
-            {'id': i, 'position_preferences': []}
-            for i in range(1, 10)
-        ]
+        players = [{"id": i, "position_preferences": []} for i in range(1, 10)]
         positions = list(range(1, 10))
         assert can_fill_all_positions(players, positions) is True
 
     def test_insufficient_players(self):
         """Test with insufficient players"""
         players = [
-            {'id': 1, 'position_preferences': []},
-            {'id': 2, 'position_preferences': []}
+            {"id": 1, "position_preferences": []},
+            {"id": 2, "position_preferences": []},
         ]
         positions = list(range(1, 10))
         assert can_fill_all_positions(players, positions) is False
@@ -80,15 +83,15 @@ class TestCanFillAllPositions:
     def test_with_position_preferences(self):
         """Test with specific position preferences"""
         players = [
-            {'id': 1, 'position_preferences': [1]},  # Pitcher only
-            {'id': 2, 'position_preferences': [2]},  # Catcher only
-            {'id': 3, 'position_preferences': []},   # Any position
-            {'id': 4, 'position_preferences': []},   # Any position
-            {'id': 5, 'position_preferences': []},   # Any position
-            {'id': 6, 'position_preferences': []},   # Any position
-            {'id': 7, 'position_preferences': []},   # Any position
-            {'id': 8, 'position_preferences': []},   # Any position
-            {'id': 9, 'position_preferences': []},   # Any position
+            {"id": 1, "position_preferences": [1]},  # Pitcher only
+            {"id": 2, "position_preferences": [2]},  # Catcher only
+            {"id": 3, "position_preferences": []},  # Any position
+            {"id": 4, "position_preferences": []},  # Any position
+            {"id": 5, "position_preferences": []},  # Any position
+            {"id": 6, "position_preferences": []},  # Any position
+            {"id": 7, "position_preferences": []},  # Any position
+            {"id": 8, "position_preferences": []},  # Any position
+            {"id": 9, "position_preferences": []},  # Any position
         ]
         positions = list(range(1, 10))
         assert can_fill_all_positions(players, positions) is True
@@ -96,25 +99,22 @@ class TestCanFillAllPositions:
     def test_impossible_constraints(self):
         """Test with impossible position constraints"""
         players = [
-            {'id': 1, 'position_preferences': [1]},  # Pitcher only
-            {'id': 2, 'position_preferences': [1]},  # Also pitcher only
-            {'id': 3, 'position_preferences': [1]},  # Also pitcher only
+            {"id": 1, "position_preferences": [1]},  # Pitcher only
+            {"id": 2, "position_preferences": [1]},  # Also pitcher only
+            {"id": 3, "position_preferences": [1]},  # Also pitcher only
         ]
         positions = [1, 2, 3]  # Need pitcher, catcher, and first base
         assert can_fill_all_positions(players, positions) is False
 
     def test_empty_positions(self):
         """Test with no positions to fill"""
-        players = [{'id': 1, 'position_preferences': []}]
+        players = [{"id": 1, "position_preferences": []}]
         positions = []
         assert can_fill_all_positions(players, positions) is True
 
     def test_exact_match(self):
         """Test with exactly matching players and positions"""
-        players = [
-            {'id': i, 'position_preferences': [i]}
-            for i in range(1, 10)
-        ]
+        players = [{"id": i, "position_preferences": [i]} for i in range(1, 10)]
         positions = list(range(1, 10))
         assert can_fill_all_positions(players, positions) is True
 
@@ -125,14 +125,14 @@ class TestAssignPositionsSmart:
     def test_simple_assignment(self):
         """Test basic position assignment"""
         players = [
-            {'id': i, 'name': f'Player {i}', 'position_preferences': []}
+            {"id": i, "name": f"Player {i}", "position_preferences": []}
             for i in range(1, 10)
         ]
         positions = list(range(1, 10))
         must_play = []
         position_candidates = {pos: players for pos in range(1, 10)}
 
-        result = assign_positions_smart(players, positions, must_play, position_candidates)
+        result = assign_positions_smart(players, positions, must_play)
 
         assert result is not None
         assert len(result) == 9
@@ -141,14 +141,16 @@ class TestAssignPositionsSmart:
     def test_with_must_play_players(self):
         """Test that must-play players are prioritized"""
         players = [
-            {'id': i, 'name': f'Player {i}', 'position_preferences': []}
+            {"id": i, "name": f"Player {i}", "position_preferences": []}
             for i in range(1, 10)
         ]
         must_play = [players[0], players[1]]  # First two players must play
         positions = list(range(1, 10))
         position_candidates = {pos: players for pos in range(1, 10)}
 
-        result = assign_positions_smart(players, positions, must_play, position_candidates)
+        result = assign_positions_smart(
+            players, positions, must_play, position_candidates
+        )
 
         assert result is not None
         # Check that must-play players are assigned
@@ -159,25 +161,23 @@ class TestAssignPositionsSmart:
     def test_impossible_assignment(self):
         """Test that impossible assignments return None"""
         players = [
-            {'id': 1, 'name': 'Player 1', 'position_preferences': [1]},
+            {"id": 1, "name": "Player 1", "position_preferences": [1]},
         ]
         positions = [1, 2, 3]  # Need 3 positions but only 1 player
         must_play = []
-        position_candidates = {
-            1: [players[0]],
-            2: [],
-            3: []
-        }
+        position_candidates = {1: [players[0]], 2: [], 3: []}
 
-        result = assign_positions_smart(players, positions, must_play, position_candidates)
+        result = assign_positions_smart(
+            players, positions, must_play, position_candidates
+        )
 
         assert result is None
 
     def test_position_scarcity_priority(self):
         """Test that scarce positions are filled first"""
-        pitcher_only = {'id': 1, 'name': 'Pitcher', 'position_preferences': [1]}
+        pitcher_only = {"id": 1, "name": "Pitcher", "position_preferences": [1]}
         flexible_players = [
-            {'id': i, 'name': f'Player {i}', 'position_preferences': []}
+            {"id": i, "name": f"Player {i}", "position_preferences": []}
             for i in range(2, 10)
         ]
         players = [pitcher_only] + flexible_players
@@ -196,7 +196,9 @@ class TestAssignPositionsSmart:
             9: flexible_players,
         }
 
-        result = assign_positions_smart(players, positions, must_play, position_candidates)
+        result = assign_positions_smart(
+            players, positions, must_play, position_candidates
+        )
 
         assert result is not None
         assert result[1] == pitcher_only  # Pitcher should be assigned to position 1
@@ -204,7 +206,7 @@ class TestAssignPositionsSmart:
     def test_with_position_history(self):
         """Test that position history affects rotation"""
         players = [
-            {'id': i, 'name': f'Player {i}', 'position_preferences': []}
+            {"id": i, "name": f"Player {i}", "position_preferences": []}
             for i in range(1, 10)
         ]
         positions = list(range(1, 10))
@@ -224,7 +226,9 @@ class TestAssignPositionsSmart:
             9: [],
         }
 
-        result = assign_positions_smart(players, positions, must_play, position_candidates, player_position_history)
+        result = assign_positions_smart(
+            players, positions, must_play, player_position_history
+        )
 
         assert result is not None
         # Player 1 should ideally not be assigned pitcher again (though not guaranteed)

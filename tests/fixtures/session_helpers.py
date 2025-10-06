@@ -3,18 +3,18 @@ Helper functions for session management in tests
 """
 
 
-def setup_authenticated_session(client, access_token='test_token'):
+def setup_authenticated_session(client, access_token="test_token"):
     """Set up an authenticated session for testing"""
     with client.session_transaction() as sess:
-        sess['access_token'] = access_token
+        sess["access_token"] = access_token
     return client
 
 
 def setup_demo_session(client):
     """Set up a demo mode session for testing"""
     with client.session_transaction() as sess:
-        sess['demo_mode'] = True
-        sess['access_token'] = 'demo_token'
+        sess["demo_mode"] = True
+        sess["access_token"] = "demo_token"
     return client
 
 
