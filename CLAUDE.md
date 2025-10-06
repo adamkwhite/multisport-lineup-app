@@ -106,16 +106,16 @@ python3 manage.py db upgrade
 
 ```bash
 # Run unit and edge case tests
-./baseball-venv/bin/pytest tests/unit/ tests/edge_cases/ -v
+./lineup-venv/bin/pytest tests/unit/ tests/edge_cases/ -v
 
 # Run with coverage
-./baseball-venv/bin/pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=term-missing
+./lineup-venv/bin/pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=term-missing
 
 # Run specific test file
-./baseball-venv/bin/pytest tests/unit/test_lineup_generation.py -v
+./lineup-venv/bin/pytest tests/unit/test_lineup_generation.py -v
 
 # Run visual regression tests (requires app running)
-./baseball-venv/bin/pytest tests/visual/ -v
+./lineup-venv/bin/pytest tests/visual/ -v
 ```
 
 **Test Coverage:** 94%+ (151/153 tests passing)

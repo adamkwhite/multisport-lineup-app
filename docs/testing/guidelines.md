@@ -289,27 +289,27 @@ def test_insufficient_players_error_message():
 
 ### Run all tests:
 ```bash
-./baseball-venv/bin/pytest
+./lineup-venv/bin/pytest
 ```
 
 ### Run specific test file:
 ```bash
-./baseball-venv/bin/pytest tests/unit/test_lineup_generation.py
+./lineup-venv/bin/pytest tests/unit/test_lineup_generation.py
 ```
 
 ### Run specific test:
 ```bash
-./baseball-venv/bin/pytest tests/unit/test_lineup_generation.py::test_exactly_9_players
+./lineup-venv/bin/pytest tests/unit/test_lineup_generation.py::test_exactly_9_players
 ```
 
 ### Run with coverage:
 ```bash
-./baseball-venv/bin/pytest --cov=app --cov-report=term-missing
+./lineup-venv/bin/pytest --cov=app --cov-report=term-missing
 ```
 
 ### Run only fast tests (skip visual):
 ```bash
-./baseball-venv/bin/pytest tests/unit/ tests/edge_cases/
+./lineup-venv/bin/pytest tests/unit/ tests/edge_cases/
 ```
 
 ## Best Practices Summary

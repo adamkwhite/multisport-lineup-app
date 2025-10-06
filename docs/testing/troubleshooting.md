@@ -32,7 +32,7 @@ from app import function_name
 Or run tests from project root:
 ```bash
 cd /home/adam/Code/baseball-lineup-app
-./baseball-venv/bin/pytest tests/
+./lineup-venv/bin/pytest tests/
 ```
 
 ### Problem: `ImportError: cannot import name 'function_name'`
@@ -51,7 +51,7 @@ cd /home/adam/Code/baseball-lineup-app
 **Solution**:
 ```bash
 # Run including skipped tests
-./baseball-venv/bin/pytest -v -m "not skip"
+./lineup-venv/bin/pytest -v -m "not skip"
 
 # Or remove skip decorator from test file
 ```
@@ -190,7 +190,7 @@ mock.side_effect = side_effect_function
 
 **Solution**:
 ```bash
-./baseball-venv/bin/playwright install chromium
+./lineup-venv/bin/playwright install chromium
 ```
 
 ### Problem: Screenshots always differ
@@ -259,7 +259,7 @@ page.locator("button").filter(has_text="Login")  # By role and text
 ```bash
 # Run from project root
 cd /home/adam/Code/baseball-lineup-app
-./baseball-venv/bin/pytest --cov=app --cov-report=term-missing
+./lineup-venv/bin/pytest --cov=app --cov-report=term-missing
 
 # Check coverage config in pytest.ini
 [tool:pytest]
@@ -273,10 +273,10 @@ addopts = --cov=app --cov-report=term-missing
 **Solution**:
 ```bash
 # Run all test directories
-./baseball-venv/bin/pytest tests/unit/ tests/edge_cases/ --cov=app
+./lineup-venv/bin/pytest tests/unit/ tests/edge_cases/ --cov=app
 
 # Verify all tests collected
-./baseball-venv/bin/pytest --collect-only | grep collected
+./lineup-venv/bin/pytest --collect-only | grep collected
 ```
 
 ### Problem: Specific lines show as uncovered
@@ -286,10 +286,10 @@ addopts = --cov=app --cov-report=term-missing
 **Debug**:
 ```bash
 # See which lines are missing
-./baseball-venv/bin/pytest --cov=app --cov-report=term-missing
+./lineup-venv/bin/pytest --cov=app --cov-report=term-missing
 
 # Focus on specific file
-./baseball-venv/bin/pytest --cov=app --cov-report=annotate
+./lineup-venv/bin/pytest --cov=app --cov-report=annotate
 # Check app.py,cover file
 ```
 
@@ -306,10 +306,10 @@ addopts = --cov=app --cov-report=term-missing
 **Profile Tests**:
 ```bash
 # Show slowest tests
-./baseball-venv/bin/pytest --durations=10
+./lineup-venv/bin/pytest --durations=10
 
 # Show all test durations
-./baseball-venv/bin/pytest --durations=0
+./lineup-venv/bin/pytest --durations=0
 ```
 
 **Solutions**:
@@ -373,22 +373,22 @@ pytest tests/visual/  # Slow, run separately
 
 2. **Use pytest -vv for verbose output**:
    ```bash
-   ./baseball-venv/bin/pytest tests/test_file.py::test_name -vv
+   ./lineup-venv/bin/pytest tests/test_file.py::test_name -vv
    ```
 
 3. **Use pytest -s to see print output**:
    ```bash
-   ./baseball-venv/bin/pytest tests/test_file.py -s
+   ./lineup-venv/bin/pytest tests/test_file.py -s
    ```
 
 4. **Run single test**:
    ```bash
-   ./baseball-venv/bin/pytest tests/test_file.py::TestClass::test_method -v
+   ./lineup-venv/bin/pytest tests/test_file.py::TestClass::test_method -v
    ```
 
 5. **Use pytest --pdb to debug**:
    ```bash
-   ./baseball-venv/bin/pytest tests/test_file.py --pdb
+   ./lineup-venv/bin/pytest tests/test_file.py --pdb
    ```
 
 ### Fixing Flaky Tests
@@ -429,26 +429,26 @@ def resource():
 
 ```bash
 # Run with full traceback
-./baseball-venv/bin/pytest tests/ --tb=long
+./lineup-venv/bin/pytest tests/ --tb=long
 
 # Run with short traceback
-./baseball-venv/bin/pytest tests/ --tb=short
+./lineup-venv/bin/pytest tests/ --tb=short
 
 # Run with no traceback (just failures)
-./baseball-venv/bin/pytest tests/ --tb=line
+./lineup-venv/bin/pytest tests/ --tb=line
 ```
 
 ### Pytest Options
 
 ```bash
 # Show all available options
-./baseball-venv/bin/pytest --help
+./lineup-venv/bin/pytest --help
 
 # Show fixture details
-./baseball-venv/bin/pytest --fixtures
+./lineup-venv/bin/pytest --fixtures
 
 # Show available markers
-./baseball-venv/bin/pytest --markers
+./lineup-venv/bin/pytest --markers
 ```
 
 ### Common Commands

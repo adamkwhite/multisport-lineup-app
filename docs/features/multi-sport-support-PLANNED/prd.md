@@ -361,6 +361,13 @@ class SportSelector {
 
 ## Timeline
 
+### Phase 0: Infrastructure Rebranding (Week 0)
+- Rename GitHub repository: `baseball-lineup-app` → `multisport-lineup-app`
+- Update SonarQube project key to `multisport-lineup-app`
+- Rename virtual environment: `lineup-venv` → `lineup-venv`
+- Update all deployment configurations and documentation
+- **Estimated:** 1-2 days
+
 ### Phase 1: Architecture Foundation (Week 1-2)
 - Create sport configuration system
 - Implement abstract LineupGenerator class
@@ -485,7 +492,8 @@ class SportSelector {
 
 ## Related Work
 
-**GitHub Issues:** (To be created)
+**GitHub Issues:**
+- Issue #45: Infrastructure Rebranding (Phase 0) - Rename repo, SonarQube, venv to multi-sport naming
 - Issue #TBD: Backend - Sport configuration and data models
 - Issue #TBD: Backend - Sport-specific lineup generation engines
 - Issue #TBD: Frontend - Sport selection page and routing

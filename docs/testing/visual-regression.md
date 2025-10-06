@@ -20,7 +20,7 @@ Visual regression testing uses Playwright to capture screenshots and detect unin
 Playwright should already be installed. Verify:
 
 ```bash
-./baseball-venv/bin/pip list | grep playwright
+./lineup-venv/bin/pip list | grep playwright
 ```
 
 Should show:
@@ -32,7 +32,7 @@ pytest-playwright        0.7.1
 ### 2. Install Browser Binaries
 
 ```bash
-./baseball-venv/bin/playwright install chromium
+./lineup-venv/bin/playwright install chromium
 ```
 
 This downloads the Chromium browser (~174MB).
@@ -48,7 +48,7 @@ Visual tests require the Flask app to be running:
 Or manually:
 
 ```bash
-./baseball-venv/bin/python app.py
+./lineup-venv/bin/python app.py
 ```
 
 Verify app is running at `http://localhost:5001`
@@ -60,13 +60,13 @@ Verify app is running at `http://localhost:5001`
 ### Run All Visual Tests
 
 ```bash
-./baseball-venv/bin/pytest tests/visual/ -v
+./lineup-venv/bin/pytest tests/visual/ -v
 ```
 
 Note: Tests are marked with `@pytest.mark.skip` by default. To run:
 
 ```bash
-./baseball-venv/bin/pytest tests/visual/ -v -m "not skip"
+./lineup-venv/bin/pytest tests/visual/ -v -m "not skip"
 ```
 
 Or remove the skip decorator from test files.
@@ -74,25 +74,25 @@ Or remove the skip decorator from test files.
 ### Run Specific Test File
 
 ```bash
-./baseball-venv/bin/pytest tests/visual/test_visual_login.py -v
+./lineup-venv/bin/pytest tests/visual/test_visual_login.py -v
 ```
 
 ### Run in Headed Mode (See Browser)
 
 ```bash
-./baseball-venv/bin/pytest tests/visual/ -v --headed
+./lineup-venv/bin/pytest tests/visual/ -v --headed
 ```
 
 Add `--slowmo=1000` to slow down actions:
 
 ```bash
-./baseball-venv/bin/pytest tests/visual/ -v --headed --slowmo=1000
+./lineup-venv/bin/pytest tests/visual/ -v --headed --slowmo=1000
 ```
 
 ### Run Specific Test
 
 ```bash
-./baseball-venv/bin/pytest tests/visual/test_visual_login.py::TestLoginPageVisuals::test_login_page_initial_state -v
+./lineup-venv/bin/pytest tests/visual/test_visual_login.py::TestLoginPageVisuals::test_login_page_initial_state -v
 ```
 
 ---
@@ -228,7 +228,7 @@ def test_form_focused(page: Page, base_url):
 On first run, Playwright generates baseline screenshots:
 
 ```bash
-./baseball-venv/bin/pytest tests/visual/ -v
+./lineup-venv/bin/pytest tests/visual/ -v
 ```
 
 Baselines are stored in:
@@ -260,7 +260,7 @@ git commit -m "Add visual regression test baselines"
 When UI changes are intentional, update baselines:
 
 ```bash
-./baseball-venv/bin/pytest tests/visual/ --update-snapshots
+./lineup-venv/bin/pytest tests/visual/ --update-snapshots
 ```
 
 This regenerates all baseline screenshots.
@@ -268,7 +268,7 @@ This regenerates all baseline screenshots.
 ### Updating Specific Test Baselines
 
 ```bash
-./baseball-venv/bin/pytest tests/visual/test_visual_login.py --update-snapshots
+./lineup-venv/bin/pytest tests/visual/test_visual_login.py --update-snapshots
 ```
 
 ### Viewing Diff Reports
@@ -287,7 +287,7 @@ playwright-report/
 View the report:
 
 ```bash
-./baseball-venv/bin/playwright show-report
+./lineup-venv/bin/playwright show-report
 ```
 
 ---
@@ -397,7 +397,7 @@ Verify at `http://localhost:5001`
 **Problem**: Genuine UI change or environment difference.
 
 **Solution**:
-1. View diff report: `./baseball-venv/bin/playwright show-report`
+1. View diff report: `./lineup-venv/bin/playwright show-report`
 2. If change is intentional: `pytest tests/visual/ --update-snapshots`
 3. If not intentional: Fix the UI bug
 

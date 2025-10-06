@@ -37,7 +37,7 @@ ls -la coverage.xml test-results/coverage-*/lcov.info
 
 **Run locally:**
 ```bash
-source baseball-venv/bin/activate
+source lineup-venv/bin/activate
 pytest tests/api/ -v
 npm test
 ```
