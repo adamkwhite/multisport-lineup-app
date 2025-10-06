@@ -278,9 +278,13 @@ class TestSportLoader:
         assert config is not None
         assert config.sport_id == "soccer"
         assert config.display_name == "Soccer"
-        assert len(config.positions) == 10  # 10 position types (GK, LB, CB, RB, LM, CM, RM, LW, RW, ST)
+        assert (
+            len(config.positions) == 10
+        )  # 10 position types (GK, LB, CB, RB, LM, CM, RM, LW, RW, ST)
         assert config.game_structure.type == "halves"
-        assert config.rules.total_positions == 11  # 11 players on field (CB and CM have 2 each)
+        assert (
+            config.rules.total_positions == 11
+        )  # 11 players on field (CB and CM have 2 each)
 
     def test_load_volleyball_config(self):
         """Test loading volleyball configuration."""
