@@ -707,6 +707,13 @@ def generate_lineup():
     data = request.get_json()
     players = data.get("players", [])
 
+    # Validate players input
+    if players is None:
+        return jsonify({"error": "Players array is required"}), 400
+
+    if not isinstance(players, list):
+        return jsonify({"error": "Players must be an array"}), 400
+
     if len(players) < 9:
         return jsonify({"error": "Need at least 9 players for a full lineup"}), 400
 
