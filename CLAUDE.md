@@ -95,6 +95,11 @@ python3 app.py
 pip install <package-name>
 pip freeze > requirements.txt
 
+# Pre-commit hooks (run automatically on commit)
+pre-commit run --all-files  # Run all checks manually
+pre-commit run black        # Run specific check
+pre-commit install          # Install git hooks (one-time setup)
+
 # Database operations (if applicable)
 python3 manage.py db migrate
 python3 manage.py db upgrade
@@ -233,8 +238,10 @@ heroku open
 - See `requirements.txt` for complete list
 
 ### Development Tools
-- Black, isort, flake8, mypy, bandit (configured via pre-commit hooks)
-- Playwright (visual regression tests)
+- **Pre-commit hooks**: Black, isort, Flake8 for local code quality checks
+- **CI/CD Tools**: Black, isort, flake8, mypy, bandit (GitHub Actions)
+- **Playwright**: Visual regression tests
+- **Pre-commit package**: Installed in virtual environment (`pip install pre-commit`)
 
 ## Known Issues
 
@@ -253,7 +260,20 @@ heroku open
 
 ## Recent Changes
 
-**2025-10-06**: Multi-sport lineup generator planning
+**2025-10-06 (Session 2)**: Pre-commit hooks and code quality improvements
+- Added pre-commit hooks for local code quality checks (`.pre-commit-config.yaml`)
+- Configured Black, isort, Flake8, and pre-commit-hooks for auto-fixing
+- Fixed 8 SonarQube maintainability issues (PR #55)
+  - Removed 7 unnecessary f-strings
+  - Simplified duplicate branch logic
+- Completed repository rebranding from baseball-lineup-app to multisport-lineup-app (PR #54)
+  - Updated 30+ references across 15+ files
+  - Cleaned up virtual environment from git history
+  - Updated SonarQube project configuration
+- Created DevOps template with pre-commit documentation (`~/Code/Devops/`)
+- All 175 tests passing, 96% coverage maintained
+
+**2025-10-06 (Session 1)**: Multi-sport lineup generator planning
 - Created PRD for sport-specific lineup generators (`docs/features/sport-specific-lineup-generators-PLANNED/prd.md`)
 - Created 6 GitHub issues (#48-#53) for implementation tracking
 - Established cross-referencing between PRD and issues
