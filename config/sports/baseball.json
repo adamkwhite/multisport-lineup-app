@@ -1,0 +1,96 @@
+{
+  "sport_id": "baseball",
+  "display_name": "Baseball",
+  "positions": [
+    {
+      "id": "P",
+      "name": "Pitcher",
+      "abbrev": "P",
+      "required": true,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "C",
+      "name": "Catcher",
+      "abbrev": "C",
+      "required": true,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "1B",
+      "name": "First Base",
+      "abbrev": "1B",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "2B",
+      "name": "Second Base",
+      "abbrev": "2B",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "3B",
+      "name": "Third Base",
+      "abbrev": "3B",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "SS",
+      "name": "Shortstop",
+      "abbrev": "SS",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "LF",
+      "name": "Left Field",
+      "abbrev": "LF",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "CF",
+      "name": "Center Field",
+      "abbrev": "CF",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "RF",
+      "name": "Right Field",
+      "abbrev": "RF",
+      "required": false,
+      "max_per_lineup": 1
+    }
+  ],
+  "game_structure": {
+    "type": "innings",
+    "periods": 6,
+    "period_name": "Inning"
+  },
+  "rules": {
+    "total_positions": 9,
+    "substitution_limit": null,
+    "required_positions": ["P", "C"],
+    "rotation_type": "flexible"
+  },
+  "field_diagram": {
+    "type": "diamond",
+    "width": 800,
+    "height": 800,
+    "position_coordinates": {
+      "P": {"x": 400, "y": 520},
+      "C": {"x": 400, "y": 650},
+      "1B": {"x": 580, "y": 520},
+      "2B": {"x": 480, "y": 400},
+      "3B": {"x": 220, "y": 520},
+      "SS": {"x": 320, "y": 400},
+      "LF": {"x": 180, "y": 220},
+      "CF": {"x": 400, "y": 150},
+      "RF": {"x": 620, "y": 220}
+    }
+  }
+}

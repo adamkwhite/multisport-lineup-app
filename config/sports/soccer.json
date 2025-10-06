@@ -1,0 +1,104 @@
+{
+  "sport_id": "soccer",
+  "display_name": "Soccer",
+  "positions": [
+    {
+      "id": "GK",
+      "name": "Goalkeeper",
+      "abbrev": "GK",
+      "required": true,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "LB",
+      "name": "Left Back",
+      "abbrev": "LB",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "CB",
+      "name": "Center Back",
+      "abbrev": "CB",
+      "required": false,
+      "max_per_lineup": 2
+    },
+    {
+      "id": "RB",
+      "name": "Right Back",
+      "abbrev": "RB",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "LM",
+      "name": "Left Midfield",
+      "abbrev": "LM",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "CM",
+      "name": "Center Midfield",
+      "abbrev": "CM",
+      "required": false,
+      "max_per_lineup": 2
+    },
+    {
+      "id": "RM",
+      "name": "Right Midfield",
+      "abbrev": "RM",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "LW",
+      "name": "Left Wing",
+      "abbrev": "LW",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "RW",
+      "name": "Right Wing",
+      "abbrev": "RW",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "ST",
+      "name": "Striker",
+      "abbrev": "ST",
+      "required": false,
+      "max_per_lineup": 2
+    }
+  ],
+  "game_structure": {
+    "type": "halves",
+    "periods": 2,
+    "period_name": "Half"
+  },
+  "rules": {
+    "total_positions": 11,
+    "substitution_limit": 3,
+    "required_positions": ["GK"],
+    "rotation_type": "substitution_based"
+  },
+  "field_diagram": {
+    "type": "rectangle",
+    "width": 800,
+    "height": 600,
+    "position_coordinates": {
+      "GK": {"x": 50, "y": 300},
+      "LB": {"x": 150, "y": 450},
+      "CB": {"x": 150, "y": 300},
+      "RB": {"x": 150, "y": 150},
+      "LM": {"x": 400, "y": 500},
+      "CM": {"x": 400, "y": 300},
+      "RM": {"x": 400, "y": 100},
+      "LW": {"x": 650, "y": 450},
+      "RW": {"x": 650, "y": 150},
+      "ST": {"x": 700, "y": 300}
+    }
+  }
+}
