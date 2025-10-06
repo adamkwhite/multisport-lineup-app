@@ -4,7 +4,7 @@ Get project context
 - Check git status and update local if needed
 - Read last PR from yesterday
 - Read FILE /<project>/CLAUDE.MD
-- Read FILE /<project>/readme.md 
+- Read FILE /<project>/readme.md
 - Read FILES in /<project>/docs/
 
 Do not create these files if they don't exist
@@ -20,4 +20,4 @@ Things to consider
 - Dependencies: External services, APIs, or libraries that the project relies on
 - Known Issues: Current bugs or limitations you're aware of
 
-List out the items in the to do by priority rank, starting with high priority. 
+List out the items in the to do by priority rank, starting with high priority.

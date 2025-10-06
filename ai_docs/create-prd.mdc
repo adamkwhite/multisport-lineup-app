@@ -106,7 +106,7 @@ For features suitable for rapid prototyping:
 
 1. **Prototype Requirements:** Natural language description of desired behavior
 2. **Refinement Prompts:** List of specific iterations to improve the prototype
-3. **Quality Gates:** 
+3. **Quality Gates:**
    - [ ] No exposed API keys/secrets
    - [ ] Input validation present
    - [ ] Mobile responsive

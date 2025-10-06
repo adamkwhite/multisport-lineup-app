@@ -167,7 +167,7 @@
             gap: 10px;
             margin-top: 20px;
         }
-        
+
         /* Baseball Diamond Layout */
         .baseball-diamond {
             position: relative;
@@ -178,7 +178,7 @@
             border-radius: 10px;
             border: 3px solid #654321;
         }
-        
+
         .position-card {
             position: absolute;
             background: white;
@@ -190,7 +190,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             transform: translate(-50%, -50%);
         }
-        
+
         /* Position-specific styling */
         .pitcher { top: 65%; left: 50%; background: #fff3cd; }
         .catcher { top: 90%; left: 50%; background: #d1ecf1; }
@@ -201,7 +201,7 @@
         .left-field { top: 20%; left: 20%; background: #e2e3e5; }
         .center-field { top: 15%; left: 50%; background: #e2e3e5; }
         .right-field { top: 20%; left: 80%; background: #e2e3e5; }
-        
+
         /* Home plate and bases */
         .base {
             position: absolute;
@@ -224,7 +224,7 @@
         .first-base-marker { top: 65%; left: 85%; }
         .second-base-marker { top: 35%; left: 50%; }
         .third-base-marker { top: 65%; left: 15%; }
-        
+
         /* Pitcher's mound */
         .pitchers-mound {
             position: absolute;
@@ -450,7 +450,7 @@
         .tab-content.active {
             display: block;
         }
-        
+
         /* Hamburger Menu Styles */
         .hamburger-menu {
             background: none;
@@ -602,17 +602,17 @@
                     <option value="archived">Archived Teams Only</option>
                 </select>
             </div>
-            
+
             <div id="teams-loading" class="loading">
                 <div class="loading-spinner"></div>
                 Loading teams...
             </div>
             <div id="teams-list" style="display:none;"></div>
-            
+
             <div id="games-section" style="display:none;">
                 <hr style="margin: 30px 0;">
                 <h4>Upcoming Games</h4>
-                
+
                 <!-- Game Filter -->
                 <div style="margin-bottom: 15px;">
                     <label for="game-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Show Games:</label>
@@ -622,13 +622,13 @@
                         <option value="all-states">All Games (Any State)</option>
                     </select>
                 </div>
-                
+
                 <div id="games-loading" class="loading">
                     <div class="loading-spinner"></div>
                     Loading games...
                 </div>
                 <div id="games-list" class="games-list"></div>
-                
+
                 <!-- Enhanced Continue Button -->
                 <div id="continue-section" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #e8f5e8, #f0f8f0); border-radius: 8px; border-left: 4px solid #4caf50; display: none;">
                     <div style="text-align: center;">
@@ -653,13 +653,13 @@
                 <strong>Selected Game:</strong> <span id="selected-game-name"></span><br>
                 <small id="selected-game-details"></small>
             </div>
-            
+
             <div id="players-loading" class="loading">
                 <div class="loading-spinner"></div>
                 Loading players...
             </div>
             <div id="players-list" class="players-list"></div>
-            
+
             <div style="margin-top: 20px;">
                 <button id="generate-lineup-btn" class="btn success" onclick="generateLineup()" style="display:none;">
                     Generate Lineup
@@ -674,13 +674,13 @@
         <div id="lineup-tab" class="tab-content">
             <h3 class="no-print">Fielding Positions</h3>
             <div id="lineup-display"></div>
-            
+
             <div id="bench-section" style="display:none;">
                 <hr style="margin: 30px 0;">
                 <h4>Bench Players</h4>
                 <div id="bench-list"></div>
             </div>
-            
+
             <div style="margin-top: 30px;" class="no-print">
                 <button class="btn" onclick="regenerateLineup()" id="regenerate-btn" style="display:none;">
                     🔄 Regenerate Lineup
@@ -1016,7 +1016,7 @@
 
             // Show selected tab
             document.getElementById(tabName).classList.add('active');
-            
+
             // Add active class to clicked button
             const activeButton = document.querySelector(`[onclick="openTab('${tabName}')"]`);
             if (activeButton) {
@@ -1027,11 +1027,11 @@
         async function loadTeams() {
             document.getElementById('teams-loading').style.display = 'block';
             document.getElementById('teams-list').style.display = 'none';
-            
+
             try {
                 const response = await fetch('/api/teams');
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     displayTeams(data);
                     showSuccess(`${data.teams ? data.teams.length : 0} teams loaded successfully`);
@@ -1041,14 +1041,14 @@
             } catch (error) {
                 showError('Failed to load teams: ' + error.message, loadTeams);
             }
-            
+
             document.getElementById('teams-loading').style.display = 'none';
         }
 
         function displayTeams(data) {
             // Store all teams for filtering
             allTeams = [];
-            
+
             if (data.collection && data.collection.items) {
                 data.collection.items.forEach(team => {
                     const teamData = {};
@@ -1056,10 +1056,10 @@
                     allTeams.push(teamData);
                 });
             }
-            
+
             // Apply current filter
             filterTeams();
-            
+
             document.getElementById('teams-list').style.display = 'block';
         }
 
@@ -1239,12 +1239,12 @@
 
             // Update user guidance progress - step 2 available
             updateUserGuidanceProgress(2);
-            
+
             try {
                 // Check if we need all games regardless of state
                 const gameFilter = document.getElementById('game-filter').value;
-                const url = gameFilter === 'all-states' ? 
-                    `/api/games/${teamId}?include_all_states=true` : 
+                const url = gameFilter === 'all-states' ?
+                    `/api/games/${teamId}?include_all_states=true` :
                     `/api/games/${teamId}`;
                 console.log('Fetching games from:', url);
                 const response = await fetch(url);
@@ -1260,7 +1260,7 @@
             } catch (error) {
                 showError('Failed to load games: ' + error.message);
             }
-            
+
             document.getElementById('games-loading').style.display = 'none';
         }
 
@@ -1276,12 +1276,12 @@
         async function filterGames() {
             const gamesList = document.getElementById('games-list');
             const filter = document.getElementById('game-filter').value;
-            
+
             // Clear games list safely
             while (gamesList.firstChild) {
                 gamesList.removeChild(gamesList.firstChild);
             }
-            
+
             // If "all-states" is selected and we have a team selected, reload data
             if (filter === 'all-states' && selectedTeam) {
                 document.getElementById('games-loading').style.display = 'block';
@@ -1326,7 +1326,7 @@
                 }
                 document.getElementById('games-loading').style.display = 'none';
             }
-            
+
             let filteredGames = allGames || [];
 
             // Apply filter
@@ -1335,20 +1335,20 @@
                 const sortedGames = [...filteredGames].sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
                 filteredGames = [sortedGames[0]];
             }
-            
+
             if (filteredGames.length === 0) {
                 const noGamesMsg = document.createElement('p');
                 noGamesMsg.textContent = 'No upcoming games found.';
                 gamesList.appendChild(noGamesMsg);
                 return;
             }
-            
+
             filteredGames.forEach(game => {
                 const gameDiv = document.createElement('div');
                 gameDiv.className = 'game-item';
                 const gameDate = new Date(game.starts_at).toLocaleDateString();
                 const gameTime = new Date(game.starts_at).toLocaleTimeString();
-                
+
                 // Create game name
                 const gameName = document.createElement('strong');
                 gameName.textContent = game.name;
@@ -1395,14 +1395,14 @@
             // Highlight selected game
             document.querySelectorAll('#games-list .game-item').forEach(item => item.classList.remove('selected'));
             event.target.classList.add('selected');
-            
+
             // Show enhanced continue section
             document.getElementById('continue-section').style.display = 'block';
             document.getElementById('next-to-players-btn').style.display = 'block';
 
             // Update user guidance steps
             updateUserGuidanceProgress(3);
-            
+
             // Update game info in players tab
             const selectedGameElement = allGames.find(game => game.id == gameId);
             if (selectedGameElement) {
@@ -1412,17 +1412,17 @@
                 document.getElementById('selected-game-details').textContent = `${gameDate} at ${gameTime} - ${selectedGameElement.location}`;
                 document.getElementById('selected-game-info').style.display = 'block';
             }
-            
+
             // Load availability
             const playersLoading = document.getElementById('players-loading');
             if (playersLoading) {
                 playersLoading.style.display = 'block';
             }
-            
+
             try {
                 const response = await fetch(`/api/availability/${gameId}`);
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     // Store in both legacy and enhanced state
                     attendingPlayers = data.attending_players;
@@ -1437,7 +1437,7 @@
             } catch (error) {
                 showError('Failed to load player availability: ' + error.message);
             }
-            
+
             if (playersLoading) {
                 playersLoading.style.display = 'none';
             }
@@ -1467,7 +1467,7 @@
                 playersList.appendChild(noPlayersMsg);
                 return;
             }
-            
+
             players.forEach(player => {
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'player-item';
@@ -1525,12 +1525,12 @@
                 playerDiv.appendChild(positionCheckboxes);
                 playersList.appendChild(playerDiv);
             });
-            
+
             // Add checkbox interaction logic
             document.querySelectorAll('.position-checkboxes').forEach(container => {
                 const anyCheckbox = container.querySelector('.any-position');
                 const positionCheckboxes = container.querySelectorAll('input[type="checkbox"]:not(.any-position)');
-                
+
                 // Handle "Any" checkbox
                 anyCheckbox.addEventListener('change', function() {
                     if (this.checked) {
@@ -1544,7 +1544,7 @@
                         });
                     }
                 });
-                
+
                 // Handle position checkboxes
                 positionCheckboxes.forEach(cb => {
                     cb.addEventListener('change', function() {
@@ -1556,26 +1556,26 @@
                         }
                     });
                 });
-                
+
                 // Don't check any boxes by default - no selection means "any position"
             });
-            
+
             // Show generate lineup button if we have enough players
             const generateBtn = document.getElementById('generate-lineup-btn');
             const nextBtn = document.getElementById('players-next-to-lineup-btn');
-            
+
             console.log('Button check:', {
                 generateBtn: generateBtn ? 'found' : 'NOT FOUND',
                 nextBtn: nextBtn ? 'found' : 'NOT FOUND',
                 playerCount: players.length,
                 shouldShow: players.length >= 8
             });
-            
+
             if (!generateBtn || !nextBtn) {
                 console.error('Buttons not found in DOM!');
                 return;
             }
-            
+
             if (players.length >= 8) {
                 generateBtn.style.display = 'inline-block';
                 generateBtn.textContent = `Generate Lineup (${players.length} players)`;
@@ -1595,19 +1595,19 @@
                     const checkboxContainer = document.querySelector(`.position-checkboxes[data-player-id="${player.id}"]`);
                     const checkedBoxes = checkboxContainer.querySelectorAll('input[type="checkbox"]:checked');
                     const positions = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
-                    
+
                     // Log for debugging
                     console.log(`Player ${player.name}: positions = `, positions);
-                    
+
                     return {
                         ...player,
                         position_preferences: positions.length === 0 || positions.includes(0) ? [] : positions  // Empty array means "any position"
                     };
                 });
-                
+
                 // Log the data being sent for debugging
                 console.log('Sending player data to backend:', playersWithPreferences);
-                
+
                 const response = await fetch('/api/lineup/generate', {
                     method: 'POST',
                     headers: {
@@ -1617,9 +1617,9 @@
                         players: playersWithPreferences
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     displayLineup(data);
                 } else {
@@ -1632,7 +1632,7 @@
 
         function displayLineup(data) {
             const lineupDisplay = document.getElementById('lineup-display');
-            
+
             if (data.lineups) {
                 // Display 3 lineups for 6-inning game
                 displayMultipleLineups(data);
@@ -1640,10 +1640,10 @@
                 // Legacy single lineup display
                 displaySingleLineup(data);
             }
-            
+
             // Show regenerate button
             document.getElementById('regenerate-btn').style.display = 'inline-block';
-            
+
             // Automatically switch to lineup tab
             openTab('lineup-tab');
 
@@ -1655,7 +1655,7 @@
 
         function displayMultipleLineups(data) {
             const lineupDisplay = document.getElementById('lineup-display');
-            
+
             // Clear lineup display safely
             while (lineupDisplay.firstChild) {
                 lineupDisplay.removeChild(lineupDisplay.firstChild);
@@ -1696,12 +1696,12 @@
             lineupDisplay.appendChild(headerDiv);
             lineupDisplay.appendChild(buttonDiv);
             lineupDisplay.appendChild(allLineupsDiv);
-            
+
             data.lineups.forEach((lineupData, index) => {
                 const lineupSection = document.createElement('div');
                 lineupSection.className = 'lineup-container';
                 lineupSection.style.marginBottom = '40px';
-                
+
                 // Create lineup title section
                 const titleDiv = document.createElement('div');
                 titleDiv.style.textAlign = 'center';
@@ -1753,30 +1753,30 @@
                 lineupSection.appendChild(titleDiv);
                 lineupSection.appendChild(diamond);
                 lineupSection.appendChild(benchSection);
-                
+
                 allLineupsDiv.appendChild(lineupSection);
-                
+
                 // Position class mapping
                 const positionClasses = {
                     1: 'pitcher',
                     2: 'catcher',
                     3: 'first-base',
-                    4: 'second-base', 
+                    4: 'second-base',
                     5: 'third-base',
                     6: 'shortstop',
                     7: 'left-field',
                     8: 'center-field',
                     9: 'right-field'
                 };
-                
+
                 // Display fielding positions on the diamond
                 Object.keys(lineupData.lineup).forEach(position => {
                     const positionCard = document.createElement('div');
                     const positionNum = parseInt(position);
                     const positionClass = positionClasses[positionNum] || '';
-                    
+
                     positionCard.className = `position-card ${positionClass}`;
-                    
+
                     const playerInfo = lineupData.lineup[position];
                     // Determine what name to display based on current toggle state
                     const toggle = document.getElementById('name-toggle');
@@ -1807,10 +1807,10 @@
                     positionCard.appendChild(positionNumber);
                     positionCard.appendChild(positionName);
                     positionCard.appendChild(playerNameDiv);
-                    
+
                     diamond.appendChild(positionCard);
                 });
-                
+
                 // Populate bench
                 const currentBenchList = document.getElementById(`bench-list-${index}`);
                 if (lineupData.bench.length > 0) {
@@ -1839,7 +1839,7 @@
 
         function displaySingleLineup(data) {
             const lineupDisplay = document.getElementById('lineup-display');
-            
+
             // Clear lineup display safely
             while (lineupDisplay.firstChild) {
                 lineupDisplay.removeChild(lineupDisplay.firstChild);
@@ -1871,30 +1871,30 @@
             baseballDiamond.appendChild(pitchersMound);
 
             lineupDisplay.appendChild(baseballDiamond);
-            
+
             const diamond = lineupDisplay.querySelector('.baseball-diamond');
-            
+
             // Position class mapping
             const positionClasses = {
                 1: 'pitcher',
                 2: 'catcher',
                 3: 'first-base',
-                4: 'second-base', 
+                4: 'second-base',
                 5: 'third-base',
                 6: 'shortstop',
                 7: 'left-field',
                 8: 'center-field',
                 9: 'right-field'
             };
-            
+
             // Display fielding positions on the diamond
             Object.keys(data.lineup).forEach(position => {
                 const positionCard = document.createElement('div');
                 const positionNum = parseInt(position);
                 const positionClass = positionClasses[positionNum] || '';
-                
+
                 positionCard.className = `position-card ${positionClass}`;
-                
+
                 const playerInfo = data.lineup[position];
                 // Determine what name to display based on current toggle state
                 const toggle = document.getElementById('name-toggle');
@@ -1925,15 +1925,15 @@
                 positionCard.appendChild(positionNumber);
                 positionCard.appendChild(positionName);
                 positionCard.appendChild(playerNameDiv);
-                
+
                 diamond.appendChild(positionCard);
             });
-            
+
             // Display bench players if any
             if (data.bench && data.bench.length > 0) {
                 const benchSection = document.getElementById('bench-section');
                 const benchList = document.getElementById('bench-list');
-                
+
                 // Clear bench list safely
                 while (benchList.firstChild) {
                     benchList.removeChild(benchList.firstChild);
@@ -1957,7 +1957,7 @@
                     benchPlayer.appendChild(playerNameStrong);
                     benchList.appendChild(benchPlayer);
                 });
-                
+
                 benchSection.style.display = 'block';
             }
         }

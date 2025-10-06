@@ -545,7 +545,7 @@ cleanup_old_results(results_dir, keep_count=5)  # Keep fewer results
 describe('Vibe-Generated Component', () => {
   // Essential: Test the happy path the AI intended
   test('works as described in prompt', () => {});
-  
+
   // Critical: Test what AI might have missed
   test('handles null/undefined inputs', () => {});
   test('validates all user inputs', () => {});
@@ -554,7 +554,7 @@ describe('Vibe-Generated Component', () => {
     expect(codeString).not.toMatch(/api[_-]?key/i);
     expect(codeString).not.toMatch(/password.*=.*['"]/i);
   });
-  
+
   // Verify AI didn't add unexpected features
   test('only implements specified requirements', () => {});
 });

@@ -17,7 +17,7 @@ Hobby Plan: $7/month
 - Custom domain, SSL
 - Good for 100-500 users
 
-Standard Plan: $25/month  
+Standard Plan: $25/month
 - More database storage
 - Better performance
 - Good for 500-2000 users
@@ -45,7 +45,7 @@ Standard Plan: $25/month
 Basic: $5/month
 - 1 GB RAM, good for small user base
 
-Pro: $12/month  
+Pro: $12/month
 - 2 GB RAM, better for growth
 ```
 
@@ -60,7 +60,7 @@ Pro: $12/month
 
 ### **AWS Services Needed:**
 - **Elastic Beanstalk** - app hosting
-- **RDS PostgreSQL** - managed database  
+- **RDS PostgreSQL** - managed database
 - **Route 53** - domain management
 - **CloudFront** - CDN for static files
 
@@ -109,7 +109,7 @@ Medium Setup: $100-200/month
 - Test payment integration
 - Validate product-market fit
 
-### **Phase 2: Growth (Heroku Standard - $25/month)**  
+### **Phase 2: Growth (Heroku Standard - $25/month)**
 - 100-500 paying users
 - Add monitoring, caching
 - Scale database
