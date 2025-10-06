@@ -260,6 +260,25 @@ heroku open
 
 ## Recent Changes
 
+**2025-10-06 (Session 3)**: Factory pattern implementation (Issue #50)
+- Implemented factory pattern for sport-specific lineup generators
+- Created `sports/services/lineup_factory.py` with runtime sport selection
+  - `get_lineup_generator(sport_id)` - Main factory function
+  - `get_supported_sports()` - Returns supported sports list
+  - `is_sport_supported(sport_id)` - Validation helper
+- Refactored `app.py` from 248 to 75 lines (70% reduction)
+  - Replaced hard-coded baseball logic with factory pattern
+  - Sport-agnostic `/api/lineup/generate` endpoint
+  - Proper error handling (400, 501 status codes)
+- Updated API response format (breaking change)
+  - New: `assignments` list, `bench_players` list, `period` fields
+  - Old: `lineup` dict, `bench` list, `pitcher` field
+- Changed position IDs from integers to strings ("P", "C" vs 1, 2)
+- Added 25 comprehensive factory tests
+- Updated all test fixtures and integration tests
+- All 293 tests passing, 96% coverage maintained
+- Commit: `c541c22`, pushed to main
+
 **2025-10-06 (Session 2)**: Pre-commit hooks and code quality improvements
 - Added pre-commit hooks for local code quality checks (`.pre-commit-config.yaml`)
 - Configured Black, isort, Flake8, and pre-commit-hooks for auto-fixing
@@ -289,36 +308,30 @@ heroku open
 ## Implementation Details
 
 ### Current Architecture
-- **Monolithic lineup generation**: All baseball logic in `app.py` (~400 lines)
-- **Sport configuration**: JSON-based configs loaded via `sport_loader.py`
-- **Smart position assignment**: `assign_positions_smart()` with history tracking
-- **Pitcher rotation**: Max 2 consecutive innings enforced
-
-### Planned Architecture (In Progress)
-- **Abstract base class**: `LineupGenerator` with sport-specific implementations
-- **Factory pattern**: Runtime sport selection via `get_lineup_generator(sport_id)`
-- **Shared utilities**: Common functions in `sports/utils/lineup_utils.py`
-- **Sport-specific rules**: Configurable via JSON (pitcher max innings, goalkeeper requirements, etc.)
+- **Factory pattern**: Runtime sport selection via `get_lineup_generator(sport_id)` (Issue #50 ✅)
+- **Sport-specific generators**: `BaseballLineupGenerator` with pitcher rotation (Issue #49 ✅)
+- **Abstract base class**: `LineupGenerator` with shared data models (Issue #48 ✅)
+- **Sport configuration**: JSON-based configs loaded via `sport_loader.py` (Issue #39 ✅)
+- **Smart position assignment**: Algorithm with history tracking
+- **API endpoint**: Sport-agnostic `/api/lineup/generate` with 400/501 error handling
 
 ## Next Steps
 
-**Immediate** (Issue #48):
-- Create `LineupGenerator` abstract base class
-- Implement shared data models (Player, Lineup, PositionAssignment)
-- Build common utility functions (assign_positions_smart, history tracking)
-- 35+ unit tests with 95%+ coverage
+**Immediate** (Issues #51-#52):
+- Implement `SoccerLineupGenerator` with goalkeeper requirements (Issue #51)
+- Implement `VolleyballLineupGenerator` with rotation rules (Issue #52)
+- Add sport-specific configuration rules (Issue #53)
 
-**Short-term** (Issues #49-#53):
-- Extract baseball logic into `BaseballLineupGenerator`
-- Implement `SoccerLineupGenerator` with goalkeeper rules
-- Implement `VolleyballLineupGenerator` with rotation
-- Create factory for runtime sport selection
-- Add sport-specific configuration rules
+**Short-term**:
+- Update frontend UI for multi-sport selection
+- Add sport selector to lineup generation form
+- Update visual field diagrams for soccer/volleyball
 
 **Medium-term**:
-- Integrate generators into app.py
-- Update UI for multi-sport selection
-- End-to-end testing for all 3 sports
+- Multi-user/multi-tenant architecture
+- Payment integration (subscription-based)
+- Advanced lineup optimization algorithms
+- Season-long statistics tracking
 
 ## Roadmap
 
@@ -330,9 +343,14 @@ heroku open
 - ✅ Position preference handling
 - ✅ Sport configuration backend (Issue #39)
 - ✅ CI/CD pipeline with SonarQube
+- ✅ Abstract LineupGenerator base class (Issue #48)
+- ✅ BaseballLineupGenerator implementation (Issue #49)
+- ✅ Factory pattern for runtime sport selection (Issue #50)
 
 ### In Progress
-- 🔄 Multi-sport lineup generators (Issues #48-#53)
+- 🔄 SoccerLineupGenerator (Issue #51)
+- 🔄 VolleyballLineupGenerator (Issue #52)
+- 🔄 Sport-specific configuration rules (Issue #53)
 
 ### Planned
 - 🔲 Multi-user/multi-tenant architecture
