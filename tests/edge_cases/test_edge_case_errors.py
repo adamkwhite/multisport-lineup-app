@@ -82,9 +82,9 @@ class TestMalformedJSONEdgeCases:
         """Test lineup generation with null players array"""
         response = client.post("/api/lineup/generate", json={"players": None})
 
-        # Currently crashes with TypeError - returns 500
-        # TODO: Add input validation to return 400 instead
-        assert response.status_code == 500
+        # Input validation properly returns 400
+        assert response.status_code == 400
+        assert response.json["error"] == "Players array is required"
 
     def test_missing_players_key(self, client):
         """Test lineup generation with missing players key"""
@@ -96,9 +96,9 @@ class TestMalformedJSONEdgeCases:
         """Test lineup generation with players as non-array"""
         response = client.post("/api/lineup/generate", json={"players": "not_an_array"})
 
-        # Currently crashes with AttributeError - returns 500
-        # TODO: Add input validation to return 400 instead
-        assert response.status_code == 500
+        # Input validation properly returns 400
+        assert response.status_code == 400
+        assert response.json["error"] == "Players must be an array"
 
     def test_player_missing_required_fields(self, client):
         """Test lineup generation with players missing required fields"""
