@@ -1,0 +1,72 @@
+{
+  "sport_id": "volleyball",
+  "display_name": "Volleyball",
+  "positions": [
+    {
+      "id": "OH",
+      "name": "Outside Hitter",
+      "abbrev": "OH",
+      "required": false,
+      "max_per_lineup": 2
+    },
+    {
+      "id": "MB",
+      "name": "Middle Blocker",
+      "abbrev": "MB",
+      "required": false,
+      "max_per_lineup": 2
+    },
+    {
+      "id": "S",
+      "name": "Setter",
+      "abbrev": "S",
+      "required": true,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "OPP",
+      "name": "Opposite",
+      "abbrev": "OPP",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "L",
+      "name": "Libero",
+      "abbrev": "L",
+      "required": false,
+      "max_per_lineup": 1
+    },
+    {
+      "id": "DS",
+      "name": "Defensive Specialist",
+      "abbrev": "DS",
+      "required": false,
+      "max_per_lineup": 1
+    }
+  ],
+  "game_structure": {
+    "type": "sets",
+    "periods": 3,
+    "period_name": "Set"
+  },
+  "rules": {
+    "total_positions": 6,
+    "substitution_limit": 6,
+    "required_positions": ["S"],
+    "rotation_type": "rotation_based"
+  },
+  "field_diagram": {
+    "type": "court",
+    "width": 600,
+    "height": 400,
+    "position_coordinates": {
+      "OH": {"x": 150, "y": 100},
+      "MB": {"x": 300, "y": 100},
+      "S": {"x": 450, "y": 100},
+      "OPP": {"x": 450, "y": 300},
+      "L": {"x": 300, "y": 300},
+      "DS": {"x": 150, "y": 300}
+    }
+  }
+}
