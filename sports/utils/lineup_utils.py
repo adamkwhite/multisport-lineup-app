@@ -60,17 +60,13 @@ def assign_positions_smart(
 
     # Calculate position scarcity (positions with fewest candidates first)
     position_scarcity = _calculate_position_scarcity(
-        remaining_positions, remaining_players, pitcher_pool
+        remaining_positions, remaining_players, None
     )
 
     # Assign positions in order of scarcity
     for position, _ in position_scarcity:
         # Get candidates who can play this position
-        if position.id == "P" and pitcher_pool:
-            # Special handling for pitcher position
-            candidates = [p for p in remaining_players if p in pitcher_pool]
-        else:
-            candidates = _get_candidates_for_position(position, remaining_players)
+        candidates = _get_candidates_for_position(position, remaining_players)
 
         # Prioritize must-play players
         must_play_candidates = [p for p in candidates if p in must_play_players]
@@ -82,14 +78,47 @@ def assign_positions_smart(
             key=_create_candidate_sort_key(position.id, player_position_history)
         )
 
-        if candidates:
-            chosen_player = candidates[0]
-            assignment = PositionAssignment(
-                player=chosen_player,
-                position=position.id,
+        if not candidates:
+            raise ValueError(
+                f"No candidates available for position {position.name} ({position.id}). "
+                f"Remaining players: {len(remaining_players)}."
             )
-            assignments.append(assignment)
-            remaining_players.remove(chosen_player)
+
+        # Try candidates in order until we find one that doesn't block future assignments
+        # Skip look-ahead if we have pitcher_pool constraints (too complex to validate)
+        chosen_player = None
+        if pitcher_pool:
+            # With pitcher_pool, just use first candidate (greedy)
+            chosen_player = candidates[0]
+        else:
+            # Without pitcher_pool, use look-ahead to avoid blocking
+            for candidate in candidates:
+                # Temporarily assign this candidate
+                temp_remaining = [p for p in remaining_players if p.id != candidate.id]
+                temp_remaining_positions = [
+                    pos for pos, _ in position_scarcity
+                    if pos.id != position.id
+                ]
+
+                # Check if remaining positions can still be filled
+                remaining_position_ids = [p.id for p in temp_remaining_positions]
+                if not remaining_position_ids or can_fill_all_positions(
+                    temp_remaining, remaining_position_ids
+                ):
+                    # This assignment won't block future positions
+                    chosen_player = candidate
+                    break
+
+            if not chosen_player:
+                # All candidates would block future positions - use first one anyway
+                chosen_player = candidates[0]
+
+        assignment = PositionAssignment(
+            player=chosen_player,
+            position=position.id,
+        )
+        assignments.append(assignment)
+        remaining_players.remove(chosen_player)
 
     return assignments
 
