@@ -4,7 +4,7 @@
 
 The Baseball Lineup App integrates with SonarQube for continuous code quality monitoring. SonarQube automatically scans code on every PR and push to main.
 
-**SonarQube Dashboard:** <YOUR_SONARQUBE_URL>/dashboard?id=baseball-lineup-app
+**SonarQube Dashboard:** <YOUR_SONARQUBE_URL>/dashboard?id=multisport-lineup-app
 
 ## Quality Metrics
 
@@ -56,7 +56,7 @@ npm test -- --coverage
 
 ### sonar-project.properties
 ```properties
-sonar.projectKey=baseball-lineup-app
+sonar.projectKey=multisport-lineup-app
 sonar.python.version=3.12
 sonar.python.coverage.reportPaths=coverage.xml
 sonar.sources=.
@@ -68,5 +68,5 @@ sonar.exclusions=**/*test*/**,**/__pycache__/**,lineup-venv/**,venv/**,htmlcov/*
 - `SONAR_HOST_URL` - <YOUR_SONARQUBE_URL>
 
 ## Resources
-- **Dashboard:** <YOUR_SONARQUBE_URL>/dashboard?id=baseball-lineup-app
+- **Dashboard:** <YOUR_SONARQUBE_URL>/dashboard?id=multisport-lineup-app
 - **Troubleshooting:** [sonarqube-troubleshooting.md](sonarqube-troubleshooting.md)

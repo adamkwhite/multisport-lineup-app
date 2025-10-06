@@ -157,7 +157,7 @@ python3 manage.py db upgrade
 ## Project Structure
 
 ```
-baseball-lineup-app/
+multisport-lineup-app/
 ├── ai_docs/               # AI-specific documentation (PRD workflow, etc.)
 ├── config/                # Configuration files
 │   └── sports/            # Sport-specific JSON configs (baseball, soccer, volleyball)
@@ -198,7 +198,7 @@ baseball-lineup-app/
 heroku login
 
 # Create new app
-heroku create baseball-lineup-app
+heroku create multisport-lineup-app
 
 # Set environment variables
 heroku config:set TEAMSNAP_CLIENT_ID=your_client_id

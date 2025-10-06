@@ -2,7 +2,7 @@
 
 ## Overview
 
-The baseball-lineup-app uses a **3-stage GitHub Actions pipeline** for comprehensive PR validation. Each stage builds on the previous, providing fast feedback while ensuring code quality.
+The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for comprehensive PR validation. Each stage builds on the previous, providing fast feedback while ensuring code quality.
 
 **Pipeline File:** `.github/workflows/pr-validation.yml`
 
@@ -264,7 +264,7 @@ git commit -m "Fix import sorting"
 - Review CI logs for differences
 
 ### SonarQube quality gate fails
-- View details: http://44.206.255.230:9000/dashboard?id=baseball-lineup-app
+- View details: http://44.206.255.230:9000/dashboard?id=multisport-lineup-app
 - Address reported issues
 - Re-run pipeline
 

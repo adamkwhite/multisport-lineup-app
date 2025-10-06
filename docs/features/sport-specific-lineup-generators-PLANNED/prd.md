@@ -735,7 +735,7 @@ def register_generator(sport_id: str, generator_class: Type[LineupGenerator]):
 
 **References:**
 - Existing lineup logic: `app.py:250-600` (to be extracted)
-- GitHub Issues: [#48](https://github.com/adamloec/baseball-lineup-app/issues/48), [#49](https://github.com/adamloec/baseball-lineup-app/issues/49), [#50](https://github.com/adamloec/baseball-lineup-app/issues/50), [#51](https://github.com/adamloec/baseball-lineup-app/issues/51), [#52](https://github.com/adamloec/baseball-lineup-app/issues/52), [#53](https://github.com/adamloec/baseball-lineup-app/issues/53)
+- GitHub Issues: [#48](https://github.com/adamkwhite/multisport-lineup-app/issues/48), [#49](https://github.com/adamkwhite/multisport-lineup-app/issues/49), [#50](https://github.com/adamkwhite/multisport-lineup-app/issues/50), [#51](https://github.com/adamkwhite/multisport-lineup-app/issues/51), [#52](https://github.com/adamkwhite/multisport-lineup-app/issues/52), [#53](https://github.com/adamkwhite/multisport-lineup-app/issues/53)
 - Sport configurations: `config/sports/*.json`
 - Sport config models: `sports/models/sport_config.py`
 

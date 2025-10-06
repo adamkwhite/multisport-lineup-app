@@ -31,7 +31,7 @@ from app import function_name
 
 Or run tests from project root:
 ```bash
-cd /home/adam/Code/baseball-lineup-app
+cd /home/adam/Code/multisport-lineup-app
 ./lineup-venv/bin/pytest tests/
 ```
 
@@ -258,7 +258,7 @@ page.locator("button").filter(has_text="Login")  # By role and text
 **Solution**:
 ```bash
 # Run from project root
-cd /home/adam/Code/baseball-lineup-app
+cd /home/adam/Code/multisport-lineup-app
 ./lineup-venv/bin/pytest --cov=app --cov-report=term-missing
 
 # Check coverage config in pytest.ini

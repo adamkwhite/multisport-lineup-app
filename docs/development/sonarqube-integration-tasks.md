@@ -18,7 +18,7 @@
 ## Tasks
 
 - [x] 1.0 Complete Basic Configuration Setup
-  - [x] 1.1 Create sonar-project.properties with baseball-lineup-app, Python 3.12, and appropriate exclusions
+  - [x] 1.1 Create sonar-project.properties with multisport-lineup-app, Python 3.12, and appropriate exclusions
   - [x] 1.2 Add .scannerwork/ directory to .gitignore
   - [x] 1.3 Add 11 comprehensive SonarQube badges to README.md (Quality Gate, Coverage, Bugs, Vulnerabilities, Code Smells, Security Rating, Maintainability Rating, Reliability Rating, Lines of Code, Duplicated Lines, Technical Debt)
   - [x] 1.4 Update README.md badge URLs from placeholder 'sonarqube.yourdomain.com' to actual SonarQube instance URL (<YOUR_SONARQUBE_URL>)
@@ -45,7 +45,7 @@
 
 - [x] 4.0 Configure SonarQube Project and Quality Gates
   - [x] 4.1 Verify SONAR_TOKEN and SONAR_HOST_URL secrets exist in GitHub repository settings
-  - [x] 4.2 Create baseball-lineup-app project in SonarQube Community instance
+  - [x] 4.2 Create multisport-lineup-app project in SonarQube Community instance
   - [x] 4.3 Configure quality gate thresholds matching claude-memory-mcp standards
   - [x] 4.4 Set coverage threshold for new code (80%+ for Python, 85%+ for JavaScript)
   - [x] 4.5 Enable security vulnerability detection and configure security hotspot review

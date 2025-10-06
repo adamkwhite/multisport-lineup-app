@@ -101,7 +101,7 @@ The Baseball Lineup App project currently lacks automated code quality monitorin
 
 ### SonarQube Configuration
 ```properties
-sonar.projectKey=baseball-lineup-app
+sonar.projectKey=multisport-lineup-app
 sonar.python.version=3.12
 sonar.python.coverage.reportPaths=coverage.xml
 sonar.sources=.
@@ -152,7 +152,7 @@ Add comprehensive SonarQube badges to README.md following claude-memory-mcp patt
 ## Timeline
 
 ### Phase 1: Basic Integration (Day 1) ✅
-- ✅ Create sonar-project.properties with baseball-lineup-app configuration
+- ✅ Create sonar-project.properties with multisport-lineup-app configuration
 - ✅ Add .scannerwork/ to .gitignore
 - ✅ Add comprehensive SonarQube badges to README.md (11 badges)
 - ⏳ Set up GitHub Actions workflow
