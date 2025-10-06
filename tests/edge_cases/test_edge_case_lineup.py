@@ -12,10 +12,14 @@ sys.path.insert(
     0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
-from tests.fixtures.player_data import (create_catchers,
-                                        create_flexible_players,
-                                        create_infielders, create_outfielders,
-                                        create_pitchers, create_player)
+from tests.fixtures.player_data import (
+    create_catchers,
+    create_flexible_players,
+    create_infielders,
+    create_outfielders,
+    create_pitchers,
+    create_player,
+)
 
 
 class TestLineupGenerationEdgeCases:
