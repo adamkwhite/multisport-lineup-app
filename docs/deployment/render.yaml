@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: baseball-lineup-app
+    name: multisport-lineup-app
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
@@ -11,7 +11,7 @@ services:
       - key: RENDER
         value: "true"
       - key: RENDER_SERVICE_NAME
-        value: baseball-lineup-app
+        value: multisport-lineup-app
       # The following variables need to be set in Render dashboard:
       # TEAMSNAP_CLIENT_ID - Your TeamSnap OAuth client ID
       # TEAMSNAP_CLIENT_SECRET - Your TeamSnap OAuth client secret

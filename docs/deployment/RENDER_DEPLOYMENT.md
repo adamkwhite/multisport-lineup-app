@@ -1,7 +1,7 @@
 # Render Deployment Guide
 
 ## Overview
-This guide covers deploying the Baseball Lineup Manager to Render's free tier.
+This guide covers deploying the Multi-Sport Lineup Manager to Render's free tier.
 
 ## Prerequisites
 - GitHub repository with your code
@@ -29,7 +29,7 @@ This guide covers deploying the Baseball Lineup Manager to Render's free tier.
 2. Click "New" → "Web Service"
 3. Connect your GitHub repository
 4. Configure:
-   - **Name**: `baseball-lineup-app` (or your preferred name)
+   - **Name**: `multisport-lineup-app` (or your preferred name)
    - **Environment**: `Python`
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `gunicorn app:app`
@@ -57,7 +57,7 @@ print(secrets.token_hex(32))
 ## Step 4: Update TeamSnap Redirect URI
 
 After your app is deployed, update your TeamSnap OAuth application:
-1. Get your app URL from Render (e.g., `https://baseball-lineup-app.onrender.com`)
+1. Get your app URL from Render (e.g., `https://multisport-lineup-app.onrender.com`)
 2. Update redirect URI to: `https://your-app-name.onrender.com/auth/callback`
 
 ## Step 5: Test Your Deployment

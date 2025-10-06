@@ -167,11 +167,11 @@ module.exports = {
   testMatch: ['**/tests/**/*.test.js'],
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
-    '<rootDir>/baseball-venv/',
+    '<rootDir>/lineup-venv/',
     '<rootDir>/static/',
     '<rootDir>/templates/'
   ],
-  modulePathIgnorePatterns: ['<rootDir>/baseball-venv/'],
+  modulePathIgnorePatterns: ['<rootDir>/lineup-venv/'],
   roots: ['<rootDir>/tests/']  // Only look for tests in tests/ directory
 };
 ```

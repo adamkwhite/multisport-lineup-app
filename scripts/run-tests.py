@@ -16,7 +16,7 @@ def run_tests_with_timestamped_results():
     # Backend tests with timestamped coverage
     backend_coverage_dir = results_dir / f'backend-coverage-{timestamp}'
     subprocess.run([
-        './baseball-venv/bin/pytest',
+        './lineup-venv/bin/pytest',
         'tests/api/',
         '--cov=app',
         '--cov-report=html:' + str(backend_coverage_dir),

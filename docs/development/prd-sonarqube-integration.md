@@ -67,7 +67,7 @@ The Baseball Lineup App project currently lacks automated code quality monitorin
 3. **Project Structure Compatibility**
    - Work with root-level app.py structure (not src/ directory)
    - Handle Flask application patterns
-   - Exclude virtual environment (baseball-venv/), test results, and coverage directories
+   - Exclude virtual environment (lineup-venv/), test results, and coverage directories
    - Exclude documentation (docs/), development tasks (ai-dev-tasks/), and scripts
    - Exclude node_modules and frontend build artifacts
 
@@ -105,7 +105,7 @@ sonar.projectKey=baseball-lineup-app
 sonar.python.version=3.12
 sonar.python.coverage.reportPaths=coverage.xml
 sonar.sources=.
-sonar.exclusions=**/*test*/**,**/__pycache__/**,baseball-venv/**,venv/**,htmlcov/**,test-results/**,scripts/**,docs/**,ai-dev-tasks/**,node_modules/**
+sonar.exclusions=**/*test*/**,**/__pycache__/**,lineup-venv/**,venv/**,htmlcov/**,test-results/**,scripts/**,docs/**,ai-dev-tasks/**,node_modules/**
 ```
 
 ### README Badge Configuration

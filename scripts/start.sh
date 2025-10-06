@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Baseball Lineup Manager Start Script
-echo "🚀 Starting Baseball Lineup Manager..."
+# Multi-Sport Lineup Manager Start Script
+echo "🚀 Starting Multi-Sport Lineup Manager..."
 
 # Check if .env exists
 if [ ! -f ".env" ]; then
@@ -32,4 +32,4 @@ echo "🌐 Starting Flask app on https://localhost:$PORT"
 echo "⚠️  Your browser will show a security warning for self-signed certificate"
 echo "📝 Press Ctrl+C to stop"
 
-./baseball-venv/bin/python app.py
+./lineup-venv/bin/python app.py

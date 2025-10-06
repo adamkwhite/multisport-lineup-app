@@ -179,7 +179,7 @@ venv/bin/flake8 app.py tests/ --max-line-length=100 --extend-ignore=E203,W503,E4
 ### Tests (Stage 2)
 ```bash
 # Python tests
-./baseball-venv/bin/pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=term-missing
+./lineup-venv/bin/pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=term-missing
 
 # JavaScript tests
 npm test -- --coverage

@@ -43,7 +43,7 @@ The Baseball Lineup App integrates with SonarQube for continuous code quality mo
 
 ### Python Tests
 ```bash
-source baseball-venv/bin/activate
+source lineup-venv/bin/activate
 pytest tests/api/ --cov=app --cov-report=xml --cov-report=html
 ```
 
@@ -60,7 +60,7 @@ sonar.projectKey=baseball-lineup-app
 sonar.python.version=3.12
 sonar.python.coverage.reportPaths=coverage.xml
 sonar.sources=.
-sonar.exclusions=**/*test*/**,**/__pycache__/**,baseball-venv/**,venv/**,htmlcov/**,test-results/**,scripts/**,docs/**,ai-dev-tasks/**,node_modules/**,*.pem,*.png,*.jpg,*.jpeg,*.gif
+sonar.exclusions=**/*test*/**,**/__pycache__/**,lineup-venv/**,venv/**,htmlcov/**,test-results/**,scripts/**,docs/**,ai-dev-tasks/**,node_modules/**,*.pem,*.png,*.jpg,*.jpeg,*.gif
 ```
 
 ### GitHub Secrets
