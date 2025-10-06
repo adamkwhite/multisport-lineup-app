@@ -215,7 +215,7 @@ These issues were identified in PR review feedback and need to be addressed to m
 
 ## References
 
-- PR Review Feedback: [baseball-lineup-app/pull/31](https://github.com/adamkwhite/baseball-lineup-app/pull/31)
-- GitHub Issues: [#33](https://github.com/adamkwhite/baseball-lineup-app/issues/33), [#34](https://github.com/adamkwhite/baseball-lineup-app/issues/34), [#35](https://github.com/adamkwhite/baseball-lineup-app/issues/35)
+- PR Review Feedback: [multisport-lineup-app/pull/31](https://github.com/adamkwhite/multisport-lineup-app/pull/31)
+- GitHub Issues: [#33](https://github.com/adamkwhite/multisport-lineup-app/issues/33), [#34](https://github.com/adamkwhite/multisport-lineup-app/issues/34), [#35](https://github.com/adamkwhite/multisport-lineup-app/issues/35)
 - Pytest Best Practices: https://docs.pytest.org/en/stable/goodpractices.html
 - Project Testing Guidelines: `docs/testing/guidelines.md`

@@ -517,9 +517,9 @@ Set up SonarQube notifications for:
 ## Complete Example
 
 For a full working example, see:
-- **Repository:** https://github.com/adamkwhite/baseball-lineup-app
-- **PR:** https://github.com/adamkwhite/baseball-lineup-app/pull/28
-- **SonarQube Dashboard:** <YOUR_SONARQUBE_URL>/dashboard?id=baseball-lineup-app
+- **Repository:** https://github.com/adamkwhite/multisport-lineup-app
+- **PR:** https://github.com/adamkwhite/multisport-lineup-app/pull/28
+- **SonarQube Dashboard:** <YOUR_SONARQUBE_URL>/dashboard?id=multisport-lineup-app
 
 ---
 

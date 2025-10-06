@@ -28,7 +28,7 @@
 
 ### Phase 4: SonarQube Project Setup ✅ (Complete)
 - [x] Add SONAR_TOKEN and SONAR_HOST_URL secrets to GitHub
-- [x] Create baseball-lineup-app project in SonarQube at http://44.206.255.230:9000
+- [x] Create multisport-lineup-app project in SonarQube at http://44.206.255.230:9000
 - [x] Configure quality gate thresholds
 - [x] Set coverage thresholds (94%+ Python, JavaScript coverage tracked)
 - [x] Enable security vulnerability detection

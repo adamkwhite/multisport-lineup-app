@@ -1,7 +1,7 @@
 {
-  "name": "baseball-lineup-app",
+  "name": "multisport-lineup-app",
   "version": "1.0.0",
-  "description": "Baseball team lineup management application with comprehensive testing infrastructure",
+  "description": "Multi-sport team lineup management application with comprehensive testing infrastructure",
   "main": "app.py",
   "scripts": {
     "test": "jest",

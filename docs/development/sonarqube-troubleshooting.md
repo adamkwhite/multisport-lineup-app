@@ -17,7 +17,7 @@ gh run view <RUN_ID> --log-failed
 
 ### Quality Gate Fails
 
-1. View results: <YOUR_SONARQUBE_URL>/dashboard?id=baseball-lineup-app
+1. View results: <YOUR_SONARQUBE_URL>/dashboard?id=multisport-lineup-app
 2. Common failures:
    - Coverage too low - add tests
    - New bugs - fix code issues
@@ -46,7 +46,7 @@ npm test
 
 **Test badge endpoint:**
 ```bash
-curl -I "<YOUR_SONARQUBE_URL>/api/project_badges/measure?project=baseball-lineup-app&metric=alert_status"
+curl -I "<YOUR_SONARQUBE_URL>/api/project_badges/measure?project=multisport-lineup-app&metric=alert_status"
 ```
 
 Should return 200 OK
