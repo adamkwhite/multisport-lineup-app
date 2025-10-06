@@ -61,6 +61,16 @@ The app allows you to:
 - Configure position rotation strategies
 - Save and reuse lineup templates
 
+## CI/CD Pipeline
+
+The project uses a **3-stage GitHub Actions pipeline** for automated quality assurance:
+
+1. **Quick Validation** (15-30s) - Black, isort, Flake8
+2. **Tests & SonarQube** (2-3 min) - Unit tests, coverage, quality gate
+3. **Claude Review** (3-5 min) - AI-powered code review
+
+**Documentation:** See `docs/development/ci-cd-pipeline.md` for full details.
+
 ## Testing
 
 The project has comprehensive test coverage (94%+):

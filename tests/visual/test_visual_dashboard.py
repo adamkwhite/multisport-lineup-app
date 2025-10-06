@@ -24,7 +24,9 @@ class TestDashboardVisuals:
         authenticated_page.wait_for_load_state("networkidle")
 
         # Take screenshot
-        expect(authenticated_page).to_have_screenshot("dashboard-authenticated-demo.png")
+        expect(authenticated_page).to_have_screenshot(
+            "dashboard-authenticated-demo.png"
+        )
 
     def test_dashboard_team_selection_visible(self, authenticated_page: Page):
         """Test that team selection is visible on authenticated dashboard"""
