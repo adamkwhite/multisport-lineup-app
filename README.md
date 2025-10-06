@@ -1,4 +1,4 @@
-# Baseball Lineup Manager
+# Multi-Sport Lineup Manager
 
 [![Quality Gate Status](http://44.206.255.230:9000/api/project_badges/measure?project=multisport-lineup-app&metric=alert_status)](http://44.206.255.230:9000/dashboard?id=multisport-lineup-app)
 [![Coverage](http://44.206.255.230:9000/api/project_badges/measure?project=multisport-lineup-app&metric=coverage)](http://44.206.255.230:9000/dashboard?id=multisport-lineup-app)
