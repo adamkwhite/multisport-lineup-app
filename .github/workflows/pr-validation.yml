@@ -86,7 +86,7 @@ jobs:
         id: python-tests
         # Explicitly fail on test failure (no continue-on-error, no || true)
         run: |
-          pytest tests/unit/ tests/edge_cases/ --cov=app --cov-report=xml:coverage.xml --cov-report=term-missing
+          pytest tests/unit/ tests/edge_cases/ --cov=app --cov=sports --cov-report=xml:coverage.xml --cov-report=term-missing
         continue-on-error: false
 
       - name: Run JavaScript tests with coverage
