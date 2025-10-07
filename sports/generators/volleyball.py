@@ -82,7 +82,7 @@ class VolleyballLineupGenerator(LineupGenerator):
 
             # Fill positions for this set
             assignments, bench_players = self._generate_set_lineup(
-                players, must_play_players, position_history, set_num
+                players, must_play_players, position_history
             )
 
             # Update bench tracker
@@ -113,7 +113,6 @@ class VolleyballLineupGenerator(LineupGenerator):
         players: List[Player],
         must_play_players: List[Player],
         position_history: Dict,
-        set_num: int,
     ) -> tuple[List[PositionAssignment], List[Player]]:
         """
         Generate lineup for a single set.
