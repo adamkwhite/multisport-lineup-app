@@ -181,7 +181,7 @@ class TestFactoryIntegration:
         assert gen1 is not gen2
 
         # But same type
-        assert type(gen1) == type(gen2)
+        assert type(gen1) is type(gen2)
 
     def test_generator_inheritance_chain(self):
         """Test that generators properly inherit from base class."""
