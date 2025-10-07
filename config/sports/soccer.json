@@ -82,7 +82,12 @@
     "total_positions": 11,
     "substitution_limit": 3,
     "required_positions": ["GK"],
-    "rotation_type": "substitution_based"
+    "rotation_type": "substitution_based",
+    "generation_rules": {
+      "substitution_limit": 3,
+      "goalkeeper_required": true,
+      "min_players_required": 11
+    }
   },
   "field_diagram": {
     "type": "rectangle",

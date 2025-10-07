@@ -54,7 +54,12 @@
     "total_positions": 6,
     "substitution_limit": 6,
     "required_positions": ["S"],
-    "rotation_type": "rotation_based"
+    "rotation_type": "rotation_based",
+    "generation_rules": {
+      "rotation_required": true,
+      "min_players_required": 6,
+      "libero_restrictions": false
+    }
   },
   "field_diagram": {
     "type": "court",

@@ -37,10 +37,13 @@ class SportRules:
     substitution_limit: Optional[int] = None
     required_positions: Optional[List[str]] = None
     rotation_type: str = "flexible"  # "flexible", "substitution_based", "rotation_based"
+    generation_rules: Optional[Dict] = None
 
     def __post_init__(self):
         if self.required_positions is None:
             self.required_positions = []
+        if self.generation_rules is None:
+            self.generation_rules = {}
 
 
 @dataclass

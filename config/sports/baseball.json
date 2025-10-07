@@ -75,7 +75,12 @@
     "total_positions": 9,
     "substitution_limit": null,
     "required_positions": ["P", "C"],
-    "rotation_type": "flexible"
+    "rotation_type": "flexible",
+    "generation_rules": {
+      "pitcher_max_consecutive_innings": 2,
+      "min_players_required": 9,
+      "position_rotation_encouraged": true
+    }
   },
   "field_diagram": {
     "type": "diamond",

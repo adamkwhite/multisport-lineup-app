@@ -36,10 +36,10 @@ class BaseballLineupGenerator(LineupGenerator):
         """
         super().__init__(sport_config)
 
-        # Get pitcher max innings from config (default to 2)
-        self.pitcher_max_innings = 2
-        if hasattr(sport_config, "rules") and hasattr(sport_config.rules, "pitcher_max_consecutive_innings"):
-            self.pitcher_max_innings = sport_config.rules.pitcher_max_consecutive_innings
+        # Get pitcher max innings from config generation_rules (default to 2)
+        self.pitcher_max_innings = sport_config.rules.generation_rules.get(
+            "pitcher_max_consecutive_innings", 2
+        )
 
     def generate(
         self,
