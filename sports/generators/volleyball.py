@@ -37,6 +37,14 @@ class VolleyballLineupGenerator(LineupGenerator):
         """
         super().__init__(sport_config)
 
+        # Get rotation rules from config generation_rules
+        self.rotation_required = sport_config.rules.generation_rules.get(
+            "rotation_required", True
+        )
+        self.libero_restrictions = sport_config.rules.generation_rules.get(
+            "libero_restrictions", False
+        )
+
     def generate(
         self,
         players: List[Player],

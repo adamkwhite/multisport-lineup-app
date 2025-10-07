@@ -116,6 +116,7 @@ def _parse_config(data: dict) -> SportConfig:
         substitution_limit=data["rules"].get("substitution_limit"),
         required_positions=data["rules"].get("required_positions", []),
         rotation_type=data["rules"].get("rotation_type", "flexible"),
+        generation_rules=data["rules"].get("generation_rules", {}),
     )
 
     # Parse field diagram
