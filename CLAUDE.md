@@ -279,6 +279,31 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 
 ## Recent Changes
 
+**2025-10-07 (Session 5)**: Infrastructure improvements and workflow enforcement
+- **Fixed demo mode bug** (commit 41e6827 - direct to main, later corrected)
+  - Changed position checkbox values from numeric to position IDs ('P', 'C', '1B' vs 1, 2, 3)
+  - Fixed "Cannot convert undefined or null to object" error in lineup generation
+  - Updated `generateLineup()` JS to use string values instead of parseInt()
+- **Completed Issue #53**: Sport-specific generation rules configuration (PR #64)
+  - Added `generation_rules` to all 3 sport configs (baseball, volleyball, soccer)
+  - Updated `SportRules` dataclass with `generation_rules: Optional[Dict]` field
+  - Generators now read rules from config instead of hardcoding (pitcher_max_innings, rotation_required, etc.)
+  - Created 20 comprehensive tests in `tests/unit/test_generation_rules.py`
+  - All 336 tests passing, 96%+ coverage maintained
+- **Infrastructure PR #65**: CI coverage and code quality fixes
+  - Added `sports/` module to CI coverage tracking (`--cov=app --cov=sports`)
+  - Updated SonarQube to analyze sports/ directory
+  - Fixed 6 code quality violations (type hints, unused params, cognitive complexity, etc.)
+  - SonarQube quality gate: 95%+ coverage, 0 violations
+- **Workflow enforcement** (PRs #67 and DevOps #1)
+  - Added mandatory "🚨 CRITICAL: Branch Workflow" section to both CLAUDE.md files
+  - Explicitly forbids direct commits to main - NO EXCEPTIONS
+  - Updated global template in `~/Code/Devops/CLAUDE.md`
+- **Created Issue #66**: Frontend multi-sport UI support (sport selection + field diagrams)
+- **Closed Issue #63**: Already completed as part of Issue #53
+- Multi-sport backend architecture complete ✅ (Issues #48, #49, #50, #51, #53 all closed)
+- Next: Frontend UI for sport selection and sport-specific field diagrams
+
 **2025-10-06 (Session 4)**: VolleyballLineupGenerator implementation (Issue #51)
 - Implemented volleyball-specific lineup generation with basic rotation support
 - Created `sports/generators/volleyball.py` with VolleyballLineupGenerator class
