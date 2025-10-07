@@ -1492,18 +1492,18 @@
                 positionCheckboxes.className = 'position-checkboxes';
                 positionCheckboxes.setAttribute('data-player-id', player.id);
 
-                // Define positions
+                // Define positions (values must match position IDs in config)
                 const positions = [
-                    { value: '1', label: ' P' },
-                    { value: '2', label: ' C' },
-                    { value: '3', label: ' 1B' },
-                    { value: '4', label: ' 2B' },
-                    { value: '5', label: ' 3B' },
-                    { value: '6', label: ' SS' },
-                    { value: '7', label: ' LF' },
-                    { value: '8', label: ' CF' },
-                    { value: '9', label: ' RF' },
-                    { value: '0', label: ' Any', className: 'any-position' }
+                    { value: 'P', label: ' P' },
+                    { value: 'C', label: ' C' },
+                    { value: '1B', label: ' 1B' },
+                    { value: '2B', label: ' 2B' },
+                    { value: '3B', label: ' 3B' },
+                    { value: 'SS', label: ' SS' },
+                    { value: 'LF', label: ' LF' },
+                    { value: 'CF', label: ' CF' },
+                    { value: 'RF', label: ' RF' },
+                    { value: 'any', label: ' Any', className: 'any-position' }
                 ];
 
                 // Create each position checkbox with label
@@ -1594,14 +1594,14 @@
                 const playersWithPreferences = attendingPlayers.map(player => {
                     const checkboxContainer = document.querySelector(`.position-checkboxes[data-player-id="${player.id}"]`);
                     const checkedBoxes = checkboxContainer.querySelectorAll('input[type="checkbox"]:checked');
-                    const positions = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+                    const positions = Array.from(checkedBoxes).map(cb => cb.value);
 
                     // Log for debugging
                     console.log(`Player ${player.name}: positions = `, positions);
 
                     return {
                         ...player,
-                        position_preferences: positions.length === 0 || positions.includes(0) ? [] : positions  // Empty array means "any position"
+                        position_preferences: positions.length === 0 || positions.includes('any') ? [] : positions  // Empty array means "any position"
                     };
                 });
 
