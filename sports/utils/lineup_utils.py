@@ -62,17 +62,9 @@ def assign_positions_smart(
 
     # Assign positions in order of scarcity
     for position, _ in position_scarcity:
-        # Get candidates who can play this position
-        candidates = _get_candidates_for_position(position, remaining_players)
-
-        # Prioritize must-play players
-        must_play_candidates = [p for p in candidates if p in must_play_players]
-        if must_play_candidates:
-            candidates = must_play_candidates
-
-        # Sort candidates by rotation history and flexibility
-        candidates.sort(
-            key=_create_candidate_sort_key(position.id, player_position_history)
+        # Get and prioritize candidates for this position
+        candidates = _prioritize_candidates_for_position(
+            position, remaining_players, must_play_players, player_position_history
         )
 
         if not candidates:
@@ -113,6 +105,40 @@ def assign_positions_smart(
         remaining_players.remove(chosen_player)
 
     return assignments
+
+
+def _prioritize_candidates_for_position(
+    position: Position,
+    remaining_players: List[Player],
+    must_play_players: List[Player],
+    player_position_history: Dict[str, List[str]],
+) -> List[Player]:
+    """
+    Get and prioritize candidates for a position.
+
+    Args:
+        position: Position to fill
+        remaining_players: Players still available
+        must_play_players: Players who must be included
+        player_position_history: Dict of player_id -> [position_ids played]
+
+    Returns:
+        Sorted list of candidate players
+    """
+    # Get candidates who can play this position
+    candidates = _get_candidates_for_position(position, remaining_players)
+
+    # Prioritize must-play players
+    must_play_candidates = [p for p in candidates if p in must_play_players]
+    if must_play_candidates:
+        candidates = must_play_candidates
+
+    # Sort candidates by rotation history and flexibility
+    candidates.sort(
+        key=_create_candidate_sort_key(position.id, player_position_history)
+    )
+
+    return candidates
 
 
 def can_fill_all_positions(

@@ -35,7 +35,7 @@ class SportRules:
 
     total_positions: int
     substitution_limit: Optional[int] = None
-    required_positions: List[str] = None
+    required_positions: Optional[List[str]] = None
     rotation_type: str = "flexible"  # "flexible", "substitution_based", "rotation_based"
 
     def __post_init__(self):
