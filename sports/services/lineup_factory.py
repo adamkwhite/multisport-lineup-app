@@ -9,6 +9,7 @@ from typing import Optional
 
 from sports.generators.base import LineupGenerator
 from sports.generators.baseball import BaseballLineupGenerator
+from sports.generators.volleyball import VolleyballLineupGenerator
 from sports.services.sport_loader import load_sport_config
 
 
@@ -56,17 +57,12 @@ def get_lineup_generator(sport_id: str) -> LineupGenerator:
     if sport_id == "baseball":
         return BaseballLineupGenerator(config)
     elif sport_id == "soccer":
-        # TODO: Implement SoccerLineupGenerator (Issue #51)
+        # TODO: Implement SoccerLineupGenerator
         raise NotImplementedError(
-            "Soccer lineup generation is not yet implemented. "
-            "Track progress at: https://github.com/adamkwhite/multisport-lineup-app/issues/51"
+            "Soccer lineup generation is not yet implemented."
         )
     elif sport_id == "volleyball":
-        # TODO: Implement VolleyballLineupGenerator (Issue #52)
-        raise NotImplementedError(
-            "Volleyball lineup generation is not yet implemented. "
-            "Track progress at: https://github.com/adamkwhite/multisport-lineup-app/issues/52"
-        )
+        return VolleyballLineupGenerator(config)
     else:
         raise ValueError(
             f"Unknown sport: '{sport_id}'. "
@@ -83,9 +79,9 @@ def get_supported_sports() -> list[str]:
 
     Example:
         >>> get_supported_sports()
-        ['baseball']
+        ['baseball', 'volleyball']
     """
-    return ["baseball"]
+    return ["baseball", "volleyball"]
 
 
 def is_sport_supported(sport_id: str) -> bool:

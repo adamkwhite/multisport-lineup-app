@@ -75,10 +75,12 @@ class TestGetLineupGenerator:
         with pytest.raises(NotImplementedError, match="Soccer lineup generation"):
             get_lineup_generator("soccer")
 
-    def test_volleyball_not_implemented(self):
-        """Test that volleyball raises NotImplementedError."""
-        with pytest.raises(NotImplementedError, match="Volleyball lineup generation"):
-            get_lineup_generator("volleyball")
+    def test_volleyball_implemented(self):
+        """Test that volleyball returns VolleyballLineupGenerator."""
+        from sports.generators.volleyball import VolleyballLineupGenerator
+
+        generator = get_lineup_generator("volleyball")
+        assert isinstance(generator, VolleyballLineupGenerator)
 
     def test_generator_is_usable(self):
         """Test that returned generator can actually generate lineups."""
@@ -113,11 +115,15 @@ class TestGetSupportedSports:
         sports = get_supported_sports()
         assert "baseball" in sports
 
+    def test_contains_volleyball(self):
+        """Test that volleyball is in supported sports."""
+        sports = get_supported_sports()
+        assert "volleyball" in sports
+
     def test_does_not_contain_unimplemented_sports(self):
         """Test that unimplemented sports are not included."""
         sports = get_supported_sports()
         assert "soccer" not in sports
-        assert "volleyball" not in sports
 
 
 class TestIsSportSupported:
@@ -140,9 +146,9 @@ class TestIsSportSupported:
         """Test that soccer is not yet supported."""
         assert is_sport_supported("soccer") is False
 
-    def test_volleyball_not_supported(self):
-        """Test that volleyball is not yet supported."""
-        assert is_sport_supported("volleyball") is False
+    def test_volleyball_is_supported(self):
+        """Test that volleyball is supported."""
+        assert is_sport_supported("volleyball") is True
 
     def test_unknown_sport_not_supported(self):
         """Test that unknown sports return False."""
