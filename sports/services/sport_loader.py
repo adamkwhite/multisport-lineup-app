@@ -160,8 +160,8 @@ def get_available_sports() -> list[dict]:
                     sports.append(
                         {"id": config.sport_id, "name": config.display_name}
                     )
-                except (FileNotFoundError, ValueError, json.JSONDecodeError):
-                    # Skip invalid configurations
+                except (FileNotFoundError, ValueError):
+                    # Skip invalid configurations (ValueError includes JSONDecodeError)
                     continue
 
     return sports
