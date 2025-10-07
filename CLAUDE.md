@@ -247,6 +247,28 @@ heroku open
 - **Self-signed certificates**: Browser warnings expected in local development
 - **TeamSnap API rate limiting**: Not yet implemented for production use
 
+## Git Workflow (MANDATORY)
+
+### 🚨 CRITICAL: Branch Workflow
+- **NEVER commit directly to main branch**
+- **ALWAYS create a feature branch first** - NO EXCEPTIONS
+- Even for small fixes, typos, or documentation - use branches and PRs
+
+**Process:**
+1. Create branch: `git checkout -b feature/description` or `fix/bug-name`
+2. Make changes and commit
+3. Push branch: `git push -u origin branch-name`
+4. Create PR: `gh pr create`
+5. Wait for CI/CD checks to pass
+6. **Ask user before merging** - Never merge without approval
+
+**Branch naming:**
+- `feature/description` - New features
+- `fix/bug-name` - Bug fixes
+- `docs/topic` - Documentation updates
+
+See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
+
 ## Important Notes
 
 - **HTTPS Required**: TeamSnap OAuth requires HTTPS for redirect URIs
