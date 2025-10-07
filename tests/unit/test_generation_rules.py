@@ -51,6 +51,46 @@ class TestBaseballGenerationRules:
 
         assert generator.pitcher_max_innings == 2
 
+    def test_baseball_generator_custom_pitcher_max_innings(self):
+        """Test that custom pitcher_max_consecutive_innings value is read correctly."""
+        from sports.generators.baseball import BaseballLineupGenerator
+        from sports.models.sport_config import (
+            FieldDiagram,
+            GameStructure,
+            Position,
+            SportConfig,
+            SportRules,
+        )
+
+        # Create config with custom pitcher max innings
+        config = SportConfig(
+            sport_id="baseball",
+            display_name="Baseball",
+            positions=[
+                Position(
+                    id="P", name="Pitcher", abbrev="P", required=True, max_per_lineup=1
+                )
+            ],
+            game_structure=GameStructure(
+                type="innings", periods=6, period_name="Inning"
+            ),
+            rules=SportRules(
+                total_positions=9,
+                generation_rules={"pitcher_max_consecutive_innings": 3},
+            ),
+            field_diagram=FieldDiagram(
+                type="diamond",
+                width=800,
+                height=800,
+                position_coordinates={"P": {"x": 400, "y": 520}},
+            ),
+        )
+
+        generator = BaseballLineupGenerator(config)
+
+        # Should use custom value of 3
+        assert generator.pitcher_max_innings == 3
+
 
 class TestVolleyballGenerationRules:
     """Tests for volleyball generation rules."""
@@ -101,6 +141,48 @@ class TestVolleyballGenerationRules:
         generator = VolleyballLineupGenerator(config)
 
         assert generator.libero_restrictions is False
+
+    def test_volleyball_generator_custom_rotation_rules(self):
+        """Test that custom rotation rules are read correctly."""
+        from sports.generators.volleyball import VolleyballLineupGenerator
+        from sports.models.sport_config import (
+            FieldDiagram,
+            GameStructure,
+            Position,
+            SportConfig,
+            SportRules,
+        )
+
+        # Create config with custom rotation rules
+        config = SportConfig(
+            sport_id="volleyball",
+            display_name="Volleyball",
+            positions=[
+                Position(
+                    id="S", name="Setter", abbrev="S", required=True, max_per_lineup=1
+                )
+            ],
+            game_structure=GameStructure(type="sets", periods=3, period_name="Set"),
+            rules=SportRules(
+                total_positions=6,
+                generation_rules={
+                    "rotation_required": False,
+                    "libero_restrictions": True,
+                },
+            ),
+            field_diagram=FieldDiagram(
+                type="court",
+                width=600,
+                height=400,
+                position_coordinates={"S": {"x": 450, "y": 100}},
+            ),
+        )
+
+        generator = VolleyballLineupGenerator(config)
+
+        # Should use custom values
+        assert generator.rotation_required is False
+        assert generator.libero_restrictions is True
 
 
 class TestSoccerGenerationRules:
