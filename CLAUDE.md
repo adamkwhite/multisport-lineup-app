@@ -34,10 +34,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Sport configuration system (JSON-based, supports baseball, soccer, volleyball)
 
 ### In Development
-- Sport-specific lineup generators (Issues #48-#53)
-- Abstract LineupGenerator base class
-- Soccer lineup generation with goalkeeper requirements
-- Volleyball lineup generation with rotation
+- Soccer lineup generation with goalkeeper requirements (Issue #53 remaining)
 
 ## Development Setup
 
@@ -260,6 +257,21 @@ heroku open
 
 ## Recent Changes
 
+**2025-10-06 (Session 4)**: VolleyballLineupGenerator implementation (Issue #51)
+- Implemented volleyball-specific lineup generation with basic rotation support
+- Created `sports/generators/volleyball.py` with VolleyballLineupGenerator class
+  - 6-position lineups (S, OH×2, MB×2, OPP/L/DS)
+  - Variable sets (3-5 configurable via `num_sets` in game_info)
+  - Position assignment with smart rotation via position history
+  - Must-play logic for players benched 2+ consecutive sets
+  - Bench tracking across sets
+- Added 22 comprehensive unit tests (`tests/unit/test_volleyball_generator.py`)
+- Updated factory pattern to support volleyball
+  - Updated `get_lineup_generator()` to return VolleyballLineupGenerator
+  - Updated `get_supported_sports()` to return `["baseball", "volleyball"]`
+- All 316 tests passing ✅, coverage maintained
+- Commit: `5b89f5e`, Issue #51 closed
+
 **2025-10-06 (Session 3)**: Factory pattern implementation (Issue #50)
 - Implemented factory pattern for sport-specific lineup generators
 - Created `sports/services/lineup_factory.py` with runtime sport selection
@@ -309,7 +321,9 @@ heroku open
 
 ### Current Architecture
 - **Factory pattern**: Runtime sport selection via `get_lineup_generator(sport_id)` (Issue #50 ✅)
-- **Sport-specific generators**: `BaseballLineupGenerator` with pitcher rotation (Issue #49 ✅)
+- **Sport-specific generators**:
+  - `BaseballLineupGenerator` with pitcher rotation (Issue #49 ✅)
+  - `VolleyballLineupGenerator` with rotation tracking (Issue #51 ✅)
 - **Abstract base class**: `LineupGenerator` with shared data models (Issue #48 ✅)
 - **Sport configuration**: JSON-based configs loaded via `sport_loader.py` (Issue #39 ✅)
 - **Smart position assignment**: Algorithm with history tracking
@@ -317,10 +331,11 @@ heroku open
 
 ## Next Steps
 
-**Immediate** (Issues #51-#52):
-- Implement `SoccerLineupGenerator` with goalkeeper requirements (Issue #51)
-- Implement `VolleyballLineupGenerator` with rotation rules (Issue #52)
+**Immediate** (Issue #53):
 - Add sport-specific configuration rules (Issue #53)
+  - Pitcher max innings for baseball
+  - Goalkeeper rotation rules for soccer
+  - Set rotation patterns for volleyball
 
 **Short-term**:
 - Update frontend UI for multi-sport selection
@@ -346,10 +361,9 @@ heroku open
 - ✅ Abstract LineupGenerator base class (Issue #48)
 - ✅ BaseballLineupGenerator implementation (Issue #49)
 - ✅ Factory pattern for runtime sport selection (Issue #50)
+- ✅ VolleyballLineupGenerator with rotation support (Issue #51)
 
 ### In Progress
-- 🔄 SoccerLineupGenerator (Issue #51)
-- 🔄 VolleyballLineupGenerator (Issue #52)
 - 🔄 Sport-specific configuration rules (Issue #53)
 
 ### Planned
