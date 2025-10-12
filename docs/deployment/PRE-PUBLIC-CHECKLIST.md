@@ -23,14 +23,14 @@ This checklist ensures the repository is safe to make public.
    - Copy new client_id and client_secret
 3. [ ] **Update local `.env` file** with new credentials
 4. [ ] **Test authentication** - Verify new credentials work
-5. [ ] **Revoke OLD credentials** - Delete old application with client_id ending in `...r20`
+5. [ ] **Revoke OLD credentials** - Delete old OAuth application from TeamSnap
 
 **Why this order?** You maintain access throughout the process and can rollback if needed.
 
 ### Optional Enhancements
 
 - [ ] **Update SonarQube URLs** in README badges
-  - Consider: Private SonarQube at `44.206.255.230:9000` may not be accessible publicly
+  - Consider: Private SonarQube instance may not be accessible publicly
   - Options:
     - Switch to SonarCloud (public SonarQube service)
     - Remove SonarQube badges from README

@@ -112,4 +112,8 @@ Subscribe to security advisories for dependencies:
 
 ## Contact
 
-For security concerns, please contact the repository maintainer.
+For security concerns, please use GitHub's private security advisory system:
+
+**Report a Vulnerability**: https://github.com/adamkwhite/multisport-lineup-app/security/advisories/new
+
+This provides a secure, private channel for vulnerability disclosure and allows us to coordinate fixes before public disclosure.
