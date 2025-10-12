@@ -282,16 +282,22 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 ## Recent Changes
 
 **2025-10-12 (Session 6)**: SonarCloud migration and public visibility
-- **Migrated from self-hosted SonarQube to SonarCloud** (PRs #74, #75)
+- **Migrated from self-hosted SonarQube to SonarCloud** (PRs #74, #75, #76, #77, #78, #79)
   - Replaced self-hosted instance with cloud-hosted SonarCloud for public dashboard visibility
   - Updated CI/CD pipeline to use `sonarqube-scan-action@v6` (official for SonarCloud)
   - Configured `sonar-project.properties` with organization (`adamkwhite`) and project key
   - Replaced all 11 README badges with SonarCloud equivalents
   - Public dashboard: https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
   - Using default "Sonar way" quality gate (80%+ new code coverage)
-- **Documentation updates**
+- **Main branch analysis workflow** (PRs #78, #79)
+  - Created `.github/workflows/main-branch-quality.yml` to analyze main branch pushes
+  - Fixed "Expected URL scheme" error by adding `sonar.host.url=https://sonarcloud.io`
+  - Badges now display actual metrics: Quality Gate (Passed), Coverage (94.2%)
+  - Resolved "Quality gate not computed" issue by establishing baseline analysis
+- **Documentation updates** (PR #76)
   - Updated `docs/development/ci-cd-pipeline.md` with SonarCloud references
-  - Updated `CLAUDE.md` External Services section
+  - Updated `CLAUDE.md` External Services section and Tech Stack
+  - Updated `.claude/settings.local.json` permissions for SonarCloud domain
   - Removed all references to self-hosted instance (44.206.255.230:9000)
 - **Security review** (PR #69)
   - Comprehensive security audit before making repository public
@@ -299,6 +305,7 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
   - Verified no credentials in git history
   - Repository now public on GitHub
 - Related: Issues #70, #71, #72, #73
+- All quality metrics passing: Quality Gate ✅, 94.2% Coverage ✅, 0 Bugs ✅, 0 Vulnerabilities ✅
 
 **2025-10-07 (Session 5)**: Infrastructure improvements and workflow enforcement
 - **Fixed demo mode bug** (commit 41e6827 - direct to main, later corrected)
