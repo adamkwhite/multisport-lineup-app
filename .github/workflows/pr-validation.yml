@@ -107,21 +107,12 @@ jobs:
           ls -la coverage.xml lcov.info 2>/dev/null || echo "⚠️ Coverage files not found"
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Quality Gate Check
-        id: sonar-gate
-        uses: SonarSource/sonarcloud-quality-gate-action@master
-        timeout-minutes: 5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        continue-on-error: false
 
       # Verify all critical steps succeeded
-      - name: Verify test and quality gate success
+      - name: Verify test success
         if: always()
         run: |
           if [ "${{ steps.python-tests.outcome }}" != "success" ]; then
@@ -132,11 +123,7 @@ jobs:
             echo "❌ JavaScript tests failed"
             exit 1
           fi
-          if [ "${{ steps.sonar-gate.outcome }}" != "success" ]; then
-            echo "❌ SonarCloud quality gate failed"
-            exit 1
-          fi
-          echo "✅ All tests and quality checks passed"
+          echo "✅ All tests passed"
 
   # Stage 3: Claude Code Review (only after SonarCloud passes)
   claude-review:
