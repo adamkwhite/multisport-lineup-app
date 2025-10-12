@@ -23,11 +23,11 @@ The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for compreh
                       │ PASS
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Stage 2: Tests & SonarQube Analysis (2-3 minutes)          │
+│  Stage 2: Tests & SonarCloud Analysis (2-3 minutes)         │
 │  ✓ Python unit tests (pytest)                               │
 │  ✓ JavaScript tests (Jest)                                  │
 │  ✓ Code coverage (94%+ target)                              │
-│  ✓ SonarQube quality gate                                   │
+│  ✓ SonarCloud quality gate (80%+ new code coverage)         │
 │  ✓ Verification step (outcome checks)                       │
 └─────────────────────┬───────────────────────────────────────┘
                       │ PASS
@@ -70,7 +70,7 @@ The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for compreh
 - Prevents wasting CI time on formatting failures
 - Developers fix style issues before running expensive tests
 
-## Stage 2: Tests & SonarQube Analysis
+## Stage 2: Tests & SonarCloud Analysis
 
 **Purpose:** Comprehensive testing and quality analysis
 **Duration:** 2-3 minutes
@@ -85,7 +85,7 @@ The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for compreh
    ```
    - 150+ unit and edge case tests
    - 94%+ code coverage target
-   - Coverage report sent to SonarQube
+   - Coverage report sent to SonarCloud
 
 2. **JavaScript Tests**
    ```bash
@@ -94,16 +94,18 @@ The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for compreh
    - Jest test suite
    - Coverage tracked
 
-3. **SonarQube Scan**
+3. **SonarCloud Scan**
    - Static code analysis
    - Security vulnerability detection
    - Code smell identification
    - Duplicated code detection
+   - Public dashboard: https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
 
-4. **SonarQube Quality Gate**
+4. **SonarCloud Quality Gate ("Sonar way" default)**
    - Must pass quality gate to proceed
    - Blocks merge if quality standards not met
-   - Checks coverage, bugs, vulnerabilities, code smells
+   - New code coverage ≥ 80%
+   - Checks bugs, vulnerabilities, code smells, security hotspots
 
 5. **Verification Step**
    - Explicitly checks all test outcomes
@@ -155,13 +157,14 @@ Ensures isort and Black don't conflict
 Test configuration (coverage, markers, etc.)
 
 ### `sonar-project.properties`
-SonarQube project configuration
+SonarCloud project configuration
+- Project key: `adamkwhite_multisport-lineup-app`
+- Organization: `adamkwhite`
 
 ## Environment Variables & Secrets
 
 Required GitHub Secrets:
-- `SONAR_TOKEN` - SonarQube authentication token
-- `SONAR_HOST_URL` - SonarQube server URL (http://44.206.255.230:9000)
+- `SONAR_TOKEN` - SonarCloud authentication token
 - `CLAUDE_CODE_OAUTH_TOKEN` - Claude Code API token
 
 ## Running Locally
@@ -185,9 +188,10 @@ venv/bin/flake8 app.py tests/ --max-line-length=100 --extend-ignore=E203,W503,E4
 npm test -- --coverage
 ```
 
-### SonarQube (optional)
+### SonarCloud (optional)
 ```bash
-# Requires SonarQube server access
+# Requires SonarCloud account and SONAR_TOKEN
+# View results at: https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
 sonar-scanner
 ```
 
@@ -199,13 +203,14 @@ sonar-scanner
 - **Impact:** Stages 2 and 3 skipped
 
 ### Stage 2 Fails - Tests
-- **Symptom:** Red X on "Tests & SonarQube Analysis"
+- **Symptom:** Red X on "Tests & SonarCloud Analysis"
 - **Fix:** Fix failing tests, verify locally with pytest
 - **Impact:** Stage 3 skipped
 
 ### Stage 2 Fails - Quality Gate
-- **Symptom:** Red X on "SonarQube Quality Gate Check"
-- **Fix:** Address code quality issues reported in SonarQube
+- **Symptom:** Red X on "SonarCloud Quality Gate Check"
+- **Fix:** Address code quality issues reported in SonarCloud dashboard
+- **Dashboard:** https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
 - **Impact:** Stage 3 skipped
 
 ### Stage 3 Fails
@@ -236,7 +241,8 @@ sonar-scanner
    - Even if they don't block merge
    - Improve code quality
 
-4. **Monitor SonarQube dashboard**
+4. **Monitor SonarCloud dashboard**
+   - Public dashboard: https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
    - Track technical debt
    - Improve code quality over time
 
@@ -263,16 +269,16 @@ git commit -m "Fix import sorting"
 - Check for environment-specific issues
 - Review CI logs for differences
 
-### SonarQube quality gate fails
-- View details: http://44.206.255.230:9000/dashboard?id=multisport-lineup-app
-- Address reported issues
+### SonarCloud quality gate fails
+- View details: https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
+- Check "New Code" tab for issues
+- Address reported issues (coverage, bugs, vulnerabilities, code smells)
 - Re-run pipeline
 
 ## Related Documentation
 
 - [CI Pipeline Safeguards](./ci-pipeline-safeguards.md)
-- [SonarQube Usage](./sonarqube-usage.md)
-- [SonarQube Setup Guide](./sonarqube-setup-guide.md)
+- [SonarCloud Dashboard](https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app) (public)
 - [Testing Guidelines](../testing/guidelines.md)
 
 ## Maintenance
@@ -287,8 +293,8 @@ git commit -m "Fix import sorting"
 ### Modifying Quality Standards
 
 - **Flake8 rules:** Update `--extend-ignore` in workflow
-- **Coverage targets:** Update pytest and SonarQube configs
-- **SonarQube rules:** Configure in SonarQube UI
+- **Coverage targets:** Update pytest config (local) and SonarCloud quality gate (cloud)
+- **SonarCloud rules:** Configure in SonarCloud UI (Quality Gates tab)
 
 ### Pipeline Evolution
 

@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Deployment**: Designed for Heroku
 - **SSL/HTTPS**: Self-signed certificates for local development
 - **Testing**: pytest, pytest-cov (94%+ coverage target)
-- **CI/CD**: GitHub Actions (3-stage pipeline), SonarQube
+- **CI/CD**: GitHub Actions (3-stage pipeline), SonarCloud
 - **Code Quality**: Black, isort, flake8, mypy, bandit
 
 ## Key Features
@@ -107,12 +107,12 @@ python3 manage.py db upgrade
 **3-Stage GitHub Actions Workflow** (`.github/workflows/pr-validation.yml`):
 
 1. **Quick Validation** (15-30s) - Code formatting, import sorting, linting
-2. **Tests & SonarQube** (2-3min) - Unit tests, coverage, quality gate
+2. **Tests & SonarCloud** (2-3min) - Unit tests, coverage, quality gate
 3. **Claude Review** (3-5min) - AI-powered code review
 
 **Key Features:**
 - 6 layers of safeguards ensure test failures block pipeline
-- SonarQube integration for code quality tracking
+- SonarCloud integration for code quality tracking (public dashboard)
 - isort configured with Black profile (`.isort.cfg`)
 - See `docs/development/ci-cd-pipeline.md` for full documentation
 
@@ -228,7 +228,9 @@ heroku open
 - **TeamSnap API**: OAuth 2.0 authentication, team/player data import
   - Requires client ID and secret from TeamSnap Developer Portal
   - HTTPS redirect URI mandatory
-- **SonarQube**: Code quality analysis (production instance at 44.206.255.230:9000)
+- **SonarCloud**: Code quality analysis and tracking
+  - Public dashboard: https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
+  - Quality gate: "Sonar way" (80%+ new code coverage, 0 bugs/vulnerabilities)
 
 ### Python Packages (requirements.txt)
 - Flask, requests, pytest, pytest-cov
@@ -279,6 +281,25 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 
 ## Recent Changes
 
+**2025-10-12 (Session 6)**: SonarCloud migration and public visibility
+- **Migrated from self-hosted SonarQube to SonarCloud** (PRs #74, #75)
+  - Replaced self-hosted instance with cloud-hosted SonarCloud for public dashboard visibility
+  - Updated CI/CD pipeline to use `sonarqube-scan-action@v6` (official for SonarCloud)
+  - Configured `sonar-project.properties` with organization (`adamkwhite`) and project key
+  - Replaced all 11 README badges with SonarCloud equivalents
+  - Public dashboard: https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
+  - Using default "Sonar way" quality gate (80%+ new code coverage)
+- **Documentation updates**
+  - Updated `docs/development/ci-cd-pipeline.md` with SonarCloud references
+  - Updated `CLAUDE.md` External Services section
+  - Removed all references to self-hosted instance (44.206.255.230:9000)
+- **Security review** (PR #69)
+  - Comprehensive security audit before making repository public
+  - Created `SECURITY.md` and `PRE-PUBLIC-CHECKLIST.md`
+  - Verified no credentials in git history
+  - Repository now public on GitHub
+- Related: Issues #70, #71, #72, #73
+
 **2025-10-07 (Session 5)**: Infrastructure improvements and workflow enforcement
 - **Fixed demo mode bug** (commit 41e6827 - direct to main, later corrected)
   - Changed position checkbox values from numeric to position IDs ('P', 'C', '1B' vs 1, 2, 3)
@@ -292,9 +313,9 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
   - All 336 tests passing, 96%+ coverage maintained
 - **Infrastructure PR #65**: CI coverage and code quality fixes
   - Added `sports/` module to CI coverage tracking (`--cov=app --cov=sports`)
-  - Updated SonarQube to analyze sports/ directory
+  - Updated SonarCloud to analyze sports/ directory
   - Fixed 6 code quality violations (type hints, unused params, cognitive complexity, etc.)
-  - SonarQube quality gate: 95%+ coverage, 0 violations
+  - SonarCloud quality gate: 95%+ coverage, 0 violations
 - **Workflow enforcement** (PRs #67 and DevOps #1)
   - Added mandatory "🚨 CRITICAL: Branch Workflow" section to both CLAUDE.md files
   - Explicitly forbids direct commits to main - NO EXCEPTIONS
@@ -341,13 +362,13 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 **2025-10-06 (Session 2)**: Pre-commit hooks and code quality improvements
 - Added pre-commit hooks for local code quality checks (`.pre-commit-config.yaml`)
 - Configured Black, isort, Flake8, and pre-commit-hooks for auto-fixing
-- Fixed 8 SonarQube maintainability issues (PR #55)
+- Fixed 8 code quality maintainability issues (PR #55)
   - Removed 7 unnecessary f-strings
   - Simplified duplicate branch logic
 - Completed repository rebranding from baseball-lineup-app to multisport-lineup-app (PR #54)
   - Updated 30+ references across 15+ files
   - Cleaned up virtual environment from git history
-  - Updated SonarQube project configuration
+  - Updated code quality project configuration
 - Created DevOps template with pre-commit documentation (`~/Code/Devops/`)
 - All 175 tests passing, 96% coverage maintained
 
@@ -404,7 +425,7 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 - ✅ Print-friendly layouts
 - ✅ Position preference handling
 - ✅ Sport configuration backend (Issue #39)
-- ✅ CI/CD pipeline with SonarQube
+- ✅ CI/CD pipeline with SonarCloud
 - ✅ Abstract LineupGenerator base class (Issue #48)
 - ✅ BaseballLineupGenerator implementation (Issue #49)
 - ✅ Factory pattern for runtime sport selection (Issue #50)
