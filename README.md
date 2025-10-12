@@ -74,8 +74,10 @@ The app allows you to:
 The project uses a **3-stage GitHub Actions pipeline** for automated quality assurance:
 
 1. **Quick Validation** (15-30s) - Black, isort, Flake8
-2. **Tests & SonarQube** (2-3 min) - Unit tests, coverage, quality gate
+2. **Tests & SonarCloud** (2-3 min) - Unit tests, coverage, quality gate
 3. **Claude Review** (3-5 min) - AI-powered code review
+
+**Code Quality Dashboard:** [View live metrics on SonarCloud](https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app)
 
 **Documentation:** See `docs/development/ci-cd-pipeline.md` for full details.
 
