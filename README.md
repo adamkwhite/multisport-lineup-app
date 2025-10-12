@@ -41,6 +41,8 @@ cp .env.example .env
 # Edit .env with your TeamSnap API credentials
 ```
 
+⚠️ **Security Warning**: Never commit your `.env` file to version control. It contains sensitive API credentials that should remain private.
+
 3. Run locally:
 ```bash
 python app.py
@@ -52,7 +54,13 @@ Visit `http://localhost:5000` to use the app.
 
 1. Go to https://auth.teamsnap.com to register your application
 2. Get your `client_id` and `client_secret`
-3. Add them to your `.env` file
+3. Add them to your `.env` file (never commit this file!)
+
+**Security Best Practices:**
+- Keep your API credentials private
+- Rotate credentials periodically
+- Use environment variables for all secrets
+- Never hardcode credentials in source code
 
 ## Configuration
 
