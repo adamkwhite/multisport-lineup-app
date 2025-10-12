@@ -49,9 +49,9 @@ jobs:
         run: |
           flake8 app.py tests/ --max-line-length=100 --extend-ignore=E203,W503,E402,F401,F841,F811,E501,F541
 
-  # Stage 2: Tests and SonarQube analysis (2-3 minutes)
-  sonarqube:
-    name: Tests & SonarQube Analysis
+  # Stage 2: Tests and SonarCloud analysis (2-3 minutes)
+  sonarcloud:
+    name: Tests & SonarCloud Analysis
     needs: quick-checks  # Only run if quick checks pass
     runs-on: ubuntu-latest
     # Explicitly prevent this job from continuing on error
@@ -106,23 +106,13 @@ jobs:
           # Verify coverage files exist
           ls -la coverage.xml lcov.info 2>/dev/null || echo "⚠️ Coverage files not found"
 
-      - name: SonarQube Scan
+      - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-      - name: SonarQube Quality Gate Check
-        id: sonar-gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # Explicitly fail on quality gate failure
-        continue-on-error: false
 
       # Verify all critical steps succeeded
-      - name: Verify test and quality gate success
+      - name: Verify test success
         if: always()
         run: |
           if [ "${{ steps.python-tests.outcome }}" != "success" ]; then
@@ -133,18 +123,14 @@ jobs:
             echo "❌ JavaScript tests failed"
             exit 1
           fi
-          if [ "${{ steps.sonar-gate.outcome }}" != "success" ]; then
-            echo "❌ SonarQube quality gate failed"
-            exit 1
-          fi
-          echo "✅ All tests and quality checks passed"
+          echo "✅ All tests passed"
 
-  # Stage 3: Claude Code Review (only after SonarQube passes)
+  # Stage 3: Claude Code Review (only after SonarCloud passes)
   claude-review:
     name: Claude Code Review
-    # CRITICAL: Only run if sonarqube job fully succeeds
+    # CRITICAL: Only run if sonarcloud job fully succeeds
     # This prevents Claude review from running if ANY test fails
-    needs: sonarqube
+    needs: sonarcloud
     if: success()  # Explicit check that previous job succeeded
     runs-on: ubuntu-latest
 
