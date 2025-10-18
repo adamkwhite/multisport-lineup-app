@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Sport Lineup Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .sports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .sport-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .sport-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .sport-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 100px;
+        }
+
+        .sport-content {
+            padding: 25px;
+        }
+
+        .sport-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .sport-description {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .sport-card.volleyball .sport-image {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .sport-card.baseball .sport-image {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .sport-card.soccer .sport-image {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .coming-soon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 30px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .sports-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .sport-image {
+                height: 200px;
+            }
+
+            .sport-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Multi-Sport Lineup Manager</h1>
+            <p>Select your sport to get started</p>
+        </div>
+
+        <div class="sports-grid">
+            <!-- Volleyball Card -->
+            <a href="/volleyball" class="sport-card volleyball">
+                <div class="sport-image">
+                    <img src="/static/images/volleyball.jpg" alt="Volleyball"
+                         style="width: 100%; height: 100%; object-fit: cover;"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='🏐';">
+                </div>
+                <div class="sport-content">
+                    <div class="sport-title">Volleyball</div>
+                    <div class="sport-description">
+                        Manage 6-position rotations with libero tracking and set-based lineup generation.
+                    </div>
+                </div>
+            </a>
+
+            <!-- Baseball Card -->
+            <a href="/baseball" class="sport-card baseball">
+                <div class="sport-image">
+                    <img src="/static/images/baseball.jpg" alt="Baseball"
+                         style="width: 100%; height: 100%; object-fit: cover;"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='⚾';">
+                </div>
+                <div class="sport-content">
+                    <div class="sport-title">Baseball</div>
+                    <div class="sport-description">
+                        Generate innings-based lineups with pitcher rotation limits and position balancing.
+                    </div>
+                </div>
+            </a>
+
+            <!-- Soccer Card -->
+            <a href="/soccer" class="sport-card soccer">
+                <div class="sport-image">
+                    <img src="/static/images/soccer.jpg" alt="Soccer"
+                         style="width: 100%; height: 100%; object-fit: cover;"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='⚽';">
+                    <div class="coming-soon">Coming Soon</div>
+                </div>
+                <div class="sport-content">
+                    <div class="sport-title">Soccer</div>
+                    <div class="sport-description">
+                        11-position formations with goalkeeper requirements and substitution management.
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>Powered by TeamSnap integration</p>
+        </div>
+    </div>
+</body>
+</html>

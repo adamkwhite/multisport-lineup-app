@@ -135,11 +135,32 @@ ERROR_NOT_AUTHENTICATED = "Not authenticated"
 
 @app.route("/")
 def index():
-    """Main dashboard"""
-    if "access_token" not in session:
-        return render_template("login.html")
+    """Sport selection landing page"""
+    return render_template("landing.html")
 
-    return render_template("dashboard.html")
+
+@app.route("/baseball")
+def baseball_dashboard():
+    """Baseball lineup manager dashboard"""
+    if "access_token" not in session:
+        return render_template("login.html", sport="baseball")
+
+    return render_template("baseball_dashboard.html")
+
+
+@app.route("/volleyball")
+def volleyball_dashboard():
+    """Volleyball lineup manager dashboard"""
+    if "access_token" not in session:
+        return render_template("login.html", sport="volleyball")
+
+    return render_template("volleyball_dashboard.html")
+
+
+@app.route("/soccer")
+def soccer_dashboard():
+    """Soccer lineup manager dashboard (coming soon)"""
+    return render_template("soccer_dashboard.html")
 
 
 @app.route("/auth/login")
@@ -823,11 +844,22 @@ def load_demo_data():
 
 
 @app.route("/demo")
-def demo_mode():
-    """Initialize demo mode and redirect to dashboard"""
+@app.route("/demo/<sport>")
+def demo_mode(sport="baseball"):
+    """Initialize demo mode and redirect to sport-specific dashboard"""
     session["demo_mode"] = True
     session["access_token"] = "demo_token"  # Fake token for demo mode
-    return redirect(url_for("index"))
+
+    # Redirect to sport-specific dashboard
+    if sport == "baseball":
+        return redirect(url_for("baseball_dashboard"))
+    elif sport == "volleyball":
+        return redirect(url_for("volleyball_dashboard"))
+    elif sport == "soccer":
+        return redirect(url_for("soccer_dashboard"))
+    else:
+        # Default to baseball for backwards compatibility
+        return redirect(url_for("baseball_dashboard"))
 
 
 @app.route("/logout")
