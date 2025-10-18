@@ -2,18 +2,25 @@
 
 This project uses the [pre-commit](https://pre-commit.com/) framework to run code quality checks before each commit.
 
+## History
+
+**Note:** Previously, this project used a legacy custom pre-commit hook that checked for tools in the global PATH. This has been removed in favor of the official pre-commit framework, which properly detects tools in the virtual environment.
+
 ## What Gets Checked
 
 Every commit automatically runs:
 
 1. **Black** - Code formatting (Python)
 2. **isort** - Import sorting (Python)
-3. **Trailing whitespace** - Removes trailing spaces
-4. **End of files** - Ensures files end with newline
-5. **YAML** - Validates YAML syntax
-6. **Large files** - Prevents accidental commits of large files
-7. **Merge conflicts** - Detects unresolved merge markers
-8. **Mixed line endings** - Ensures consistent line endings
+3. **Flake8** - Python linting (manual stage only, see note below)
+4. **Trailing whitespace** - Removes trailing spaces
+5. **End of files** - Ensures files end with newline
+6. **YAML** - Validates YAML syntax
+7. **Large files** - Prevents accidental commits of large files
+8. **Merge conflicts** - Detects unresolved merge markers
+9. **Mixed line endings** - Ensures consistent line endings
+
+**Note:** Flake8 runs only in manual mode (`stages: [manual]`) to provide warnings without blocking commits. This allows developers to see linting issues without disrupting their workflow.
 
 ## Setup
 
@@ -69,7 +76,11 @@ git commit --no-verify
 Ensure you're in the virtual environment:
 
 ```bash
-source lineup-venv/bin/activate  # Linux/Mac
+# Linux/Mac
+source lineup-venv/bin/activate
+
+# Windows
+lineup-venv\Scripts\activate
 ```
 
 ### Hooks not running
@@ -92,9 +103,11 @@ pre-commit install-hooks
 
 ## CI/CD Integration
 
-The same checks run in GitHub Actions as part of the PR validation pipeline:
+Similar checks run in GitHub Actions as part of the PR validation pipeline:
 
 - **Stage 1: Quick Validation** - Runs Black, isort, Flake8
-- All checks must pass before PR can be merged
+- **Additional checks:** Trailing whitespace, YAML validation, and other hooks run locally via pre-commit
 
-See `docs/development/ci-cd-pipeline.md` for details.
+All checks must pass before PR can be merged.
+
+See `docs/development/ci-cd-pipeline.md` for full CI details.
