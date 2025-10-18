@@ -81,8 +81,21 @@ if os.getenv("RENDER") or os.getenv("FLASK_ENV") == "production":
     app_name = os.getenv("RENDER_SERVICE_NAME", "baseball-lineup-app")
     CORS(app, origins=[f"https://{app_name}.onrender.com"])
 else:
-    # Development: Allow all origins
-    CORS(app)
+    # Development: Restrict to localhost only for security
+    CORS(
+        app,
+        origins=[
+            "http://localhost:5000",
+            "https://localhost:5000",
+            "http://localhost:5001",
+            "https://localhost:5001",
+            "http://127.0.0.1:5000",
+            "https://127.0.0.1:5000",
+            "http://127.0.0.1:5001",
+            "https://127.0.0.1:5001",
+        ],
+        supports_credentials=True,
+    )
 
 # Port configuration - Render provides PORT environment variable
 PORT = int(os.getenv("PORT", 5001))
