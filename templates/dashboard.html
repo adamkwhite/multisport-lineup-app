@@ -432,6 +432,7 @@
             font-weight: bold;
             transition: background-color 0.3s;
             border-bottom: 3px solid transparent;
+            position: relative;
         }
         .tab-button:hover {
             background-color: #ddd;
@@ -440,6 +441,18 @@
             background-color: white;
             border-bottom: 3px solid #3498db;
             color: #3498db;
+        }
+        .tab-button.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #e8e8e8;
+        }
+        .tab-button.locked:hover {
+            background-color: #e8e8e8;
+        }
+        .tab-button.locked::after {
+            content: " 🔒";
+            font-size: 14px;
         }
         .tab-content {
             display: none;
@@ -567,8 +580,8 @@
         <!-- Tab Buttons -->
         <div class="tab-buttons no-print">
             <button class="tab-button active" onclick="openTab('teams-tab')">📋 Select Team & Game</button>
-            <button class="tab-button" onclick="openTab('players-tab')">👥 Players</button>
-            <button class="tab-button" onclick="openTab('lineup-tab')">⚾ Lineup</button>
+            <button class="tab-button locked" onclick="openTab('players-tab')">👥 Players</button>
+            <button class="tab-button locked" onclick="openTab('lineup-tab')">⚾ Lineup</button>
         </div>
 
         <!-- Tab Content: Teams and Games -->
@@ -724,6 +737,13 @@
                 currentFilter: 'all',
                 gamesVisible: false,
                 playersVisible: false
+            },
+
+            // Tab accessibility state
+            tabs: {
+                teamsAccessible: true,
+                playersAccessible: false,
+                lineupAccessible: false
             }
         };
 
@@ -822,6 +842,9 @@
                 toggle.addEventListener('change', toggleNameObfuscation);
             }
 
+            // Initialize tab lock states
+            updateTabLockStates();
+
             // Then load teams
             loadTeams();
         };
@@ -904,6 +927,14 @@
             StateManager.clearSelectedTeam();
             StateManager.clearSelectedGame();
             console.log('Cleared state management selections');
+
+            // Reset tab accessibility - lock Players and Lineup tabs
+            appState.tabs.playersAccessible = false;
+            appState.tabs.lineupAccessible = false;
+            updateTabLockStates();
+
+            // Return to teams tab
+            openTab('teams-tab');
         }
 
         // Update user guidance progress (XSS safe)
@@ -1007,6 +1038,13 @@
 
         // Tab functionality
         function openTab(tabName) {
+            // Check if tab is accessible based on completion state
+            if (!isTabAccessible(tabName)) {
+                console.log(`Tab ${tabName} is not accessible yet`);
+                showError(getTabAccessibilityMessage(tabName));
+                return;
+            }
+
             // Hide all tab contents
             const tabContents = document.querySelectorAll('.tab-content');
             tabContents.forEach(tab => tab.classList.remove('active'));
@@ -1022,6 +1060,68 @@
             const activeButton = document.querySelector(`[onclick="openTab('${tabName}')"]`);
             if (activeButton) {
                 activeButton.classList.add('active');
+            }
+        }
+
+        // Check if a tab is accessible based on current state
+        function isTabAccessible(tabName) {
+            switch(tabName) {
+                case 'teams-tab':
+                    return true; // Always accessible
+                case 'players-tab':
+                    return appState.tabs.playersAccessible;
+                case 'lineup-tab':
+                    return appState.tabs.lineupAccessible;
+                default:
+                    return false;
+            }
+        }
+
+        // Get message for why a tab is not accessible
+        function getTabAccessibilityMessage(tabName) {
+            switch(tabName) {
+                case 'players-tab':
+                    if (!StateManager.isTeamSelected()) {
+                        return 'Please select a team first';
+                    }
+                    if (!StateManager.isGameSelected()) {
+                        return 'Please select a game first';
+                    }
+                    return 'Players tab not yet accessible';
+                case 'lineup-tab':
+                    return 'Please generate a lineup first by going to the Players tab';
+                default:
+                    return 'This tab is not accessible yet';
+            }
+        }
+
+        // Update tab lock states based on current progress
+        function updateTabLockStates() {
+            const playersTab = document.querySelector('[onclick="openTab(\'players-tab\')"]');
+            const lineupTab = document.querySelector('[onclick="openTab(\'lineup-tab\')"]');
+
+            // Update players tab accessibility
+            if (StateManager.isTeamSelected() && StateManager.isGameSelected()) {
+                appState.tabs.playersAccessible = true;
+                if (playersTab) {
+                    playersTab.classList.remove('locked');
+                }
+            } else {
+                appState.tabs.playersAccessible = false;
+                if (playersTab) {
+                    playersTab.classList.add('locked');
+                }
+            }
+
+            // Update lineup tab accessibility
+            if (appState.tabs.lineupAccessible) {
+                if (lineupTab) {
+                    lineupTab.classList.remove('locked');
+                }
+            } else {
+                if (lineupTab) {
+                    lineupTab.classList.add('locked');
+                }
             }
         }
 
@@ -1404,6 +1504,9 @@
             // Update user guidance steps
             updateUserGuidanceProgress(3);
 
+            // Update tab lock states - Players tab should now be accessible
+            updateTabLockStates();
+
             // Update game info in players tab
             const selectedGameElement = allGames.find(game => game.id == gameId);
             if (selectedGameElement) {
@@ -1590,10 +1693,37 @@
         }
 
         async function generateLineup() {
+            // VERSION CHECK - If you see this alert, the new code is loaded
+            console.log('🔧 CODE VERSION: 2025-10-18-v3 LOADED');
+
             try {
+                // Validate we have players
+                if (!attendingPlayers || attendingPlayers.length === 0) {
+                    showError('No players available. Please select a game first.');
+                    return;
+                }
+
+                console.log('Starting lineup generation with', attendingPlayers.length, 'players');
+
                 // Collect position preferences
-                const playersWithPreferences = attendingPlayers.map(player => {
+                const playersWithPreferences = attendingPlayers.map((player, index) => {
+                    // Defensive check: ensure player object exists
+                    if (!player) {
+                        console.error(`Player at index ${index} is null or undefined`);
+                        return null;
+                    }
+
                     const checkboxContainer = document.querySelector(`.position-checkboxes[data-player-id="${player.id}"]`);
+
+                    // Defensive check: if container not found, default to no preferences
+                    if (!checkboxContainer) {
+                        console.warn(`Checkbox container not found for player ${player.name} (ID: ${player.id})`);
+                        return {
+                            ...player,  // Spread all player fields
+                            position_preferences: []  // Empty array means "any position"
+                        };
+                    }
+
                     const checkedBoxes = checkboxContainer.querySelectorAll('input[type="checkbox"]:checked');
                     const positions = Array.from(checkedBoxes).map(cb => cb.value);
 
@@ -1601,10 +1731,10 @@
                     console.log(`Player ${player.name}: positions = `, positions);
 
                     return {
-                        ...player,
+                        ...player,  // Spread all player fields
                         position_preferences: positions.length === 0 || positions.includes('any') ? [] : positions  // Empty array means "any position"
                     };
-                });
+                }).filter(p => p !== null);  // Remove any null entries
 
                 // Log the data being sent for debugging
                 console.log('Sending player data to backend:', playersWithPreferences);
@@ -1624,27 +1754,43 @@
                 });
 
                 const data = await response.json();
+                console.log('Backend response data:', data);
 
                 if (response.ok) {
-                    displayLineup(data);
+                    try {
+                        displayLineup(data);
+                    } catch (displayError) {
+                        console.error('Error in displayLineup:', displayError);
+                        console.error('Stack trace:', displayError.stack);
+                        showError('Failed to display lineup: ' + displayError.message);
+                    }
                 } else {
                     showError('Failed to generate lineup: ' + data.error);
                 }
             } catch (error) {
+                console.error('Error in generateLineup:', error);
+                console.error('Stack trace:', error.stack);
                 showError('Failed to generate lineup: ' + error.message);
             }
         }
 
         function displayLineup(data) {
+            console.log('displayLineup called with data:', data);
             const lineupDisplay = document.getElementById('lineup-display');
 
-            if (data.lineups) {
-                // Display 3 lineups for 6-inning game
+            if (data.lineups && Array.isArray(data.lineups)) {
+                console.log('Displaying multiple lineups:', data.lineups.length);
+                // Display lineups using new API format
                 displayMultipleLineups(data);
             } else {
-                // Legacy single lineup display
+                console.warn('Legacy single lineup format detected - this may not work with new API');
+                // Legacy single lineup display (deprecated)
                 displaySingleLineup(data);
             }
+
+            // Mark lineup tab as accessible now that lineup is generated
+            appState.tabs.lineupAccessible = true;
+            updateTabLockStates();
 
             // Show regenerate button
             document.getElementById('regenerate-btn').style.display = 'inline-block';
@@ -1655,7 +1801,9 @@
             // Apply current obfuscation setting to newly displayed lineup
             updateAllPlayerNames();
 
-            showSuccess(`${data.lineups.length} lineup${data.lineups.length > 1 ? 's' : ''} generated!`);
+            // Show success message - handle both multi-lineup and single lineup responses
+            const lineupCount = data.lineups ? data.lineups.length : 1;
+            showSuccess(`${lineupCount} lineup${lineupCount > 1 ? 's' : ''} generated!`);
         }
 
         function displayMultipleLineups(data) {
@@ -1775,51 +1923,66 @@
                 };
 
                 // Display fielding positions on the diamond
-                Object.keys(lineupData.lineup).forEach(position => {
+                // Handle new API format with assignments array
+                if (!lineupData.assignments || !Array.isArray(lineupData.assignments)) {
+                    console.error('Invalid lineup data - missing assignments array:', lineupData);
+                    return;
+                }
+
+                lineupData.assignments.forEach(assignment => {
                     const positionCard = document.createElement('div');
-                    const positionNum = parseInt(position);
+                    const position = assignment.position;  // "P", "C", "1B", etc.
+
+                    // Map position IDs to position numbers for styling
+                    const positionToNumber = {
+                        'P': 1, 'C': 2, '1B': 3, '2B': 4, '3B': 5,
+                        'SS': 6, 'LF': 7, 'CF': 8, 'RF': 9
+                    };
+                    const positionNum = positionToNumber[position] || 0;
                     const positionClass = positionClasses[positionNum] || '';
 
                     positionCard.className = `position-card ${positionClass}`;
 
-                    const playerInfo = lineupData.lineup[position];
+                    const playerInfo = assignment.player;
+                    const positionName = position;  // Use position ID as name for now
                     // Determine what name to display based on current toggle state
                     const toggle = document.getElementById('name-toggle');
                     const hideNames = toggle ? toggle.checked : false;
-                    const displayName = hideNames ? obfuscateName(playerInfo.player_name) : playerInfo.player_name;
+                    const displayName = hideNames ? obfuscateName(playerInfo.name) : playerInfo.name;
 
-                    // Create position number
+                    // Create position number (use position number from mapping)
                     const positionNumber = document.createElement('div');
                     positionNumber.className = 'position-number';
-                    positionNumber.textContent = position;
+                    positionNumber.textContent = positionNum;
 
-                    // Create position name
-                    const positionName = document.createElement('div');
-                    positionName.className = 'position-name';
-                    positionName.style.fontSize = '10px';
-                    positionName.style.margin = '2px 0';
-                    positionName.textContent = playerInfo.position_name;
+                    // Create position name element
+                    const positionNameDiv = document.createElement('div');
+                    positionNameDiv.className = 'position-name';
+                    positionNameDiv.style.fontSize = '10px';
+                    positionNameDiv.style.margin = '2px 0';
+                    positionNameDiv.textContent = position;
 
                     // Create player name
                     const playerNameDiv = document.createElement('div');
                     playerNameDiv.className = 'player-name';
-                    playerNameDiv.setAttribute('data-original-name', playerInfo.player_name);
+                    playerNameDiv.setAttribute('data-original-name', playerInfo.name);
                     playerNameDiv.style.fontSize = '11px';
                     playerNameDiv.style.fontWeight = 'bold';
                     playerNameDiv.textContent = displayName;
 
                     // Assemble position card
                     positionCard.appendChild(positionNumber);
-                    positionCard.appendChild(positionName);
+                    positionCard.appendChild(positionNameDiv);
                     positionCard.appendChild(playerNameDiv);
 
                     diamond.appendChild(positionCard);
                 });
 
-                // Populate bench
+                // Populate bench (use bench_players from new API format)
                 const currentBenchList = document.getElementById(`bench-list-${index}`);
-                if (lineupData.bench.length > 0) {
-                    lineupData.bench.forEach(player => {
+                const benchPlayers = lineupData.bench_players || lineupData.bench || [];
+                if (benchPlayers.length > 0) {
+                    benchPlayers.forEach(player => {
                         const benchPlayer = document.createElement('div');
                         benchPlayer.className = 'player-item';
                         // Determine what name to display based on current toggle state
