@@ -116,6 +116,9 @@ else:
 TEAMSNAP_API_BASE = "https://api.teamsnap.com/v3"
 TEAMSNAP_AUTH_BASE = "https://auth.teamsnap.com"
 
+# Multi-sport configuration
+VALID_SPORTS = ["baseball", "volleyball", "soccer"]
+
 # Baseball positions
 FIELDING_POSITIONS = {
     1: "Pitcher",
@@ -168,6 +171,9 @@ def login():
     """Redirect to TeamSnap OAuth"""
     # Preserve sport context for post-auth redirect
     sport = request.args.get("sport", "baseball")
+    # Validate sport before storing in session (defense in depth)
+    if sport not in VALID_SPORTS:
+        sport = "baseball"
     session["oauth_sport"] = sport
 
     auth_url = f"{TEAMSNAP_AUTH_BASE}/oauth/authorize"
@@ -210,8 +216,7 @@ def auth_callback():
         sport = session.pop("oauth_sport", "baseball")
 
         # Validate sport and construct route name
-        valid_sports = ["baseball", "volleyball", "soccer"]
-        if sport not in valid_sports:
+        if sport not in VALID_SPORTS:
             sport = "baseball"
 
         return redirect(url_for(f"{sport}_dashboard"))
@@ -863,16 +868,11 @@ def demo_mode(sport="baseball"):
     session["demo_mode"] = True
     session["access_token"] = "demo_token"  # Fake token for demo mode
 
-    # Redirect to sport-specific dashboard
-    if sport == "baseball":
-        return redirect(url_for("baseball_dashboard"))
-    elif sport == "volleyball":
-        return redirect(url_for("volleyball_dashboard"))
-    elif sport == "soccer":
-        return redirect(url_for("soccer_dashboard"))
-    else:
-        # Default to baseball for backwards compatibility
-        return redirect(url_for("baseball_dashboard"))
+    # Validate sport and redirect to sport-specific dashboard
+    if sport not in VALID_SPORTS:
+        sport = "baseball"  # Default to baseball for backwards compatibility
+
+    return redirect(url_for(f"{sport}_dashboard"))
 
 
 @app.route("/logout")
