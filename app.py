@@ -166,6 +166,10 @@ def soccer_dashboard():
 @app.route("/auth/login")
 def login():
     """Redirect to TeamSnap OAuth"""
+    # Preserve sport context for post-auth redirect
+    sport = request.args.get("sport", "baseball")
+    session["oauth_sport"] = sport
+
     auth_url = f"{TEAMSNAP_AUTH_BASE}/oauth/authorize"
     params = {
         "client_id": TEAMSNAP_CLIENT_ID,
@@ -201,7 +205,16 @@ def auth_callback():
         token_info = response.json()
 
         session["access_token"] = token_info["access_token"]
-        return redirect(url_for("index"))
+
+        # Retrieve sport context and redirect to correct dashboard
+        sport = session.pop("oauth_sport", "baseball")
+
+        # Validate sport and construct route name
+        valid_sports = ["baseball", "volleyball", "soccer"]
+        if sport not in valid_sports:
+            sport = "baseball"
+
+        return redirect(url_for(f"{sport}_dashboard"))
 
     except requests.RequestException as e:
         return f"Token exchange failed: {str(e)}", 400

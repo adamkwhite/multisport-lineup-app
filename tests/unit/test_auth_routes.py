@@ -71,7 +71,8 @@ class TestAuthRoutes:
         response = client.get("/auth/callback?code=test_code", follow_redirects=False)
 
         assert response.status_code == 302
-        assert response.location.endswith("/")
+        # Now redirects to /baseball by default (not /)
+        assert response.location.endswith("/baseball")
 
         # Check that token was stored in session
         with client.session_transaction() as sess:

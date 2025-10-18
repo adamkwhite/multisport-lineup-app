@@ -111,3 +111,41 @@ class TestSportRoutes:
         response = client.get("/demo/invalid", follow_redirects=False)
         assert response.status_code == 302
         assert response.location.endswith("/baseball")
+
+    def test_oauth_preserves_baseball_context(self, client):
+        """Test OAuth flow preserves baseball sport context"""
+        # Initiate OAuth from baseball
+        response = client.get("/auth/login?sport=baseball", follow_redirects=False)
+        assert response.status_code == 302
+        # Verify sport is stored in session
+        with client.session_transaction() as sess:
+            assert sess.get("oauth_sport") == "baseball"
+
+    def test_oauth_preserves_volleyball_context(self, client):
+        """Test OAuth flow preserves volleyball sport context"""
+        # Initiate OAuth from volleyball
+        response = client.get("/auth/login?sport=volleyball", follow_redirects=False)
+        assert response.status_code == 302
+        # Verify sport is stored in session
+        with client.session_transaction() as sess:
+            assert sess.get("oauth_sport") == "volleyball"
+
+    def test_oauth_defaults_to_baseball_without_sport(self, client):
+        """Test OAuth defaults to baseball when sport parameter missing"""
+        response = client.get("/auth/login", follow_redirects=False)
+        assert response.status_code == 302
+        # Verify default sport is stored in session
+        with client.session_transaction() as sess:
+            assert sess.get("oauth_sport") == "baseball"
+
+    def test_login_template_includes_sport_parameter(self, client):
+        """Test login template includes sport parameter in OAuth link"""
+        # Get baseball login page
+        response = client.get("/baseball")
+        assert response.status_code == 200
+        assert b"/auth/login?sport=baseball" in response.data
+
+        # Get volleyball login page
+        response = client.get("/volleyball")
+        assert response.status_code == 200
+        assert b"/auth/login?sport=volleyball" in response.data
