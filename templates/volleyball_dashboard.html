@@ -581,7 +581,7 @@
         <div class="tab-buttons no-print">
             <button class="tab-button active" onclick="openTab('teams-tab')">📋 Select Team & Game</button>
             <button class="tab-button locked" onclick="openTab('players-tab')">👥 Players</button>
-            <button class="tab-button locked" onclick="openTab('lineup-tab')">⚾ Lineup</button>
+            <button class="tab-button locked" onclick="openTab('lineup-tab')">🏐 Rotation</button>
         </div>
 
         <!-- Tab Content: Teams and Games -->
@@ -602,7 +602,7 @@
                         <span style="font-weight: 500;">Choose a game</span> from the available games
                     </li>
                     <li id="step-3" style="margin-bottom: 5px; opacity: 0.5;">
-                        <span style="font-weight: 500;">Continue</span> to view players and create lineup
+                        <span style="font-weight: 500;">Continue</span> to view players and create rotation
                     </li>
                 </ol>
             </div>
@@ -676,17 +676,17 @@
 
             <div style="margin-top: 20px;">
                 <button id="generate-lineup-btn" class="btn success" onclick="generateLineup()" style="display:none;">
-                    Generate Lineup
+                    Generate Rotation
                 </button>
                 <button class="btn" onclick="generateAndShowLineup()" id="players-next-to-lineup-btn" style="display:none; margin-left: 10px;">
-                    Next: View Lineup →
+                    Next: View Rotation →
                 </button>
             </div>
         </div>
 
-        <!-- Tab Content: Lineup -->
+        <!-- Tab Content: Rotation -->
         <div id="lineup-tab" class="tab-content">
-            <h3 class="no-print">Fielding Positions</h3>
+            <h3 class="no-print">Court Positions</h3>
             <div id="lineup-display"></div>
 
             <div id="bench-section" style="display:none;">
@@ -697,7 +697,7 @@
 
             <div style="margin-top: 30px;" class="no-print">
                 <button class="btn" onclick="regenerateLineup()" id="regenerate-btn" style="display:none;">
-                    🔄 Regenerate Lineup
+                    🔄 Regenerate Rotation
                 </button>
                 <button class="btn" onclick="openTab('players-tab')" style="margin-left: 10px;">
                     ← Back to Players
@@ -883,7 +883,7 @@
             const stepTexts = {
                 1: { action: 'Select your team', description: ' by clicking on a team card below' },
                 2: { action: 'Choose a game', description: ' from the available games' },
-                3: { action: 'Continue', description: ' to view players and create lineup' }
+                3: { action: 'Continue', description: ' to view players and create rotation' }
             };
 
             for (let i = 1; i <= 3; i++) {
@@ -1601,15 +1601,12 @@
 
                 // Define positions (values must match position IDs in config)
                 const positions = [
-                    { value: 'P', label: ' P' },
-                    { value: 'C', label: ' C' },
-                    { value: '1B', label: ' 1B' },
-                    { value: '2B', label: ' 2B' },
-                    { value: '3B', label: ' 3B' },
-                    { value: 'SS', label: ' SS' },
-                    { value: 'LF', label: ' LF' },
-                    { value: 'CF', label: ' CF' },
-                    { value: 'RF', label: ' RF' },
+                    { value: 'OH', label: ' OH' },  // Outside Hitter
+                    { value: 'MB', label: ' MB' },  // Middle Blocker
+                    { value: 'S', label: ' S' },    // Setter
+                    { value: 'OPP', label: ' OPP' },// Opposite
+                    { value: 'L', label: ' L' },    // Libero
+                    { value: 'DS', label: ' DS' },  // Defensive Specialist
                     { value: 'any', label: ' Any', className: 'any-position' }
                 ];
 
@@ -1675,7 +1672,7 @@
                 generateBtn: generateBtn ? 'found' : 'NOT FOUND',
                 nextBtn: nextBtn ? 'found' : 'NOT FOUND',
                 playerCount: players.length,
-                shouldShow: players.length >= 8
+                shouldShow: players.length >= 6  // Volleyball needs 6 players minimum
             });
 
             if (!generateBtn || !nextBtn) {
