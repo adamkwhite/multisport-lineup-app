@@ -165,7 +165,7 @@
                 <div class="sport-image">
                     <img src="/static/images/volleyball.jpg" alt="Volleyball"
                          style="width: 100%; height: 100%; object-fit: cover;"
-                         onerror="this.style.display='none'; this.parentElement.innerHTML='🏐';">
+                         onerror="this.style.display='none'; this.parentElement.textContent='🏐';">
                 </div>
                 <div class="sport-content">
                     <div class="sport-title">Volleyball</div>
@@ -180,7 +180,7 @@
                 <div class="sport-image">
                     <img src="/static/images/baseball.jpg" alt="Baseball"
                          style="width: 100%; height: 100%; object-fit: cover;"
-                         onerror="this.style.display='none'; this.parentElement.innerHTML='⚾';">
+                         onerror="this.style.display='none'; this.parentElement.textContent='⚾';">
                 </div>
                 <div class="sport-content">
                     <div class="sport-title">Baseball</div>
@@ -195,7 +195,7 @@
                 <div class="sport-image">
                     <img src="/static/images/soccer.jpg" alt="Soccer"
                          style="width: 100%; height: 100%; object-fit: cover;"
-                         onerror="this.style.display='none'; this.parentElement.innerHTML='⚽';">
+                         onerror="this.style.display='none'; const emoji=document.createTextNode('⚽'); this.parentElement.insertBefore(emoji, this.parentElement.firstChild);">
                     <div class="coming-soon">Coming Soon</div>
                 </div>
                 <div class="sport-content">
