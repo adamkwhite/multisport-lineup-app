@@ -116,6 +116,9 @@ else:
 TEAMSNAP_API_BASE = "https://api.teamsnap.com/v3"
 TEAMSNAP_AUTH_BASE = "https://auth.teamsnap.com"
 
+# Multi-sport configuration
+VALID_SPORTS = ["baseball", "volleyball", "soccer"]
+
 # Baseball positions
 FIELDING_POSITIONS = {
     1: "Pitcher",
@@ -160,12 +163,19 @@ def volleyball_dashboard():
 @app.route("/soccer")
 def soccer_dashboard():
     """Soccer lineup manager dashboard (coming soon)"""
-    return render_template("soccer_dashboard.html")
+    return render_template("soccer_dashboard.html", sport="soccer")
 
 
 @app.route("/auth/login")
 def login():
     """Redirect to TeamSnap OAuth"""
+    # Preserve sport context for post-auth redirect
+    sport = request.args.get("sport", "baseball")
+    # Validate sport before storing in session (defense in depth)
+    if sport not in VALID_SPORTS:
+        sport = "baseball"
+    session["oauth_sport"] = sport
+
     auth_url = f"{TEAMSNAP_AUTH_BASE}/oauth/authorize"
     params = {
         "client_id": TEAMSNAP_CLIENT_ID,
@@ -201,7 +211,15 @@ def auth_callback():
         token_info = response.json()
 
         session["access_token"] = token_info["access_token"]
-        return redirect(url_for("index"))
+
+        # Retrieve sport context and redirect to correct dashboard
+        sport = session.pop("oauth_sport", "baseball")
+
+        # Validate sport and construct route name
+        if sport not in VALID_SPORTS:
+            sport = "baseball"
+
+        return redirect(url_for(f"{sport}_dashboard"))
 
     except requests.RequestException as e:
         return f"Token exchange failed: {str(e)}", 400
@@ -850,16 +868,11 @@ def demo_mode(sport="baseball"):
     session["demo_mode"] = True
     session["access_token"] = "demo_token"  # Fake token for demo mode
 
-    # Redirect to sport-specific dashboard
-    if sport == "baseball":
-        return redirect(url_for("baseball_dashboard"))
-    elif sport == "volleyball":
-        return redirect(url_for("volleyball_dashboard"))
-    elif sport == "soccer":
-        return redirect(url_for("soccer_dashboard"))
-    else:
-        # Default to baseball for backwards compatibility
-        return redirect(url_for("baseball_dashboard"))
+    # Validate sport and redirect to sport-specific dashboard
+    if sport not in VALID_SPORTS:
+        sport = "baseball"  # Default to baseball for backwards compatibility
+
+    return redirect(url_for(f"{sport}_dashboard"))
 
 
 @app.route("/logout")

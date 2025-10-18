@@ -71,7 +71,8 @@ class TestAuthRoutes:
         response = client.get("/auth/callback?code=test_code", follow_redirects=False)
 
         assert response.status_code == 302
-        assert response.location.endswith("/")
+        # Now redirects to /baseball by default (not /)
+        assert response.location.endswith("/baseball")
 
         # Check that token was stored in session
         with client.session_transaction() as sess:
@@ -89,6 +90,52 @@ class TestAuthRoutes:
 
         assert response.status_code == 400
         assert b"Token exchange failed" in response.data
+
+    @patch("app.requests.post")
+    def test_auth_callback_redirects_to_volleyball(self, mock_post, client):
+        """Test callback redirects to volleyball when sport context set"""
+        # Set sport context in session (simulating /auth/login flow)
+        with client.session_transaction() as sess:
+            sess["oauth_sport"] = "volleyball"
+
+        # Mock OAuth response
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"access_token": "test_token_volleyball"}
+        mock_response.raise_for_status = MagicMock()
+        mock_post.return_value = mock_response
+
+        response = client.get("/auth/callback?code=test_code", follow_redirects=False)
+
+        assert response.status_code == 302
+        assert response.location.endswith("/volleyball")
+
+        # Check that token was stored and sport context was cleared
+        with client.session_transaction() as sess:
+            assert sess.get("access_token") == "test_token_volleyball"
+            assert "oauth_sport" not in sess  # Should be popped
+
+    @patch("app.requests.post")
+    def test_auth_callback_validates_invalid_sport(self, mock_post, client):
+        """Test callback validates and defaults to baseball for invalid sports"""
+        # Set invalid sport context in session
+        with client.session_transaction() as sess:
+            sess["oauth_sport"] = "invalid_sport"
+
+        # Mock OAuth response
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"access_token": "test_token_invalid"}
+        mock_response.raise_for_status = MagicMock()
+        mock_post.return_value = mock_response
+
+        response = client.get("/auth/callback?code=test_code", follow_redirects=False)
+
+        assert response.status_code == 302
+        # Should default to baseball for invalid sport
+        assert response.location.endswith("/baseball")
+
+        # Check that token was stored
+        with client.session_transaction() as sess:
+            assert sess.get("access_token") == "test_token_invalid"
 
     def test_logout(self, client):
         """Test logout clears session"""
