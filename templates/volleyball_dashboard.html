@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Baseball Lineup Manager - Dashboard</title>
+    <title>Volleyball Lineup Manager - Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -556,8 +556,8 @@
 <body>
     <div class="header no-print">
         <div>
-            <span class="logo">⚾</span>
-            <strong>Baseball Lineup Manager{% if session.demo_mode %} <span class="demo-indicator">(DEMO)</span>{% endif %}</strong>
+            <span class="logo">🏐</span>
+            <strong>Volleyball Lineup Manager{% if session.demo_mode %} <span class="demo-indicator">(DEMO)</span>{% endif %}</strong>
         </div>
         <div style="position: relative;">
             <button class="btn" onclick="resetUserGuidance(); loadTeams()">Refresh Teams</button>
@@ -581,7 +581,7 @@
         <div class="tab-buttons no-print">
             <button class="tab-button active" onclick="openTab('teams-tab')">📋 Select Team & Game</button>
             <button class="tab-button locked" onclick="openTab('players-tab')">👥 Players</button>
-            <button class="tab-button locked" onclick="openTab('lineup-tab')">⚾ Lineup</button>
+            <button class="tab-button locked" onclick="openTab('lineup-tab')">🏐 Rotation</button>
         </div>
 
         <!-- Tab Content: Teams and Games -->
@@ -602,7 +602,7 @@
                         <span style="font-weight: 500;">Choose a game</span> from the available games
                     </li>
                     <li id="step-3" style="margin-bottom: 5px; opacity: 0.5;">
-                        <span style="font-weight: 500;">Continue</span> to view players and create lineup
+                        <span style="font-weight: 500;">Continue</span> to view players and create rotation
                     </li>
                 </ol>
             </div>
@@ -676,17 +676,17 @@
 
             <div style="margin-top: 20px;">
                 <button id="generate-lineup-btn" class="btn success" onclick="generateLineup()" style="display:none;">
-                    Generate Lineup
+                    Generate Rotation
                 </button>
                 <button class="btn" onclick="generateAndShowLineup()" id="players-next-to-lineup-btn" style="display:none; margin-left: 10px;">
-                    Next: View Lineup →
+                    Next: View Rotation →
                 </button>
             </div>
         </div>
 
-        <!-- Tab Content: Lineup -->
+        <!-- Tab Content: Rotation -->
         <div id="lineup-tab" class="tab-content">
-            <h3 class="no-print">Fielding Positions</h3>
+            <h3 class="no-print">Court Positions</h3>
             <div id="lineup-display"></div>
 
             <div id="bench-section" style="display:none;">
@@ -697,7 +697,7 @@
 
             <div style="margin-top: 30px;" class="no-print">
                 <button class="btn" onclick="regenerateLineup()" id="regenerate-btn" style="display:none;">
-                    🔄 Regenerate Lineup
+                    🔄 Regenerate Rotation
                 </button>
                 <button class="btn" onclick="openTab('players-tab')" style="margin-left: 10px;">
                     ← Back to Players
@@ -744,7 +744,10 @@
                 teamsAccessible: true,
                 playersAccessible: false,
                 lineupAccessible: false
-            }
+            },
+
+            // Sport (hardcoded for volleyball)
+            sport: "volleyball"
         };
 
         // State management helper functions
@@ -880,7 +883,7 @@
             const stepTexts = {
                 1: { action: 'Select your team', description: ' by clicking on a team card below' },
                 2: { action: 'Choose a game', description: ' from the available games' },
-                3: { action: 'Continue', description: ' to view players and create lineup' }
+                3: { action: 'Continue', description: ' to view players and create rotation' }
             };
 
             for (let i = 1; i <= 3; i++) {
@@ -1598,15 +1601,12 @@
 
                 // Define positions (values must match position IDs in config)
                 const positions = [
-                    { value: 'P', label: ' P' },
-                    { value: 'C', label: ' C' },
-                    { value: '1B', label: ' 1B' },
-                    { value: '2B', label: ' 2B' },
-                    { value: '3B', label: ' 3B' },
-                    { value: 'SS', label: ' SS' },
-                    { value: 'LF', label: ' LF' },
-                    { value: 'CF', label: ' CF' },
-                    { value: 'RF', label: ' RF' },
+                    { value: 'OH', label: ' OH' },  // Outside Hitter
+                    { value: 'MB', label: ' MB' },  // Middle Blocker
+                    { value: 'S', label: ' S' },    // Setter
+                    { value: 'OPP', label: ' OPP' },// Opposite
+                    { value: 'L', label: ' L' },    // Libero
+                    { value: 'DS', label: ' DS' },  // Defensive Specialist
                     { value: 'any', label: ' Any', className: 'any-position' }
                 ];
 
@@ -1672,7 +1672,7 @@
                 generateBtn: generateBtn ? 'found' : 'NOT FOUND',
                 nextBtn: nextBtn ? 'found' : 'NOT FOUND',
                 playerCount: players.length,
-                shouldShow: players.length >= 8
+                shouldShow: players.length >= 6  // Volleyball needs 6 players minimum
             });
 
             if (!generateBtn || !nextBtn) {
@@ -1680,7 +1680,7 @@
                 return;
             }
 
-            if (players.length >= 8) {
+            if (players.length >= 6) {
                 generateBtn.style.display = 'inline-block';
                 generateBtn.textContent = `Generate Lineup (${players.length} players)`;
                 nextBtn.style.display = 'inline-block';
@@ -1688,7 +1688,7 @@
             } else {
                 generateBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
-                showError(`Need at least 8 players for a lineup. Currently have ${players.length} attending.`);
+                showError(`Need at least 6 players for a volleyball lineup. Currently have ${players.length} attending.`);
             }
         }
 
@@ -1749,6 +1749,7 @@
                         'X-CSRFToken': csrfToken
                     },
                     body: JSON.stringify({
+                        sport: appState.sport,
                         players: playersWithPreferences
                     })
                 });
@@ -1823,7 +1824,7 @@
             const headerText = document.createElement('p');
             headerText.style.color = '#666';
             headerText.style.margin = '5px 0';
-            headerText.textContent = `${data.lineups.length} Lineup${data.lineups.length > 1 ? 's' : ''} Available • One Per Pitcher`;
+            headerText.textContent = `${data.lineups.length} Rotation${data.lineups.length > 1 ? 's' : ''} Available`;
 
             headerDiv.appendChild(headerText);
 
@@ -1861,34 +1862,19 @@
                 titleDiv.style.marginBottom = '20px';
 
                 const titleHeader = document.createElement('h3');
-                titleHeader.textContent = `Lineup ${index + 1}`;
+                titleHeader.textContent = `Set ${index + 1}`;
                 titleDiv.appendChild(titleHeader);
 
-                // Create baseball diamond
-                const diamond = document.createElement('div');
-                diamond.className = 'baseball-diamond';
-                diamond.id = `diamond-${index}`;
-
-                // Create diamond elements
-                const homePlate = document.createElement('div');
-                homePlate.className = 'home-plate';
-                diamond.appendChild(homePlate);
-
-                const firstBase = document.createElement('div');
-                firstBase.className = 'base first-base-marker';
-                diamond.appendChild(firstBase);
-
-                const secondBase = document.createElement('div');
-                secondBase.className = 'base second-base-marker';
-                diamond.appendChild(secondBase);
-
-                const thirdBase = document.createElement('div');
-                thirdBase.className = 'base third-base-marker';
-                diamond.appendChild(thirdBase);
-
-                const pitchersMound = document.createElement('div');
-                pitchersMound.className = 'pitchers-mound';
-                diamond.appendChild(pitchersMound);
+                // Create simple position list for volleyball (court diagram coming soon)
+                const positionList = document.createElement('div');
+                positionList.id = `position-list-${index}`;
+                positionList.style.display = 'grid';
+                positionList.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                positionList.style.gap = '10px';
+                positionList.style.marginBottom = '20px';
+                positionList.style.padding = '20px';
+                positionList.style.backgroundColor = '#f8f9fa';
+                positionList.style.borderRadius = '8px';
 
                 // Create bench section
                 const benchSection = document.createElement('div');
@@ -1904,25 +1890,12 @@
 
                 // Assemble lineup section
                 lineupSection.appendChild(titleDiv);
-                lineupSection.appendChild(diamond);
+                lineupSection.appendChild(positionList);
                 lineupSection.appendChild(benchSection);
 
                 allLineupsDiv.appendChild(lineupSection);
 
-                // Position class mapping
-                const positionClasses = {
-                    1: 'pitcher',
-                    2: 'catcher',
-                    3: 'first-base',
-                    4: 'second-base',
-                    5: 'third-base',
-                    6: 'shortstop',
-                    7: 'left-field',
-                    8: 'center-field',
-                    9: 'right-field'
-                };
-
-                // Display fielding positions on the diamond
+                // Display positions in simple grid format (volleyball court diagram coming soon)
                 // Handle new API format with assignments array
                 if (!lineupData.assignments || !Array.isArray(lineupData.assignments)) {
                     console.error('Invalid lineup data - missing assignments array:', lineupData);
@@ -1931,51 +1904,41 @@
 
                 lineupData.assignments.forEach(assignment => {
                     const positionCard = document.createElement('div');
-                    const position = assignment.position;  // "P", "C", "1B", etc.
+                    const position = assignment.position;  // "S", "OH", "MB", etc.
 
-                    // Map position IDs to position numbers for styling
-                    const positionToNumber = {
-                        'P': 1, 'C': 2, '1B': 3, '2B': 4, '3B': 5,
-                        'SS': 6, 'LF': 7, 'CF': 8, 'RF': 9
-                    };
-                    const positionNum = positionToNumber[position] || 0;
-                    const positionClass = positionClasses[positionNum] || '';
-
-                    positionCard.className = `position-card ${positionClass}`;
+                    positionCard.style.padding = '15px';
+                    positionCard.style.backgroundColor = 'white';
+                    positionCard.style.borderRadius = '8px';
+                    positionCard.style.border = '2px solid #e0e0e0';
+                    positionCard.style.textAlign = 'center';
 
                     const playerInfo = assignment.player;
-                    const positionName = position;  // Use position ID as name for now
                     // Determine what name to display based on current toggle state
                     const toggle = document.getElementById('name-toggle');
                     const hideNames = toggle ? toggle.checked : false;
                     const displayName = hideNames ? obfuscateName(playerInfo.name) : playerInfo.name;
 
-                    // Create position number (use position number from mapping)
-                    const positionNumber = document.createElement('div');
-                    positionNumber.className = 'position-number';
-                    positionNumber.textContent = positionNum;
-
                     // Create position name element
                     const positionNameDiv = document.createElement('div');
-                    positionNameDiv.className = 'position-name';
-                    positionNameDiv.style.fontSize = '10px';
-                    positionNameDiv.style.margin = '2px 0';
+                    positionNameDiv.style.fontSize = '14px';
+                    positionNameDiv.style.fontWeight = 'bold';
+                    positionNameDiv.style.color = '#3498db';
+                    positionNameDiv.style.marginBottom = '8px';
                     positionNameDiv.textContent = position;
 
                     // Create player name
                     const playerNameDiv = document.createElement('div');
                     playerNameDiv.className = 'player-name';
                     playerNameDiv.setAttribute('data-original-name', playerInfo.name);
-                    playerNameDiv.style.fontSize = '11px';
+                    playerNameDiv.style.fontSize = '13px';
                     playerNameDiv.style.fontWeight = 'bold';
                     playerNameDiv.textContent = displayName;
 
                     // Assemble position card
-                    positionCard.appendChild(positionNumber);
                     positionCard.appendChild(positionNameDiv);
                     positionCard.appendChild(playerNameDiv);
 
-                    diamond.appendChild(positionCard);
+                    positionList.appendChild(positionCard);
                 });
 
                 // Populate bench (use bench_players from new API format)

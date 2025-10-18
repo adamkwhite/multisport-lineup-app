@@ -1,0 +1,2234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Baseball Lineup Manager - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        .logo {
+            font-size: 1.8em;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn.danger {
+            background-color: #e74c3c;
+        }
+        .btn.danger:hover {
+            background-color: #c0392b;
+        }
+        .btn.success {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn.success:hover {
+            background-color: #219a52;
+            color: white;
+        }
+        .games-list, .players-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .game-item, .player-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .game-item:hover, .player-item:hover {
+            background-color: #f8f9fa;
+        }
+        .game-item.selected {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        /* Team Selection Radio Button Styles */
+        .team-card-container {
+            position: relative;
+            margin: 5px 0;
+        }
+        .team-radio {
+            display: none;
+        }
+        .team-radio:focus + .team-card {
+            outline: 2px solid #3498db;
+            outline-offset: 2px;
+        }
+        .team-card {
+            display: block;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: white;
+            transition: all 0.2s ease;
+            position: relative;
+            margin: 0;
+        }
+        .team-card:hover {
+            background-color: #f8f9fa;
+            border-color: #3498db;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+            cursor: pointer;
+        }
+        .team-card:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+        }
+        .team-radio:checked + .team-card {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            border-width: 2px;
+            box-shadow: 0 2px 10px rgba(33, 150, 243, 0.2);
+        }
+        .team-radio:checked + .team-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.25);
+        }
+        .selection-indicator {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            width: 20px;
+            height: 20px;
+            transform: translateY(-50%);
+        }
+        .radio-visual {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            background-color: white;
+            transition: all 0.2s ease;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .team-card:hover .radio-visual {
+            border-color: #3498db;
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+        .team-radio:checked + .team-card .radio-visual {
+            border-color: #2196f3;
+            background-color: white;
+        }
+        .team-radio:checked + .team-card .radio-visual::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #2196f3;
+            transform: translate(-50%, -50%);
+        }
+        .lineup-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Baseball Diamond Layout */
+        .baseball-diamond {
+            position: relative;
+            width: 700px;
+            height: 600px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, #8fbc8f 0%, #90ee90 100%);
+            border-radius: 10px;
+            border: 3px solid #654321;
+        }
+
+        .position-card {
+            position: absolute;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #333;
+            min-width: 70px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transform: translate(-50%, -50%);
+        }
+
+        /* Position-specific styling */
+        .pitcher { top: 65%; left: 50%; background: #fff3cd; }
+        .catcher { top: 90%; left: 50%; background: #d1ecf1; }
+        .first-base { top: 65%; left: 85%; background: #d4edda; }
+        .second-base { top: 45%; left: 65%; background: #d4edda; }
+        .third-base { top: 65%; left: 15%; background: #d4edda; }
+        .shortstop { top: 45%; left: 35%; background: #d4edda; }
+        .left-field { top: 20%; left: 20%; background: #e2e3e5; }
+        .center-field { top: 15%; left: 50%; background: #e2e3e5; }
+        .right-field { top: 20%; left: 80%; background: #e2e3e5; }
+
+        /* Home plate and bases */
+        .base {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 2px solid #333;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .home-plate {
+            top: 85%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            background: white;
+            border: 2px solid #333;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%);
+            transform: translate(-50%, -50%);
+        }
+        .first-base-marker { top: 65%; left: 85%; }
+        .second-base-marker { top: 35%; left: 50%; }
+        .third-base-marker { top: 65%; left: 15%; }
+
+        /* Pitcher's mound */
+        .pitchers-mound {
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: #deb887;
+            border-radius: 50%;
+            border: 2px solid #8b7355;
+            transform: translate(-50%, -50%);
+        }
+        .position-number {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c5aa0;
+        }
+        .position-name {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+        .player-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ffebee, #fce4ec);
+            border: 1px solid #f48fb1;
+            border-left: 4px solid #e91e63;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #880e4f;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            border: 1px solid #81c784;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #2e7d32;
+        }
+
+        .retry-button {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
+        .retry-button:hover {
+            background: #e64a19;
+        }
+        .error {
+            color: #e74c3c;
+            background-color: #fdf2f2;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #27ae60;
+            background-color: #f0f9f4;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .position-checkboxes {
+            display: inline-flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .position-checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 12px;
+            background: #f0f0f0;
+            padding: 3px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .position-checkboxes input[type="checkbox"] {
+            margin: 0;
+        }
+        .position-checkboxes label:has(input:checked) {
+            background: #3498db;
+            color: white;
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            .lineup-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            /* Mobile team card optimizations */
+            .team-card {
+                padding: 12px;
+                font-size: 16px; /* Larger touch targets */
+                min-height: 44px; /* iOS recommended touch target size */
+            }
+            .selection-indicator {
+                left: 12px;
+                width: 24px;
+                height: 24px;
+            }
+            .radio-visual {
+                width: 22px;
+                height: 22px;
+            }
+            .team-info {
+                padding-left: 50px !important; /* More space for larger radio button */
+            }
+            .team-card:hover {
+                transform: none; /* Disable hover animations on mobile */
+                box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Small mobile optimizations */
+            .team-card {
+                padding: 15px 10px;
+                margin: 8px 0;
+            }
+            .team-card strong {
+                font-size: 18px;
+            }
+            .team-card small {
+                font-size: 14px;
+                line-height: 1.4;
+            }
+            .selection-indicator {
+                left: 10px;
+            }
+            .team-info {
+                padding-left: 45px !important;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            /* Large screen optimizations */
+            .team-card {
+                max-width: 600px; /* Prevent cards from becoming too wide */
+            }
+        }
+
+        /* Tab Styles */
+        .tab-container {
+            width: 100%;
+        }
+        .tab-buttons {
+            display: flex;
+            background-color: #f1f1f1;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            border-bottom: 3px solid transparent;
+            position: relative;
+        }
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+        .tab-button.active {
+            background-color: white;
+            border-bottom: 3px solid #3498db;
+            color: #3498db;
+        }
+        .tab-button.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #e8e8e8;
+        }
+        .tab-button.locked:hover {
+            background-color: #e8e8e8;
+        }
+        .tab-button.locked::after {
+            content: " 🔒";
+            font-size: 14px;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Hamburger Menu Styles */
+        .hamburger-menu {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .hamburger-menu:hover {
+            background-color: #f0f0f0;
+            color: #3498db;
+        }
+
+        /* Dropdown Menu Styles */
+        .menu-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 180px;
+            margin-top: 5px;
+        }
+        .menu-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 0;
+            font-size: 14px;
+        }
+        .menu-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        /* Print styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                font-size: 12px;
+            }
+            .tab-container {
+                border: none;
+                box-shadow: none;
+                background: none;
+            }
+            .lineup-container {
+                page-break-after: always;
+                page-break-inside: avoid;
+                margin-bottom: 0;
+                height: auto;
+                min-height: 0;
+            }
+            .lineup-container:last-child {
+                page-break-after: auto;
+            }
+            h3 {
+                margin-top: 0;
+                margin-bottom: 10px;
+                font-size: 16px;
+            }
+            p {
+                margin: 5px 0;
+            }
+        }
+        .demo-indicator {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header no-print">
+        <div>
+            <span class="logo">⚾</span>
+            <strong>Baseball Lineup Manager{% if session.demo_mode %} <span class="demo-indicator">(DEMO)</span>{% endif %}</strong>
+        </div>
+        <div style="position: relative;">
+            <button class="btn" onclick="resetUserGuidance(); loadTeams()">Refresh Teams</button>
+            <a href="/logout" class="btn danger">Logout</a>
+            <button class="hamburger-menu" onclick="toggleMenu()">☰</button>
+
+            <!-- Dropdown Menu -->
+            <div id="menu-dropdown" class="menu-dropdown" style="display: none;">
+                <div class="menu-item">
+                    <label>
+                        <input type="checkbox" id="name-toggle"> Hide Player Names
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Container -->
+    <div class="tab-container">
+        <!-- Tab Buttons -->
+        <div class="tab-buttons no-print">
+            <button class="tab-button active" onclick="openTab('teams-tab')">📋 Select Team & Game</button>
+            <button class="tab-button locked" onclick="openTab('players-tab')">👥 Players</button>
+            <button class="tab-button locked" onclick="openTab('lineup-tab')">⚾ Lineup</button>
+        </div>
+
+        <!-- Tab Content: Teams and Games -->
+        <div id="teams-tab" class="tab-content active">
+            <h3>Select Team & Game</h3>
+
+            <!-- User Guidance -->
+            <div id="user-guidance" style="background: linear-gradient(135deg, #e3f2fd, #f8f9fa); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 20px; margin-right: 8px;">📋</span>
+                    <strong style="color: #1976d2;">Getting Started</strong>
+                </div>
+                <ol style="margin: 0; padding-left: 20px; color: #555;">
+                    <li id="step-1" style="margin-bottom: 5px;">
+                        <span style="font-weight: 500;">Select your team</span> by clicking on a team card below
+                    </li>
+                    <li id="step-2" style="margin-bottom: 5px; opacity: 0.5;">
+                        <span style="font-weight: 500;">Choose a game</span> from the available games
+                    </li>
+                    <li id="step-3" style="margin-bottom: 5px; opacity: 0.5;">
+                        <span style="font-weight: 500;">Continue</span> to view players and create lineup
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Team Status Filter -->
+            <div style="margin-bottom: 20px;">
+                <label for="team-status-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Filter Teams:</label>
+                <select id="team-status-filter" class="btn" style="width: 200px;" onchange="filterTeams()">
+                    <option value="all" selected>All Teams</option>
+                    <option value="active">Active Teams Only</option>
+                    <option value="archived">Archived Teams Only</option>
+                </select>
+            </div>
+
+            <div id="teams-loading" class="loading">
+                <div class="loading-spinner"></div>
+                Loading teams...
+            </div>
+            <div id="teams-list" style="display:none;"></div>
+
+            <div id="games-section" style="display:none;">
+                <hr style="margin: 30px 0;">
+                <h4>Upcoming Games</h4>
+
+                <!-- Game Filter -->
+                <div style="margin-bottom: 15px;">
+                    <label for="game-filter" style="display: block; margin-bottom: 5px; font-weight: bold;">Show Games:</label>
+                    <select id="game-filter" class="btn" style="width: 180px;" onchange="filterGames()">
+                        <option value="next">Next Game Only</option>
+                        <option value="all" selected>All Upcoming Games</option>
+                        <option value="all-states">All Games (Any State)</option>
+                    </select>
+                </div>
+
+                <div id="games-loading" class="loading">
+                    <div class="loading-spinner"></div>
+                    Loading games...
+                </div>
+                <div id="games-list" class="games-list"></div>
+
+                <!-- Enhanced Continue Button -->
+                <div id="continue-section" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #e8f5e8, #f0f8f0); border-radius: 8px; border-left: 4px solid #4caf50; display: none;">
+                    <div style="text-align: center;">
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 24px;">✅</span>
+                            <div style="margin-top: 8px; font-weight: 600; color: #2e7d32;">Ready to Continue!</div>
+                            <div style="color: #555; font-size: 14px;">You've selected your team and game</div>
+                        </div>
+                        <button class="btn success" onclick="openTab('players-tab')" id="next-to-players-btn" style="font-size: 16px; padding: 12px 24px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none;">
+                            <span style="margin-right: 8px;">👥</span>
+                            Continue to View Players
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Players -->
+        <div id="players-tab" class="tab-content">
+            <h3>Attending Players</h3>
+            <div id="selected-game-info" style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; display:none;">
+                <strong>Selected Game:</strong> <span id="selected-game-name"></span><br>
+                <small id="selected-game-details"></small>
+            </div>
+
+            <div id="players-loading" class="loading">
+                <div class="loading-spinner"></div>
+                Loading players...
+            </div>
+            <div id="players-list" class="players-list"></div>
+
+            <div style="margin-top: 20px;">
+                <button id="generate-lineup-btn" class="btn success" onclick="generateLineup()" style="display:none;">
+                    Generate Lineup
+                </button>
+                <button class="btn" onclick="generateAndShowLineup()" id="players-next-to-lineup-btn" style="display:none; margin-left: 10px;">
+                    Next: View Lineup →
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Content: Lineup -->
+        <div id="lineup-tab" class="tab-content">
+            <h3 class="no-print">Fielding Positions</h3>
+            <div id="lineup-display"></div>
+
+            <div id="bench-section" style="display:none;">
+                <hr style="margin: 30px 0;">
+                <h4>Bench Players</h4>
+                <div id="bench-list"></div>
+            </div>
+
+            <div style="margin-top: 30px;" class="no-print">
+                <button class="btn" onclick="regenerateLineup()" id="regenerate-btn" style="display:none;">
+                    🔄 Regenerate Lineup
+                </button>
+                <button class="btn" onclick="openTab('players-tab')" style="margin-left: 10px;">
+                    ← Back to Players
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced state management structure
+        const appState = {
+            // Team selection state
+            selectedTeam: {
+                id: null,
+                name: null,
+                data: null,
+                selectedAt: null
+            },
+
+            // Game selection state
+            selectedGame: {
+                id: null,
+                name: null,
+                data: null,
+                selectedAt: null
+            },
+
+            // Players state
+            attendingPlayers: [],
+
+            // Data cache
+            allTeams: [],
+            allGames: [],
+
+            // UI state
+            ui: {
+                currentFilter: 'all',
+                gamesVisible: false,
+                playersVisible: false
+            },
+
+            // Tab accessibility state
+            tabs: {
+                teamsAccessible: true,
+                playersAccessible: false,
+                lineupAccessible: false
+            },
+
+            // Sport (hardcoded for baseball)
+            sport: "baseball"
+        };
+
+        // State management helper functions
+        const StateManager = {
+            // Team selection methods
+            setSelectedTeam(teamId, teamName, teamData = null) {
+                console.log('StateManager: Setting selected team:', teamId, teamName);
+                appState.selectedTeam = {
+                    id: teamId,
+                    name: teamName,
+                    data: teamData,
+                    selectedAt: new Date().toISOString()
+                };
+                // Update legacy variable for backward compatibility
+                selectedTeam = teamId;
+                this.updateUI();
+            },
+
+            getSelectedTeam() {
+                return appState.selectedTeam;
+            },
+
+            clearSelectedTeam() {
+                console.log('StateManager: Clearing selected team');
+                appState.selectedTeam = { id: null, name: null, data: null, selectedAt: null };
+                selectedTeam = null;
+                this.updateUI();
+            },
+
+            // Game selection methods
+            setSelectedGame(gameId, gameName, gameData = null) {
+                console.log('StateManager: Setting selected game:', gameId, gameName);
+                appState.selectedGame = {
+                    id: gameId,
+                    name: gameName,
+                    data: gameData,
+                    selectedAt: new Date().toISOString()
+                };
+                selectedGame = gameId;
+                this.updateUI();
+            },
+
+            getSelectedGame() {
+                return appState.selectedGame;
+            },
+
+            clearSelectedGame() {
+                console.log('StateManager: Clearing selected game');
+                appState.selectedGame = { id: null, name: null, data: null, selectedAt: null };
+                selectedGame = null;
+                this.updateUI();
+            },
+
+            // UI state methods
+            updateUI() {
+                appState.ui.gamesVisible = appState.selectedTeam.id !== null;
+                appState.ui.playersVisible = appState.selectedGame.id !== null;
+                console.log('StateManager: UI state updated:', appState.ui);
+            },
+
+            // Validation methods
+            isTeamSelected() {
+                return appState.selectedTeam.id !== null;
+            },
+
+            isGameSelected() {
+                return appState.selectedGame.id !== null;
+            },
+
+            // Debug method
+            logCurrentState() {
+                console.log('Current App State:', JSON.stringify(appState, null, 2));
+            }
+        };
+
+        // Legacy variables for backward compatibility (will be removed gradually)
+        let selectedTeam = null;
+        let selectedGame = null;
+        let attendingPlayers = [];
+        let allTeams = []; // Store all teams for filtering
+        let allGames = []; // Store all games for filtering
+        let isRefreshing = false; // Flag to prevent state restoration during refresh
+
+        // Load teams on page load
+        window.onload = function() {
+            // Reset user guidance to initial state
+            resetUserGuidance();
+
+            // Initialize toggle state first
+            loadToggleState();
+
+            // Add event listener to toggle
+            const toggle = document.getElementById('name-toggle');
+            if (toggle) {
+                toggle.addEventListener('change', toggleNameObfuscation);
+            }
+
+            // Initialize tab lock states
+            updateTabLockStates();
+
+            // Then load teams
+            loadTeams();
+        };
+
+        // Hamburger menu functionality
+        function toggleMenu() {
+            const menu = document.getElementById('menu-dropdown');
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menu-dropdown');
+            const hamburger = document.querySelector('.hamburger-menu');
+
+            // If click is outside both menu and hamburger button, close the menu
+            if (menu && hamburger && !menu.contains(event.target) && !hamburger.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
+
+        // Reset user guidance to initial state
+        function resetUserGuidance() {
+            console.log('resetUserGuidance called');
+
+            // Set flag to prevent state restoration
+            isRefreshing = true;
+
+            const stepTexts = {
+                1: { action: 'Select your team', description: ' by clicking on a team card below' },
+                2: { action: 'Choose a game', description: ' from the available games' },
+                3: { action: 'Continue', description: ' to view players and create lineup' }
+            };
+
+            for (let i = 1; i <= 3; i++) {
+                const step = document.getElementById(`step-${i}`);
+                if (step) {
+                    // Reset to original text and styling (XSS safe)
+                    // Clear first using safe DOM method
+                    while (step.firstChild) {
+                        step.removeChild(step.firstChild);
+                    }
+
+                    // Create safe DOM elements
+                    const actionSpan = document.createElement('span');
+                    actionSpan.style.fontWeight = '500';
+                    actionSpan.textContent = stepTexts[i].action;
+
+                    const descText = document.createTextNode(stepTexts[i].description);
+
+                    step.appendChild(actionSpan);
+                    step.appendChild(descText);
+
+                    step.style.opacity = i === 1 ? '1' : '0.5';
+                    step.style.color = '#555';
+                    step.style.fontWeight = 'normal';
+                    console.log(`Reset step ${i} to initial state`);
+                }
+            }
+
+            // Hide continue section
+            const continueSection = document.getElementById('continue-section');
+            if (continueSection) {
+                continueSection.style.display = 'none';
+                console.log('Hidden continue section');
+            }
+
+            // Hide games section too
+            const gamesSection = document.getElementById('games-section');
+            if (gamesSection) {
+                gamesSection.style.display = 'none';
+                console.log('Hidden games section');
+            }
+
+            // Clear state management selections
+            StateManager.clearSelectedTeam();
+            StateManager.clearSelectedGame();
+            console.log('Cleared state management selections');
+
+            // Reset tab accessibility - lock Players and Lineup tabs
+            appState.tabs.playersAccessible = false;
+            appState.tabs.lineupAccessible = false;
+            updateTabLockStates();
+
+            // Return to teams tab
+            openTab('teams-tab');
+        }
+
+        // Update user guidance progress (XSS safe)
+        function updateUserGuidanceProgress(completedStep) {
+            for (let i = 1; i <= 3; i++) {
+                const step = document.getElementById(`step-${i}`);
+                if (step) {
+                    if (i <= completedStep) {
+                        step.style.opacity = '1';
+                        step.style.color = '#2e7d32';
+                        step.style.fontWeight = '600';
+                        // Add checkmark for completed steps (but not current step)
+                        if (i < completedStep && !step.textContent.startsWith('✅')) {
+                            // Safely prepend checkmark
+                            const checkmark = document.createTextNode('✅ ');
+                            step.insertBefore(checkmark, step.firstChild);
+                        }
+                    } else {
+                        step.style.opacity = '0.5';
+                        step.style.color = '#555';
+                        step.style.fontWeight = 'normal';
+                    }
+                }
+            }
+        }
+
+        // Name obfuscation functionality
+        function obfuscateName(fullName) {
+            if (!fullName || !fullName.trim()) {
+                return "Unknown Player";
+            }
+
+            const parts = fullName.trim().split(' ');
+            if (parts.length < 2) {
+                // Handle single names
+                const name = parts[0];
+                if (name.length === 1) {
+                    return name;
+                }
+                return name[0] + '*'.repeat(name.length - 1);
+            }
+
+            const firstName = parts[0];
+            const lastName = parts[parts.length - 1]; // Handle middle names by taking last part
+
+            // Handle very short names
+            let firstPart;
+            if (firstName.length === 1) {
+                firstPart = firstName;
+            } else {
+                firstPart = firstName[0] + '*'.repeat(firstName.length - 1);
+            }
+
+            let lastPart;
+            if (lastName.length === 1) {
+                lastPart = lastName;
+            } else {
+                lastPart = lastName[0] + '*'.repeat(lastName.length - 1);
+            }
+
+            return firstPart + ' ' + lastPart;
+        }
+
+        function toggleNameObfuscation() {
+            const toggle = document.getElementById('name-toggle');
+            const hideNames = toggle.checked;
+
+            // Save preference to localStorage
+            localStorage.setItem('hidePlayerNames', hideNames.toString());
+
+            // Update all visible player names
+            updateAllPlayerNames();
+        }
+
+        function updateAllPlayerNames() {
+            const toggle = document.getElementById('name-toggle');
+            const hideNames = toggle ? toggle.checked : false; // Checked = hide names (obfuscate)
+
+            // Update all elements with class "player-name"
+            document.querySelectorAll('.player-name').forEach(element => {
+                const originalName = element.dataset.originalName;
+                const obfuscatedName = element.dataset.obfuscatedName;
+                if (originalName) {
+                    element.textContent = hideNames ? (obfuscatedName || obfuscateName(originalName)) : originalName;
+                }
+            });
+        }
+
+        function loadToggleState() {
+            const savedState = localStorage.getItem('hidePlayerNames');
+            const hideNames = savedState === 'true'; // Default to false (show real names)
+
+            const toggle = document.getElementById('name-toggle');
+            if (toggle) {
+                toggle.checked = hideNames;
+            }
+
+            return hideNames;
+        }
+
+
+        // Tab functionality
+        function openTab(tabName) {
+            // Check if tab is accessible based on completion state
+            if (!isTabAccessible(tabName)) {
+                console.log(`Tab ${tabName} is not accessible yet`);
+                showError(getTabAccessibilityMessage(tabName));
+                return;
+            }
+
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => button.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked button
+            const activeButton = document.querySelector(`[onclick="openTab('${tabName}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+        }
+
+        // Check if a tab is accessible based on current state
+        function isTabAccessible(tabName) {
+            switch(tabName) {
+                case 'teams-tab':
+                    return true; // Always accessible
+                case 'players-tab':
+                    return appState.tabs.playersAccessible;
+                case 'lineup-tab':
+                    return appState.tabs.lineupAccessible;
+                default:
+                    return false;
+            }
+        }
+
+        // Get message for why a tab is not accessible
+        function getTabAccessibilityMessage(tabName) {
+            switch(tabName) {
+                case 'players-tab':
+                    if (!StateManager.isTeamSelected()) {
+                        return 'Please select a team first';
+                    }
+                    if (!StateManager.isGameSelected()) {
+                        return 'Please select a game first';
+                    }
+                    return 'Players tab not yet accessible';
+                case 'lineup-tab':
+                    return 'Please generate a lineup first by going to the Players tab';
+                default:
+                    return 'This tab is not accessible yet';
+            }
+        }
+
+        // Update tab lock states based on current progress
+        function updateTabLockStates() {
+            const playersTab = document.querySelector('[onclick="openTab(\'players-tab\')"]');
+            const lineupTab = document.querySelector('[onclick="openTab(\'lineup-tab\')"]');
+
+            // Update players tab accessibility
+            if (StateManager.isTeamSelected() && StateManager.isGameSelected()) {
+                appState.tabs.playersAccessible = true;
+                if (playersTab) {
+                    playersTab.classList.remove('locked');
+                }
+            } else {
+                appState.tabs.playersAccessible = false;
+                if (playersTab) {
+                    playersTab.classList.add('locked');
+                }
+            }
+
+            // Update lineup tab accessibility
+            if (appState.tabs.lineupAccessible) {
+                if (lineupTab) {
+                    lineupTab.classList.remove('locked');
+                }
+            } else {
+                if (lineupTab) {
+                    lineupTab.classList.add('locked');
+                }
+            }
+        }
+
+        async function loadTeams() {
+            document.getElementById('teams-loading').style.display = 'block';
+            document.getElementById('teams-list').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/teams');
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayTeams(data);
+                    showSuccess(`${data.teams ? data.teams.length : 0} teams loaded successfully`);
+                } else {
+                    showError('Failed to load teams: ' + data.error, loadTeams);
+                }
+            } catch (error) {
+                showError('Failed to load teams: ' + error.message, loadTeams);
+            }
+
+            document.getElementById('teams-loading').style.display = 'none';
+        }
+
+        function displayTeams(data) {
+            // Store all teams for filtering
+            allTeams = [];
+
+            if (data.collection && data.collection.items) {
+                data.collection.items.forEach(team => {
+                    const teamData = {};
+                    team.data.forEach(d => teamData[d.name] = d.value);
+                    allTeams.push(teamData);
+                });
+            }
+
+            // Apply current filter
+            filterTeams();
+
+            document.getElementById('teams-list').style.display = 'block';
+        }
+
+        function filterTeams() {
+            const teamsList = document.getElementById('teams-list');
+            const filter = document.getElementById('team-status-filter').value;
+
+            console.log('Filtering teams with filter:', filter, 'Current selection:', selectedTeam);
+
+            // Clear teams list safely
+            while (teamsList.firstChild) {
+                teamsList.removeChild(teamsList.firstChild);
+            }
+
+            let filteredTeams = allTeams;
+
+            // Apply filter
+            if (filter === 'active') {
+                filteredTeams = allTeams.filter(team => team.is_archived !== true && team.season_name !== 'Archived');
+            } else if (filter === 'archived') {
+                filteredTeams = allTeams.filter(team => team.is_archived === true || team.season_name === 'Archived');
+            } else if (filter === 'cobs') {
+                filteredTeams = allTeams.filter(team =>
+                    team.name && team.name.toLowerCase().includes('cobs')
+                );
+            }
+
+            // Display filtered teams with radio button selection
+            filteredTeams.forEach(teamData => {
+                const teamContainer = document.createElement('div');
+                teamContainer.className = 'team-card-container';
+
+                // Create radio input
+                const radioInput = document.createElement('input');
+                radioInput.type = 'radio';
+                radioInput.name = 'team-selection';
+                radioInput.value = teamData.id;
+                radioInput.id = `team-${teamData.id}`;
+                radioInput.className = 'team-radio';
+
+                // Create label
+                const label = document.createElement('label');
+                label.setAttribute('for', `team-${teamData.id}`);
+                label.className = 'team-card';
+
+                // Create selection indicator
+                const selectionIndicator = document.createElement('div');
+                selectionIndicator.className = 'selection-indicator';
+                const radioVisual = document.createElement('span');
+                radioVisual.className = 'radio-visual';
+                selectionIndicator.appendChild(radioVisual);
+
+                // Create team info container
+                const teamInfo = document.createElement('div');
+                teamInfo.className = 'team-info';
+                teamInfo.style.paddingLeft = '45px';
+
+                // Create team name
+                const teamName = document.createElement('strong');
+                teamName.textContent = teamData.name;
+
+                // Create status badge
+                const statusBadge = document.createElement('span');
+                statusBadge.style.color = teamData.is_archived ? '#666' : '#27ae60';
+                statusBadge.style.fontSize = '12px';
+                statusBadge.textContent = teamData.is_archived ? '[ARCHIVED]' : '[ACTIVE]';
+
+                // Create division info
+                const divisionInfo = document.createElement('small');
+                divisionInfo.textContent = `Division: ${teamData.division_name || 'N/A'}`;
+
+                // Create season info
+                const seasonInfo = document.createElement('small');
+                seasonInfo.textContent = `Season: ${teamData.season_name || 'N/A'}`;
+
+                // Assemble team info
+                teamInfo.appendChild(teamName);
+                teamInfo.appendChild(document.createTextNode(' '));
+                teamInfo.appendChild(statusBadge);
+                teamInfo.appendChild(document.createElement('br'));
+                teamInfo.appendChild(divisionInfo);
+                teamInfo.appendChild(document.createElement('br'));
+                teamInfo.appendChild(seasonInfo);
+
+                // Assemble label
+                label.appendChild(selectionIndicator);
+                label.appendChild(teamInfo);
+
+                // Assemble container
+                teamContainer.appendChild(radioInput);
+                teamContainer.appendChild(label);
+
+                // Add event listener to radio button
+                radioInput.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        console.log('Radio button clicked for team:', teamData.name, 'ID:', teamData.id);
+                        selectTeam(teamData.id, teamData.name);
+                    }
+                });
+
+                // Restore selection state if this team was previously selected (but not during refresh)
+                if (!isRefreshing) {
+                    const currentSelectedTeam = StateManager.getSelectedTeam();
+                    if (currentSelectedTeam.id && currentSelectedTeam.id == teamData.id) {
+                        radioInput.checked = true;
+                        console.log('Restored selection for team:', teamData.name, 'selected at:', currentSelectedTeam.selectedAt);
+                        // Ensure games section is visible if we have a selected team
+                        if (document.getElementById('games-section').style.display === 'none') {
+                            document.getElementById('games-section').style.display = 'block';
+                        }
+                    }
+                }
+
+                teamsList.appendChild(teamContainer);
+            });
+
+            if (filteredTeams.length === 0) {
+                const noTeamsMsg = document.createElement('p');
+                noTeamsMsg.textContent = 'No teams found for the selected filter.';
+                teamsList.appendChild(noTeamsMsg);
+            }
+
+            // Check if currently selected team is still in filtered results (but not during refresh)
+            if (!isRefreshing) {
+                const currentSelectedTeam = StateManager.getSelectedTeam();
+                if (currentSelectedTeam.id) {
+                    const selectedTeamStillVisible = filteredTeams.some(team => team.id == currentSelectedTeam.id);
+                    console.log('Checking if selected team still visible:', selectedTeamStillVisible, 'for team ID:', currentSelectedTeam.id);
+                    if (!selectedTeamStillVisible) {
+                        console.log('Selected team filtered out, clearing games section');
+                        // Clear games section if selected team is no longer visible
+                        const gamesSection = document.getElementById('games-section');
+                        if (gamesSection) {
+                            gamesSection.style.display = 'none';
+                            console.log('Games section hidden');
+                        } else {
+                            console.log('ERROR: games-section element not found!');
+                        }
+                        // Note: Keep selectedTeam variable for when filter changes back
+                    }
+                } else {
+                    console.log('No selected team to check');
+                }
+            }
+
+            // Reset the refresh flag after teams are displayed
+            isRefreshing = false;
+        }
+
+        async function selectTeam(teamId, teamName) {
+            console.log('selectTeam called with:', teamId, teamName);
+
+            // Find full team data from allTeams for enhanced state
+            const teamData = allTeams.find(team => team.id === teamId) || null;
+
+            // Use enhanced state management
+            StateManager.setSelectedTeam(teamId, teamName, teamData);
+
+            // Update user guidance progress - step 1 completed
+            updateUserGuidanceProgress(1);
+
+            // Log state for analytics foundation
+            console.log('Team selection analytics:', {
+                teamId,
+                teamName,
+                selectedAt: StateManager.getSelectedTeam().selectedAt,
+                filterUsed: document.getElementById('team-status-filter').value
+            });
+
+            // Radio button selection is handled by CSS automatically
+            // No need to manually manage selection classes
+
+            // Show games section and load games
+            console.log('Showing games section...');
+            document.getElementById('games-section').style.display = 'block';
+            document.getElementById('games-loading').style.display = 'block';
+
+            // Update user guidance progress - step 2 available
+            updateUserGuidanceProgress(2);
+
+            try {
+                // Check if we need all games regardless of state
+                const gameFilter = document.getElementById('game-filter').value;
+                const url = gameFilter === 'all-states' ?
+                    `/api/games/${teamId}?include_all_states=true` :
+                    `/api/games/${teamId}`;
+                console.log('Fetching games from:', url);
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log('Games API response:', data);
+
+                if (response.ok) {
+                    displayGames(data.games);
+                } else {
+                    console.error('Games API error:', data);
+                    showError('Failed to load games: ' + data.error);
+                }
+            } catch (error) {
+                showError('Failed to load games: ' + error.message);
+            }
+
+            document.getElementById('games-loading').style.display = 'none';
+        }
+
+        function displayGames(games) {
+            console.log('displayGames called with:', games);
+            // Store all games for filtering
+            allGames = games || [];  // Ensure it's always an array
+
+            // Apply current filter
+            filterGames();
+        }
+
+        async function filterGames() {
+            const gamesList = document.getElementById('games-list');
+            const filter = document.getElementById('game-filter').value;
+
+            // Clear games list safely
+            while (gamesList.firstChild) {
+                gamesList.removeChild(gamesList.firstChild);
+            }
+
+            // If "all-states" is selected and we have a team selected, reload data
+            if (filter === 'all-states' && selectedTeam) {
+                document.getElementById('games-loading').style.display = 'block';
+                try {
+                    const response = await fetch(`/api/games/${selectedTeam}?include_all_states=true`);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        allGames = data.games;
+                    } else {
+                        const errorMsg = document.createElement('p');
+                        errorMsg.textContent = 'Error loading games';
+                        gamesList.appendChild(errorMsg);
+                        document.getElementById('games-loading').style.display = 'none';
+                        return;
+                    }
+                } catch (error) {
+                    const errorMsg = document.createElement('p');
+                    errorMsg.textContent = 'Error loading games';
+                    gamesList.appendChild(errorMsg);
+                    document.getElementById('games-loading').style.display = 'none';
+                    return;
+                }
+                document.getElementById('games-loading').style.display = 'none';
+            } else if ((filter === 'next' || filter === 'all') && selectedTeam) {
+                // If switching back from all-states, reload upcoming games only
+                const currentFilter = filter;
+                document.getElementById('games-loading').style.display = 'block';
+                try {
+                    const response = await fetch(`/api/games/${selectedTeam}`);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        allGames = data.games;
+                    }
+                } catch (error) {
+                    const errorMsg = document.createElement('p');
+                    errorMsg.textContent = 'Error loading games';
+                    gamesList.appendChild(errorMsg);
+                    document.getElementById('games-loading').style.display = 'none';
+                    return;
+                }
+                document.getElementById('games-loading').style.display = 'none';
+            }
+
+            let filteredGames = allGames || [];
+
+            // Apply filter
+            if (filter === 'next' && filteredGames.length > 0) {
+                // Sort games by date and take only the first one
+                const sortedGames = [...filteredGames].sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+                filteredGames = [sortedGames[0]];
+            }
+
+            if (filteredGames.length === 0) {
+                const noGamesMsg = document.createElement('p');
+                noGamesMsg.textContent = 'No upcoming games found.';
+                gamesList.appendChild(noGamesMsg);
+                return;
+            }
+
+            filteredGames.forEach(game => {
+                const gameDiv = document.createElement('div');
+                gameDiv.className = 'game-item';
+                const gameDate = new Date(game.starts_at).toLocaleDateString();
+                const gameTime = new Date(game.starts_at).toLocaleTimeString();
+
+                // Create game name
+                const gameName = document.createElement('strong');
+                gameName.textContent = game.name;
+
+                // Create game date/time
+                const gameDateTime = document.createElement('small');
+                gameDateTime.textContent = `${gameDate} at ${gameTime}`;
+
+                // Create game location
+                const gameLocation = document.createElement('small');
+                gameLocation.textContent = `📍 ${game.location}`;
+
+                // Assemble game div
+                gameDiv.appendChild(gameName);
+                gameDiv.appendChild(document.createElement('br'));
+                gameDiv.appendChild(gameDateTime);
+                gameDiv.appendChild(document.createElement('br'));
+                gameDiv.appendChild(gameLocation);
+                gameDiv.onclick = () => selectGame(game.id, game.name);
+                gamesList.appendChild(gameDiv);
+            });
+        }
+
+        async function selectGame(gameId, gameName) {
+            // Find full game data from allGames
+            const gameData = allGames.find(game => game.id === gameId) || null;
+
+            // Use enhanced state management
+            StateManager.setSelectedGame(gameId, gameName, gameData);
+
+            // Log analytics data for the team → game flow
+            const teamState = StateManager.getSelectedTeam();
+            const gameState = StateManager.getSelectedGame();
+            if (teamState.selectedAt && gameState.selectedAt) {
+                const selectionTimeMs = new Date(gameState.selectedAt) - new Date(teamState.selectedAt);
+                console.log('Team → Game selection analytics:', {
+                    teamId: teamState.id,
+                    gameId: gameState.id,
+                    selectionTimeMs,
+                    selectionTimeSeconds: (selectionTimeMs / 1000).toFixed(2)
+                });
+            }
+
+            // Highlight selected game
+            document.querySelectorAll('#games-list .game-item').forEach(item => item.classList.remove('selected'));
+            event.target.classList.add('selected');
+
+            // Show enhanced continue section
+            document.getElementById('continue-section').style.display = 'block';
+            document.getElementById('next-to-players-btn').style.display = 'block';
+
+            // Update user guidance steps
+            updateUserGuidanceProgress(3);
+
+            // Update tab lock states - Players tab should now be accessible
+            updateTabLockStates();
+
+            // Update game info in players tab
+            const selectedGameElement = allGames.find(game => game.id == gameId);
+            if (selectedGameElement) {
+                document.getElementById('selected-game-name').textContent = selectedGameElement.name;
+                const gameDate = new Date(selectedGameElement.starts_at).toLocaleDateString();
+                const gameTime = new Date(selectedGameElement.starts_at).toLocaleTimeString();
+                document.getElementById('selected-game-details').textContent = `${gameDate} at ${gameTime} - ${selectedGameElement.location}`;
+                document.getElementById('selected-game-info').style.display = 'block';
+            }
+
+            // Load availability
+            const playersLoading = document.getElementById('players-loading');
+            if (playersLoading) {
+                playersLoading.style.display = 'block';
+            }
+
+            try {
+                const response = await fetch(`/api/availability/${gameId}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store in both legacy and enhanced state
+                    attendingPlayers = data.attending_players;
+                    appState.attendingPlayers = data.attending_players;
+                    console.log('Players loaded successfully:', data.attending_players.length, 'players');
+                    displayPlayers(attendingPlayers);
+                    showSuccess(`${data.attending_players.length} players loaded for the selected game`);
+                } else {
+                    console.error('Failed to load player availability:', data.error);
+                    showError('Failed to load player availability: ' + data.error);
+                }
+            } catch (error) {
+                showError('Failed to load player availability: ' + error.message);
+            }
+
+            if (playersLoading) {
+                playersLoading.style.display = 'none';
+            }
+        }
+
+        function displayPlayers(players) {
+            console.log('displayPlayers called with:', players?.length, 'players');
+            const playersList = document.getElementById('players-list');
+            if (!playersList) {
+                console.error('players-list element not found!');
+                return;
+            }
+
+            // Ensure toggle state is loaded
+            loadToggleState();
+
+            // Clear players list safely
+            while (playersList.firstChild) {
+                playersList.removeChild(playersList.firstChild);
+            }
+
+            console.log(`Displaying ${players.length} players`);
+
+            if (players.length === 0) {
+                const noPlayersMsg = document.createElement('p');
+                noPlayersMsg.textContent = 'No players marked as attending.';
+                playersList.appendChild(noPlayersMsg);
+                return;
+            }
+
+            players.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-item';
+                playerDiv.style.display = 'flex';
+                playerDiv.style.justifyContent = 'space-between';
+                playerDiv.style.alignItems = 'center';
+
+                // Determine what name to display based on current toggle state
+                const toggle = document.getElementById('name-toggle');
+                const hideNames = toggle ? toggle.checked : false;
+                const displayName = hideNames ? (player.obfuscated_name || obfuscateName(player.name)) : player.name;
+
+                // Create player name element
+                const playerName = document.createElement('strong');
+                playerName.className = 'player-name';
+                playerName.setAttribute('data-original-name', player.name);
+                playerName.setAttribute('data-obfuscated-name', player.obfuscated_name || obfuscateName(player.name));
+                playerName.textContent = displayName;
+
+                // Create position checkboxes container
+                const positionCheckboxes = document.createElement('div');
+                positionCheckboxes.className = 'position-checkboxes';
+                positionCheckboxes.setAttribute('data-player-id', player.id);
+
+                // Define positions (values must match position IDs in config)
+                const positions = [
+                    { value: 'P', label: ' P' },
+                    { value: 'C', label: ' C' },
+                    { value: '1B', label: ' 1B' },
+                    { value: '2B', label: ' 2B' },
+                    { value: '3B', label: ' 3B' },
+                    { value: 'SS', label: ' SS' },
+                    { value: 'LF', label: ' LF' },
+                    { value: 'CF', label: ' CF' },
+                    { value: 'RF', label: ' RF' },
+                    { value: 'any', label: ' Any', className: 'any-position' }
+                ];
+
+                // Create each position checkbox with label
+                positions.forEach(position => {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = position.value;
+                    if (position.className) {
+                        checkbox.className = position.className;
+                    }
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(position.label));
+                    positionCheckboxes.appendChild(label);
+                });
+
+                // Assemble player div
+                playerDiv.appendChild(playerName);
+                playerDiv.appendChild(positionCheckboxes);
+                playersList.appendChild(playerDiv);
+            });
+
+            // Add checkbox interaction logic
+            document.querySelectorAll('.position-checkboxes').forEach(container => {
+                const anyCheckbox = container.querySelector('.any-position');
+                const positionCheckboxes = container.querySelectorAll('input[type="checkbox"]:not(.any-position)');
+
+                // Handle "Any" checkbox
+                anyCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        positionCheckboxes.forEach(cb => {
+                            cb.checked = false;
+                            cb.disabled = true;
+                        });
+                    } else {
+                        positionCheckboxes.forEach(cb => {
+                            cb.disabled = false;
+                        });
+                    }
+                });
+
+                // Handle position checkboxes
+                positionCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        if (Array.from(positionCheckboxes).some(c => c.checked)) {
+                            anyCheckbox.checked = false;
+                            anyCheckbox.disabled = true;
+                        } else {
+                            anyCheckbox.disabled = false;
+                        }
+                    });
+                });
+
+                // Don't check any boxes by default - no selection means "any position"
+            });
+
+            // Show generate lineup button if we have enough players
+            const generateBtn = document.getElementById('generate-lineup-btn');
+            const nextBtn = document.getElementById('players-next-to-lineup-btn');
+
+            console.log('Button check:', {
+                generateBtn: generateBtn ? 'found' : 'NOT FOUND',
+                nextBtn: nextBtn ? 'found' : 'NOT FOUND',
+                playerCount: players.length,
+                shouldShow: players.length >= 8
+            });
+
+            if (!generateBtn || !nextBtn) {
+                console.error('Buttons not found in DOM!');
+                return;
+            }
+
+            if (players.length >= 8) {
+                generateBtn.style.display = 'inline-block';
+                generateBtn.textContent = `Generate Lineup (${players.length} players)`;
+                nextBtn.style.display = 'inline-block';
+                console.log('Buttons should be visible now');
+            } else {
+                generateBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                showError(`Need at least 8 players for a lineup. Currently have ${players.length} attending.`);
+            }
+        }
+
+        async function generateLineup() {
+            // VERSION CHECK - If you see this alert, the new code is loaded
+            console.log('🔧 CODE VERSION: 2025-10-18-v3 LOADED');
+
+            try {
+                // Validate we have players
+                if (!attendingPlayers || attendingPlayers.length === 0) {
+                    showError('No players available. Please select a game first.');
+                    return;
+                }
+
+                console.log('Starting lineup generation with', attendingPlayers.length, 'players');
+
+                // Collect position preferences
+                const playersWithPreferences = attendingPlayers.map((player, index) => {
+                    // Defensive check: ensure player object exists
+                    if (!player) {
+                        console.error(`Player at index ${index} is null or undefined`);
+                        return null;
+                    }
+
+                    const checkboxContainer = document.querySelector(`.position-checkboxes[data-player-id="${player.id}"]`);
+
+                    // Defensive check: if container not found, default to no preferences
+                    if (!checkboxContainer) {
+                        console.warn(`Checkbox container not found for player ${player.name} (ID: ${player.id})`);
+                        return {
+                            ...player,  // Spread all player fields
+                            position_preferences: []  // Empty array means "any position"
+                        };
+                    }
+
+                    const checkedBoxes = checkboxContainer.querySelectorAll('input[type="checkbox"]:checked');
+                    const positions = Array.from(checkedBoxes).map(cb => cb.value);
+
+                    // Log for debugging
+                    console.log(`Player ${player.name}: positions = `, positions);
+
+                    return {
+                        ...player,  // Spread all player fields
+                        position_preferences: positions.length === 0 || positions.includes('any') ? [] : positions  // Empty array means "any position"
+                    };
+                }).filter(p => p !== null);  // Remove any null entries
+
+                // Log the data being sent for debugging
+                console.log('Sending player data to backend:', playersWithPreferences);
+
+                // Get CSRF token from meta tag
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                const response = await fetch('/api/lineup/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        sport: appState.sport,
+                        players: playersWithPreferences
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Backend response data:', data);
+
+                if (response.ok) {
+                    try {
+                        displayLineup(data);
+                    } catch (displayError) {
+                        console.error('Error in displayLineup:', displayError);
+                        console.error('Stack trace:', displayError.stack);
+                        showError('Failed to display lineup: ' + displayError.message);
+                    }
+                } else {
+                    showError('Failed to generate lineup: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error in generateLineup:', error);
+                console.error('Stack trace:', error.stack);
+                showError('Failed to generate lineup: ' + error.message);
+            }
+        }
+
+        function displayLineup(data) {
+            console.log('displayLineup called with data:', data);
+            const lineupDisplay = document.getElementById('lineup-display');
+
+            if (data.lineups && Array.isArray(data.lineups)) {
+                console.log('Displaying multiple lineups:', data.lineups.length);
+                // Display lineups using new API format
+                displayMultipleLineups(data);
+            } else {
+                console.warn('Legacy single lineup format detected - this may not work with new API');
+                // Legacy single lineup display (deprecated)
+                displaySingleLineup(data);
+            }
+
+            // Mark lineup tab as accessible now that lineup is generated
+            appState.tabs.lineupAccessible = true;
+            updateTabLockStates();
+
+            // Show regenerate button
+            document.getElementById('regenerate-btn').style.display = 'inline-block';
+
+            // Automatically switch to lineup tab
+            openTab('lineup-tab');
+
+            // Apply current obfuscation setting to newly displayed lineup
+            updateAllPlayerNames();
+
+            // Show success message - handle both multi-lineup and single lineup responses
+            const lineupCount = data.lineups ? data.lineups.length : 1;
+            showSuccess(`${lineupCount} lineup${lineupCount > 1 ? 's' : ''} generated!`);
+        }
+
+        function displayMultipleLineups(data) {
+            const lineupDisplay = document.getElementById('lineup-display');
+
+            // Clear lineup display safely
+            while (lineupDisplay.firstChild) {
+                lineupDisplay.removeChild(lineupDisplay.firstChild);
+            }
+
+            // Create header section
+            const headerDiv = document.createElement('div');
+            headerDiv.style.textAlign = 'center';
+            headerDiv.style.marginBottom = '10px';
+            headerDiv.className = 'no-print';
+
+            const headerText = document.createElement('p');
+            headerText.style.color = '#666';
+            headerText.style.margin = '5px 0';
+            headerText.textContent = `${data.lineups.length} Lineup${data.lineups.length > 1 ? 's' : ''} Available • One Per Pitcher`;
+
+            headerDiv.appendChild(headerText);
+
+            // Create print button section
+            const buttonDiv = document.createElement('div');
+            buttonDiv.style.textAlign = 'center';
+            buttonDiv.style.marginBottom = '10px';
+            buttonDiv.className = 'no-print';
+
+            const printButton = document.createElement('button');
+            printButton.className = 'btn';
+            printButton.style.margin = '10px';
+            printButton.textContent = '🖨️ Print All Lineups';
+            printButton.onclick = () => window.print();
+
+            buttonDiv.appendChild(printButton);
+
+            // Create all-lineups container
+            const allLineupsDiv = document.createElement('div');
+            allLineupsDiv.id = 'all-lineups';
+
+            // Assemble the main structure
+            lineupDisplay.appendChild(headerDiv);
+            lineupDisplay.appendChild(buttonDiv);
+            lineupDisplay.appendChild(allLineupsDiv);
+
+            data.lineups.forEach((lineupData, index) => {
+                const lineupSection = document.createElement('div');
+                lineupSection.className = 'lineup-container';
+                lineupSection.style.marginBottom = '40px';
+
+                // Create lineup title section
+                const titleDiv = document.createElement('div');
+                titleDiv.style.textAlign = 'center';
+                titleDiv.style.marginBottom = '20px';
+
+                const titleHeader = document.createElement('h3');
+                titleHeader.textContent = `Lineup ${index + 1}`;
+                titleDiv.appendChild(titleHeader);
+
+                // Create baseball diamond
+                const diamond = document.createElement('div');
+                diamond.className = 'baseball-diamond';
+                diamond.id = `diamond-${index}`;
+
+                // Create diamond elements
+                const homePlate = document.createElement('div');
+                homePlate.className = 'home-plate';
+                diamond.appendChild(homePlate);
+
+                const firstBase = document.createElement('div');
+                firstBase.className = 'base first-base-marker';
+                diamond.appendChild(firstBase);
+
+                const secondBase = document.createElement('div');
+                secondBase.className = 'base second-base-marker';
+                diamond.appendChild(secondBase);
+
+                const thirdBase = document.createElement('div');
+                thirdBase.className = 'base third-base-marker';
+                diamond.appendChild(thirdBase);
+
+                const pitchersMound = document.createElement('div');
+                pitchersMound.className = 'pitchers-mound';
+                diamond.appendChild(pitchersMound);
+
+                // Create bench section
+                const benchSection = document.createElement('div');
+                benchSection.id = `bench-section-${index}`;
+                benchSection.className = 'bench-section';
+                benchSection.style.marginTop = '10px';
+                benchSection.style.textAlign = 'center';
+
+                const benchList = document.createElement('div');
+                benchList.id = `bench-list-${index}`;
+                benchList.className = 'bench-list';
+                benchSection.appendChild(benchList);
+
+                // Assemble lineup section
+                lineupSection.appendChild(titleDiv);
+                lineupSection.appendChild(diamond);
+                lineupSection.appendChild(benchSection);
+
+                allLineupsDiv.appendChild(lineupSection);
+
+                // Position class mapping
+                const positionClasses = {
+                    1: 'pitcher',
+                    2: 'catcher',
+                    3: 'first-base',
+                    4: 'second-base',
+                    5: 'third-base',
+                    6: 'shortstop',
+                    7: 'left-field',
+                    8: 'center-field',
+                    9: 'right-field'
+                };
+
+                // Display fielding positions on the diamond
+                // Handle new API format with assignments array
+                if (!lineupData.assignments || !Array.isArray(lineupData.assignments)) {
+                    console.error('Invalid lineup data - missing assignments array:', lineupData);
+                    return;
+                }
+
+                lineupData.assignments.forEach(assignment => {
+                    const positionCard = document.createElement('div');
+                    const position = assignment.position;  // "P", "C", "1B", etc.
+
+                    // Map position IDs to position numbers for styling
+                    const positionToNumber = {
+                        'P': 1, 'C': 2, '1B': 3, '2B': 4, '3B': 5,
+                        'SS': 6, 'LF': 7, 'CF': 8, 'RF': 9
+                    };
+                    const positionNum = positionToNumber[position] || 0;
+                    const positionClass = positionClasses[positionNum] || '';
+
+                    positionCard.className = `position-card ${positionClass}`;
+
+                    const playerInfo = assignment.player;
+                    const positionName = position;  // Use position ID as name for now
+                    // Determine what name to display based on current toggle state
+                    const toggle = document.getElementById('name-toggle');
+                    const hideNames = toggle ? toggle.checked : false;
+                    const displayName = hideNames ? obfuscateName(playerInfo.name) : playerInfo.name;
+
+                    // Create position number (use position number from mapping)
+                    const positionNumber = document.createElement('div');
+                    positionNumber.className = 'position-number';
+                    positionNumber.textContent = positionNum;
+
+                    // Create position name element
+                    const positionNameDiv = document.createElement('div');
+                    positionNameDiv.className = 'position-name';
+                    positionNameDiv.style.fontSize = '10px';
+                    positionNameDiv.style.margin = '2px 0';
+                    positionNameDiv.textContent = position;
+
+                    // Create player name
+                    const playerNameDiv = document.createElement('div');
+                    playerNameDiv.className = 'player-name';
+                    playerNameDiv.setAttribute('data-original-name', playerInfo.name);
+                    playerNameDiv.style.fontSize = '11px';
+                    playerNameDiv.style.fontWeight = 'bold';
+                    playerNameDiv.textContent = displayName;
+
+                    // Assemble position card
+                    positionCard.appendChild(positionNumber);
+                    positionCard.appendChild(positionNameDiv);
+                    positionCard.appendChild(playerNameDiv);
+
+                    diamond.appendChild(positionCard);
+                });
+
+                // Populate bench (use bench_players from new API format)
+                const currentBenchList = document.getElementById(`bench-list-${index}`);
+                const benchPlayers = lineupData.bench_players || lineupData.bench || [];
+                if (benchPlayers.length > 0) {
+                    benchPlayers.forEach(player => {
+                        const benchPlayer = document.createElement('div');
+                        benchPlayer.className = 'player-item';
+                        // Determine what name to display based on current toggle state
+                        const toggle = document.getElementById('name-toggle');
+                        const hideNames = toggle ? toggle.checked : false;
+                        const displayName = hideNames ? obfuscateName(player.name) : player.name;
+                        // Create player name element safely
+                        const playerNameSpan = document.createElement('span');
+                        playerNameSpan.className = 'player-name';
+                        playerNameSpan.setAttribute('data-original-name', player.name);
+                        playerNameSpan.textContent = displayName;
+                        benchPlayer.appendChild(playerNameSpan);
+                        currentBenchList.appendChild(benchPlayer);
+                    });
+                } else {
+                    const noBenchMsg = document.createElement('em');
+                    noBenchMsg.textContent = 'No bench players';
+                    currentBenchList.appendChild(noBenchMsg);
+                }
+            });
+        }
+
+        function displaySingleLineup(data) {
+            const lineupDisplay = document.getElementById('lineup-display');
+
+            // Clear lineup display safely
+            while (lineupDisplay.firstChild) {
+                lineupDisplay.removeChild(lineupDisplay.firstChild);
+            }
+
+            // Create baseball diamond structure safely
+            const baseballDiamond = document.createElement('div');
+            baseballDiamond.className = 'baseball-diamond';
+
+            // Create home plate and bases
+            const homePlate = document.createElement('div');
+            homePlate.className = 'home-plate';
+            baseballDiamond.appendChild(homePlate);
+
+            const firstBase = document.createElement('div');
+            firstBase.className = 'base first-base-marker';
+            baseballDiamond.appendChild(firstBase);
+
+            const secondBase = document.createElement('div');
+            secondBase.className = 'base second-base-marker';
+            baseballDiamond.appendChild(secondBase);
+
+            const thirdBase = document.createElement('div');
+            thirdBase.className = 'base third-base-marker';
+            baseballDiamond.appendChild(thirdBase);
+
+            const pitchersMound = document.createElement('div');
+            pitchersMound.className = 'pitchers-mound';
+            baseballDiamond.appendChild(pitchersMound);
+
+            lineupDisplay.appendChild(baseballDiamond);
+
+            const diamond = lineupDisplay.querySelector('.baseball-diamond');
+
+            // Position class mapping
+            const positionClasses = {
+                1: 'pitcher',
+                2: 'catcher',
+                3: 'first-base',
+                4: 'second-base',
+                5: 'third-base',
+                6: 'shortstop',
+                7: 'left-field',
+                8: 'center-field',
+                9: 'right-field'
+            };
+
+            // Display fielding positions on the diamond
+            Object.keys(data.lineup).forEach(position => {
+                const positionCard = document.createElement('div');
+                const positionNum = parseInt(position);
+                const positionClass = positionClasses[positionNum] || '';
+
+                positionCard.className = `position-card ${positionClass}`;
+
+                const playerInfo = data.lineup[position];
+                // Determine what name to display based on current toggle state
+                const toggle = document.getElementById('name-toggle');
+                const hideNames = toggle ? toggle.checked : false;
+                const displayName = hideNames ? obfuscateName(playerInfo.player_name) : playerInfo.player_name;
+
+                // Create position number
+                const positionNumber = document.createElement('div');
+                positionNumber.className = 'position-number';
+                positionNumber.textContent = position;
+
+                // Create position name
+                const positionName = document.createElement('div');
+                positionName.className = 'position-name';
+                positionName.style.fontSize = '10px';
+                positionName.style.margin = '2px 0';
+                positionName.textContent = playerInfo.position_name;
+
+                // Create player name
+                const playerNameDiv = document.createElement('div');
+                playerNameDiv.className = 'player-name';
+                playerNameDiv.setAttribute('data-original-name', playerInfo.player_name);
+                playerNameDiv.style.fontSize = '11px';
+                playerNameDiv.style.fontWeight = 'bold';
+                playerNameDiv.textContent = displayName;
+
+                // Assemble position card
+                positionCard.appendChild(positionNumber);
+                positionCard.appendChild(positionName);
+                positionCard.appendChild(playerNameDiv);
+
+                diamond.appendChild(positionCard);
+            });
+
+            // Display bench players if any
+            if (data.bench && data.bench.length > 0) {
+                const benchSection = document.getElementById('bench-section');
+                const benchList = document.getElementById('bench-list');
+
+                // Clear bench list safely
+                while (benchList.firstChild) {
+                    benchList.removeChild(benchList.firstChild);
+                }
+
+                data.bench.forEach(player => {
+                    const benchPlayer = document.createElement('div');
+                    benchPlayer.className = 'player-item';
+
+                    // Determine what name to display based on current toggle state
+                    const toggle = document.getElementById('name-toggle');
+                    const hideNames = toggle ? toggle.checked : false;
+                    const displayName = hideNames ? obfuscateName(player.name) : player.name;
+
+                    // Create player name element safely
+                    const playerNameStrong = document.createElement('strong');
+                    playerNameStrong.className = 'player-name';
+                    playerNameStrong.setAttribute('data-original-name', player.name);
+                    playerNameStrong.textContent = displayName;
+
+                    benchPlayer.appendChild(playerNameStrong);
+                    benchList.appendChild(benchPlayer);
+                });
+
+                benchSection.style.display = 'block';
+            }
+        }
+
+        function regenerateLineup() {
+            generateLineup();
+        }
+
+        async function generateAndShowLineup() {
+            // First generate the lineup
+            await generateLineup();
+            // The generateLineup function already switches to the lineup tab
+        }
+
+        function showError(message, retryFunction = null) {
+            // Remove existing messages
+            document.querySelectorAll('.error-message, .success-message').forEach(el => el.remove());
+
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message no-print';
+
+            // Create header safely
+            const headerDiv = document.createElement('div');
+            headerDiv.style.display = 'flex';
+            headerDiv.style.alignItems = 'center';
+            headerDiv.style.marginBottom = '8px';
+
+            const iconSpan = document.createElement('span');
+            iconSpan.style.fontSize = '18px';
+            iconSpan.style.marginRight = '8px';
+            iconSpan.textContent = '⚠️';
+
+            const titleStrong = document.createElement('strong');
+            titleStrong.textContent = 'Error';
+
+            headerDiv.appendChild(iconSpan);
+            headerDiv.appendChild(titleStrong);
+
+            // Create message safely
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message; // XSS safe
+
+            errorDiv.appendChild(headerDiv);
+            errorDiv.appendChild(messageDiv);
+
+            // Add retry button if provided
+            if (retryFunction) {
+                const retryButton = document.createElement('button');
+                retryButton.className = 'retry-button';
+                retryButton.textContent = 'Retry';
+                retryButton.onclick = function() {
+                    errorDiv.remove();
+                    retryFunction();
+                };
+                errorDiv.appendChild(retryButton);
+            }
+
+            document.body.insertBefore(errorDiv, document.body.firstChild);
+
+            // Auto-remove after 8 seconds
+            setTimeout(() => errorDiv.remove(), 8000);
+        }
+
+        function showSuccess(message) {
+            // Remove existing messages
+            document.querySelectorAll('.error-message, .success-message').forEach(el => el.remove());
+
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message no-print';
+
+            // Create header safely
+            const headerDiv = document.createElement('div');
+            headerDiv.style.display = 'flex';
+            headerDiv.style.alignItems = 'center';
+            headerDiv.style.marginBottom = '8px';
+
+            const iconSpan = document.createElement('span');
+            iconSpan.style.fontSize = '18px';
+            iconSpan.style.marginRight = '8px';
+            iconSpan.textContent = '✅';
+
+            const titleStrong = document.createElement('strong');
+            titleStrong.textContent = 'Success';
+
+            headerDiv.appendChild(iconSpan);
+            headerDiv.appendChild(titleStrong);
+
+            // Create message safely
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message; // XSS safe
+
+            successDiv.appendChild(headerDiv);
+            successDiv.appendChild(messageDiv);
+
+            document.body.insertBefore(successDiv, document.body.firstChild);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+    </script>
+</body>
+</html>

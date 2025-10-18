@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baseball Lineup Manager</title>
+    <title>{{ sport|title }} Lineup Manager</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -104,23 +104,23 @@
             border-bottom: 1px solid #eee;
         }
         .features li:before {
-            content: "⚾ ";
+            content: "{% if sport == 'volleyball' %}🏐{% elif sport == 'soccer' %}⚽{% else %}⚾{% endif %} ";
             margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">⚾</div>
-        <h1>Baseball Lineup Manager</h1>
+        <div class="logo">{% if sport == 'volleyball' %}🏐{% elif sport == 'soccer' %}⚽{% else %}⚾{% endif %}</div>
+        <h1>{{ sport|title }} Lineup Manager</h1>
         <p>Choose how you'd like to get started with lineup generation.</p>
 
         <div class="options-container">
             <!-- Demo Mode - LEFT SIDE -->
             <div class="option-card demo-card">
                 <h3>🏟️ Try Demo Mode</h3>
-                <p>Experience all features instantly with famous baseball players. No account needed!</p>
-                <a href="/demo" class="btn demo-btn">Start Demo</a>
+                <p>Experience all features instantly with famous {% if sport == 'volleyball' %}volleyball{% elif sport == 'soccer' %}soccer{% else %}baseball{% endif %} players. No account needed!</p>
+                <a href="/demo/{{ sport }}" class="btn demo-btn">Start Demo</a>
                 <p style="margin-top: 15px; color: #666; font-size: 12px;">
                     Perfect for trying the app or demonstrations
                 </p>
@@ -142,7 +142,16 @@
             <ul>
                 <li>Fetch upcoming games from TeamSnap</li>
                 <li>Get list of attending players automatically</li>
-                <li>Generate optimal fielding positions</li>
+                {% if sport == 'volleyball' %}
+                <li>Generate optimal court rotations (6 positions)</li>
+                <li>Track set-by-set lineups and bench players</li>
+                {% elif sport == 'soccer' %}
+                <li>Generate optimal formations (11 positions)</li>
+                <li>Manage goalkeeper rotation requirements</li>
+                {% else %}
+                <li>Generate optimal fielding positions (9 positions)</li>
+                <li>Pitcher rotation limits (2 innings max)</li>
+                {% endif %}
                 <li>Simple interface for lineup management</li>
             </ul>
         </div>

@@ -27,10 +27,12 @@ class TestDemoMode:
     """Tests for demo mode functionality"""
 
     def test_demo_route(self, client):
-        """Test that /demo route sets up demo mode"""
+        """Test that /demo route sets up demo mode and redirects to baseball"""
         response = client.get("/demo", follow_redirects=False)
         assert response.status_code == 302  # Redirect
-        assert response.location.endswith("/")
+        assert response.location.endswith(
+            "/baseball"
+        )  # Now redirects to baseball dashboard
 
         # Check session was set up
         with client.session_transaction() as sess:
@@ -42,8 +44,8 @@ class TestDemoMode:
         # Set up demo mode
         client.get("/demo")
 
-        # Access dashboard
-        response = client.get("/")
+        # Access baseball dashboard (demo mode should allow access)
+        response = client.get("/baseball")
         assert response.status_code == 200
 
     def test_load_demo_data(self):
