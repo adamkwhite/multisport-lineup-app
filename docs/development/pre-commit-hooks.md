@@ -4,7 +4,14 @@ This project uses the [pre-commit](https://pre-commit.com/) framework to run cod
 
 ## History
 
-**Note:** Previously, this project used a legacy custom pre-commit hook that checked for tools in the global PATH. This has been removed in favor of the official pre-commit framework, which properly detects tools in the virtual environment.
+**Note:** Previously, this project used a legacy custom pre-commit hook (`.git/hooks/pre-commit.legacy`) that checked for tools in the global PATH. This has been removed in favor of the official pre-commit framework, which properly detects tools in the virtual environment.
+
+**Important:** If you previously cloned this repository and have the legacy hook, you can remove it manually:
+```bash
+rm .git/hooks/pre-commit.legacy  # If it exists
+```
+
+The `.git/hooks/` directory is not tracked by Git, so this cleanup only affects your local machine.
 
 ## What Gets Checked
 
@@ -20,7 +27,7 @@ Every commit automatically runs:
 8. **Merge conflicts** - Detects unresolved merge markers
 9. **Mixed line endings** - Ensures consistent line endings
 
-**Note:** Flake8 runs only in manual mode (`stages: [manual]`) to provide warnings without blocking commits. This allows developers to see linting issues without disrupting their workflow.
+**Note:** Flake8 is configured with `stages: [manual]` locally, meaning it won't block your commits. Run `pre-commit run flake8 --all-files` to check linting manually. However, Flake8 **does run in CI/CD** and will block PRs if linting issues are found.
 
 ## Setup
 
@@ -55,9 +62,13 @@ Pre-commit configuration is defined in `.pre-commit-config.yaml` at the project 
 
 ### Tool Versions
 
+Current versions (defined in `.pre-commit-config.yaml`):
+
 - **Black**: v24.10.0
 - **isort**: v5.13.2 (configured with Black profile)
 - **pre-commit-hooks**: v5.0.0
+
+**Note:** Versions are subject to change. See `.pre-commit-config.yaml` for the authoritative source.
 
 ## Bypassing Hooks (Not Recommended)
 
