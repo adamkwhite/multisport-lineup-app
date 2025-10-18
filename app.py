@@ -13,6 +13,7 @@ import requests
 from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from flask_cors import CORS
+from flask_wtf.csrf import CSRFProtect
 
 
 def obfuscate_name(full_name):
@@ -56,6 +57,9 @@ app = Flask(__name__)
 import secrets
 
 app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
+
+# Enable CSRF protection
+csrf = CSRFProtect(app)
 
 # Detect environment
 is_development = not (os.getenv("RENDER") or os.getenv("FLASK_ENV") == "production")

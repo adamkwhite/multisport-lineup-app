@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Baseball Lineup Manager - Dashboard</title>
     <style>
         body {
@@ -1608,10 +1609,14 @@
                 // Log the data being sent for debugging
                 console.log('Sending player data to backend:', playersWithPreferences);
 
+                // Get CSRF token from meta tag
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
                 const response = await fetch('/api/lineup/generate', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
                     },
                     body: JSON.stringify({
                         players: playersWithPreferences
