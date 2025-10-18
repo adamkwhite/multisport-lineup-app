@@ -18,6 +18,7 @@ def app():
     """Create Flask app instance for testing"""
     flask_app.config["TESTING"] = True
     flask_app.config["SECRET_KEY"] = "test-secret-key"
+    flask_app.config["WTF_CSRF_ENABLED"] = False  # Disable CSRF for tests
     return flask_app
 
 
