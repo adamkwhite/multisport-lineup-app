@@ -163,7 +163,7 @@ def volleyball_dashboard():
 @app.route("/soccer")
 def soccer_dashboard():
     """Soccer lineup manager dashboard (coming soon)"""
-    return render_template("soccer_dashboard.html")
+    return render_template("soccer_dashboard.html", sport="soccer")
 
 
 @app.route("/auth/login")
