@@ -20,6 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Testing**: pytest, pytest-cov (94%+ coverage target)
 - **CI/CD**: GitHub Actions (3-stage pipeline), SonarCloud
 - **Code Quality**: Black, isort, flake8, mypy, bandit
+- **Security**: gitleaks (secret scanning), pre-commit hooks
 
 ## Key Features
 
@@ -237,10 +238,11 @@ heroku open
 - See `requirements.txt` for complete list
 
 ### Development Tools
-- **Pre-commit hooks**: Black, isort, Flake8 for local code quality checks
+- **Pre-commit hooks**: Black, isort, Flake8, gitleaks for local code quality checks
 - **CI/CD Tools**: Black, isort, flake8, mypy, bandit (GitHub Actions)
 - **Playwright**: Visual regression tests
-- **Pre-commit package**: Installed in virtual environment (`pip install pre-commit`)
+- **Pre-commit package**: v3.5.0 (in requirements.txt)
+- **Gitleaks**: v8.18.4 (secret scanning)
 
 ## Known Issues
 
@@ -280,6 +282,32 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 - **PRD Workflow**: Use `ai_docs/create-prd.mdc` for creating new feature PRDs with GitHub issue tracking
 
 ## Recent Changes
+
+**2025-10-18 (Session 7)**: Security hardening and pre-commit infrastructure
+- **Pre-commit hooks documentation** (PR #90 - MERGED)
+  - Created comprehensive `docs/development/pre-commit-hooks.md` documentation
+  - Fixed critical issue: Added `pre-commit==3.5.0` to requirements.txt
+  - Clarified Flake8 behavior (manual locally, enforced in CI/CD)
+  - Removed misleading legacy `.git/hooks/pre-commit.legacy` file
+  - Added cleanup instructions for developers with legacy hooks
+- **Gitleaks secret scanning** (PR #91 - OPEN)
+  - Added gitleaks v8.18.4 to pre-commit hooks for automated secret detection
+  - Scans for 600+ patterns (API keys, tokens, credentials) before every commit
+  - Blocks commits containing hardcoded secrets
+  - Critical security improvement for OAuth application handling TeamSnap credentials
+  - Updated documentation with gitleaks configuration and usage
+- **OAuth sport context preservation** (PR #89 - MERGED)
+  - Fixed volleyball dashboard showing baseball branding
+  - Added VALID_SPORTS constant for DRY principle
+  - Implemented defense-in-depth validation for sport parameters
+  - Added 2 end-to-end OAuth redirect tests (volleyball, invalid sport)
+  - Fixed missing sport parameter in soccer_dashboard() route
+- **Code quality improvements**
+  - All Claude Code Review feedback addressed across all PRs
+  - Maintained 94%+ test coverage (353 tests passing)
+  - SonarCloud quality gate passed on all PRs
+  - Enhanced documentation accuracy and completeness
+- Related: PRs #89, #90, #91
 
 **2025-10-12 (Session 6)**: SonarCloud migration and public visibility
 - **Migrated from self-hosted SonarQube to SonarCloud** (PRs #74, #75, #76, #77, #78, #79)
