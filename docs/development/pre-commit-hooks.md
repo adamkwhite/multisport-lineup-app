@@ -26,6 +26,7 @@ Every commit automatically runs:
 7. **Large files** - Prevents accidental commits of large files
 8. **Merge conflicts** - Detects unresolved merge markers
 9. **Mixed line endings** - Ensures consistent line endings
+10. **Gitleaks** - Secret scanning (detects API keys, tokens, credentials)
 
 **Note:** Flake8 is configured with `stages: [manual]` locally, meaning it won't block your commits. Run `pre-commit run flake8 --all-files` to check linting manually. However, Flake8 **does run in CI/CD** and will block PRs if linting issues are found.
 
@@ -66,7 +67,9 @@ Current versions (defined in `.pre-commit-config.yaml`):
 
 - **Black**: v24.10.0
 - **isort**: v5.13.2 (configured with Black profile)
+- **Flake8**: v7.1.1
 - **pre-commit-hooks**: v5.0.0
+- **Gitleaks**: v8.18.4
 
 **Note:** Versions are subject to change. See `.pre-commit-config.yaml` for the authoritative source.
 
