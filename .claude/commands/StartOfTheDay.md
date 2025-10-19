@@ -4,6 +4,7 @@ Get project context
 - Check git status and update local if needed
 - Read last PR from yesterday
 - Read FILE /<project>/CLAUDE.MD
+- Read FILE /<project>/docs/archive/CHANGELOG.md (for detailed session history)
 - Read FILE /<project>/readme.md
 - Read FILES in /<project>/docs/
 
@@ -14,8 +15,8 @@ Things to consider
 - Current Status: Where you are in the development process
 - Current Branch: Which branch we were last working on
 - Technology Stack: Languages, frameworks, and libraries being used, including version information
-- Implementation Details: Current   architecture and design decisions
-- Recent Changes: What you've been working on recently
+- Implementation Details: Current architecture and design decisions
+- Recent Changes: What you've been working on recently (check CHANGELOG.md for detailed history)
 - Next Steps: What you plan to implement or change next
 - Dependencies: External services, APIs, or libraries that the project relies on
 - Known Issues: Current bugs or limitations you're aware of
