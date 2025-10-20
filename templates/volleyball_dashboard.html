@@ -1027,40 +1027,20 @@
             const lineupTab = document.querySelector('[onclick="openTab(\'lineup-tab\')"]');
 
             // Update games tab accessibility
-            if (StateManager.isTeamSelected()) {
-                appState.tabs.gamesAccessible = true;
-                if (gamesTab) {
-                    gamesTab.classList.remove('locked');
-                }
-            } else {
-                appState.tabs.gamesAccessible = false;
-                if (gamesTab) {
-                    gamesTab.classList.add('locked');
-                }
+            appState.tabs.gamesAccessible = StateManager.isTeamSelected();
+            if (gamesTab) {
+                gamesTab.classList.toggle('locked', !appState.tabs.gamesAccessible);
             }
 
             // Update players tab accessibility
-            if (StateManager.isGameSelected()) {
-                appState.tabs.playersAccessible = true;
-                if (playersTab) {
-                    playersTab.classList.remove('locked');
-                }
-            } else {
-                appState.tabs.playersAccessible = false;
-                if (playersTab) {
-                    playersTab.classList.add('locked');
-                }
+            appState.tabs.playersAccessible = StateManager.isGameSelected();
+            if (playersTab) {
+                playersTab.classList.toggle('locked', !appState.tabs.playersAccessible);
             }
 
             // Update lineup tab accessibility
-            if (appState.tabs.lineupAccessible) {
-                if (lineupTab) {
-                    lineupTab.classList.remove('locked');
-                }
-            } else {
-                if (lineupTab) {
-                    lineupTab.classList.add('locked');
-                }
+            if (lineupTab) {
+                lineupTab.classList.toggle('locked', !appState.tabs.lineupAccessible);
             }
         }
 
@@ -1857,7 +1837,7 @@
                     // Create player name
                     const playerNameDiv = document.createElement('div');
                     playerNameDiv.className = 'player-name';
-                    playerNameDiv.setAttribute('data-original-name', playerInfo.name);
+                    playerNameDiv.dataset.originalName = playerInfo.name;
                     playerNameDiv.style.fontSize = '13px';
                     playerNameDiv.style.fontWeight = 'bold';
                     playerNameDiv.textContent = displayName;
