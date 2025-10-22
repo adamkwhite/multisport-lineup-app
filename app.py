@@ -11,7 +11,16 @@ from urllib.parse import urlencode
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from flask import (
+    Flask,
+    has_request_context,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 
@@ -852,7 +861,8 @@ def load_demo_data(sport=None):
 
     # Determine which sport's demo data to load
     if sport is None:
-        sport = session.get("demo_sport", "baseball")
+        # Only access session if we're in a request context (for test compatibility)
+        sport = session.get("demo_sport", "baseball") if has_request_context() else "baseball"
 
     # Map sport to demo data file
     demo_files = {
