@@ -862,7 +862,11 @@ def load_demo_data(sport=None):
     # Determine which sport's demo data to load
     if sport is None:
         # Only access session if we're in a request context (for test compatibility)
-        sport = session.get("demo_sport", "baseball") if has_request_context() else "baseball"
+        sport = (
+            session.get("demo_sport", "baseball")
+            if has_request_context()
+            else "baseball"
+        )
 
     # Map sport to demo data file
     demo_files = {
