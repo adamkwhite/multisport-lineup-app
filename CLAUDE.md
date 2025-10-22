@@ -176,17 +176,18 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 
 ## Recent Changes
 
+**2025-10-20 (Session 9)**: UI improvements and SonarCloud code quality fixes
+- Split "Select Team & Game" tab into separate tabs for improved UX (PR #95)
+- Fixed SonarCloud high-value issues: accessibility, unused code, modern JS practices (PR #98)
+- Handled Dependabot PRs #93, #94 (pre-commit 4.3.0, flask-wtf updates)
+- Created issues #96 (ruff migration), #97 (template refactoring)
+- User preference established: prioritize high-value fixes over micro-optimizations
+
 **2025-10-19 (Session 8)**: SonarCloud MCP integration and documentation optimization
 - Successfully integrated SonarCloud MCP server (Docker-based, now operational)
 - Optimized CLAUDE.md: 479→224 lines (53% reduction, ~3k tokens saved)
 - Created `docs/archive/CHANGELOG.md` for detailed session history
 - Updated `/StartOfTheDay` and `/WrapUpForTheDay` slash commands for new workflow
-
-**2025-10-18 (Session 7)**: Security hardening and pre-commit infrastructure
-- Added gitleaks v8.18.4 secret scanning to pre-commit hooks (PR #91)
-- Comprehensive pre-commit hooks documentation (PR #90)
-- Fixed OAuth sport context preservation (PR #89)
-- Maintained 94%+ test coverage, all quality gates passed
 
 For detailed session history, see `docs/archive/CHANGELOG.md`
 
