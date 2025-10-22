@@ -195,29 +195,30 @@ class TestDemoMode:
 
     def test_load_demo_data_volleyball_missing_file(self):
         """Test load_demo_data when volleyball demo file is missing"""
-        with patch(
-            "builtins.open",
-            side_effect=lambda f, *args, **kwargs: (
-                FileNotFoundError() if "volleyball" in f else open(f, *args, **kwargs)
-            ),
-        ):
+
+        def mock_open_side_effect(file, *args, **kwargs):
+            if "volleyball" in str(file):
+                raise FileNotFoundError(f"File not found: {file}")
+            # Use the real open for other files
+            return open(file, *args, **kwargs)
+
+        with patch("builtins.open", side_effect=mock_open_side_effect):
             result = load_demo_data(sport="volleyball")
             assert result is None
 
     def test_load_demo_data_volleyball_corrupted_json(self):
         """Test load_demo_data with corrupted volleyball JSON"""
-        corrupted_json = (
-            '{"team": {"id": "vb-001", "name": "Demo Team"'  # Missing closing braces
-        )
+        import json as json_module
 
-        original_open = open
+        original_load = json_module.load
 
-        def mock_open_wrapper(file, *args, **kwargs):
-            if "volleyball-demo-data.json" in str(file):
-                return mock_open(read_data=corrupted_json)()
-            return original_open(file, *args, **kwargs)
+        def mock_json_load(f, *args, **kwargs):
+            # Check if we're loading volleyball demo data
+            if hasattr(f, "name") and "volleyball" in str(f.name):
+                raise json_module.JSONDecodeError("Invalid JSON", "", 0)
+            return original_load(f, *args, **kwargs)
 
-        with patch("builtins.open", side_effect=mock_open_wrapper):
+        with patch("json.load", side_effect=mock_json_load):
             result = load_demo_data(sport="volleyball")
             assert result is None
 
