@@ -1,0 +1,169 @@
+{
+  "team": {
+    "name": "Demo Volleyball All-Stars",
+    "id": "demo-volleyball-001"
+  },
+  "players": [
+    {
+      "id": "vb-player-001",
+      "name": "Karch Kiraly",
+      "obfuscated_name": "K*** K***",
+      "position_preference": "S",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "1"
+    },
+    {
+      "id": "vb-player-002",
+      "name": "Giba",
+      "obfuscated_name": "G***",
+      "position_preference": "OH",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "9"
+    },
+    {
+      "id": "vb-player-003",
+      "name": "Yuji Nishida",
+      "obfuscated_name": "Y*** N***",
+      "position_preference": "OPP",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "11"
+    },
+    {
+      "id": "vb-player-004",
+      "name": "Wilfredo León",
+      "obfuscated_name": "W*** L***",
+      "position_preference": "OH",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "10"
+    },
+    {
+      "id": "vb-player-005",
+      "name": "Earvin Ngapeth",
+      "obfuscated_name": "E*** N***",
+      "position_preference": "OH",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "9"
+    },
+    {
+      "id": "vb-player-006",
+      "name": "Ivan Zaytsev",
+      "obfuscated_name": "I*** Z***",
+      "position_preference": "OH",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "2"
+    },
+    {
+      "id": "vb-player-007",
+      "name": "Saeid Marouf",
+      "obfuscated_name": "S*** M***",
+      "position_preference": "S",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "5"
+    },
+    {
+      "id": "vb-player-008",
+      "name": "Kim Yeon-koung",
+      "obfuscated_name": "K** Y***-k***",
+      "position_preference": "OH",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "10"
+    },
+    {
+      "id": "vb-player-009",
+      "name": "Paola Egonu",
+      "obfuscated_name": "P*** E***",
+      "position_preference": "OPP",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "18"
+    },
+    {
+      "id": "vb-player-010",
+      "name": "Jordan Thompson",
+      "obfuscated_name": "J*** T***",
+      "position_preference": "MB",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "19"
+    },
+    {
+      "id": "vb-player-011",
+      "name": "Tijana Bošković",
+      "obfuscated_name": "T*** B***",
+      "position_preference": "OPP",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "18"
+    },
+    {
+      "id": "vb-player-012",
+      "name": "Misty May-Treanor",
+      "obfuscated_name": "M*** M***-T***",
+      "position_preference": "any",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "1"
+    },
+    {
+      "id": "vb-player-013",
+      "name": "Regla Torres",
+      "obfuscated_name": "R*** T***",
+      "position_preference": "MB",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "12"
+    },
+    {
+      "id": "vb-player-014",
+      "name": "Logan Tom",
+      "obfuscated_name": "L*** T**",
+      "position_preference": "OH",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "15"
+    },
+    {
+      "id": "vb-player-015",
+      "name": "Jakub Kochanowski",
+      "obfuscated_name": "J*** K***",
+      "position_preference": "MB",
+      "status_code": 1,
+      "type": "player",
+      "jersey_number": "6"
+    }
+  ],
+  "games": [
+    {
+      "id": "vb-game-001",
+      "date": "2025-10-05",
+      "time": "10:00 AM",
+      "opponent": "Demo Spikers"
+    },
+    {
+      "id": "vb-game-002",
+      "date": "2025-10-12",
+      "time": "2:00 PM",
+      "opponent": "Championship Blockers"
+    },
+    {
+      "id": "vb-game-003",
+      "date": "2025-10-19",
+      "time": "11:00 AM",
+      "opponent": "League Setters"
+    },
+    {
+      "id": "vb-game-004",
+      "date": "2025-10-26",
+      "time": "1:30 PM",
+      "opponent": "Victory Volleyball"
+    }
+  ]
+}
