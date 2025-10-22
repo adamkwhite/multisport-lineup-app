@@ -109,6 +109,77 @@ class TestDemoMode:
                 data = response.get_json()
                 assert "attending_players" in data
 
+    def test_load_demo_data_with_sport_parameter(self):
+        """Test load_demo_data with explicit sport parameter"""
+        # Test baseball demo data
+        baseball_data = load_demo_data(sport="baseball")
+        assert baseball_data is not None
+        assert "team" in baseball_data
+        assert "players" in baseball_data
+        assert baseball_data["team"]["name"] == "Demo All-Stars"
+
+        # Test volleyball demo data
+        volleyball_data = load_demo_data(sport="volleyball")
+        assert volleyball_data is not None
+        assert "team" in volleyball_data
+        assert "players" in volleyball_data
+        assert volleyball_data["team"]["name"] == "Demo Volleyball All-Stars"
+
+        # Test that different sports load different data
+        assert baseball_data["team"]["id"] != volleyball_data["team"]["id"]
+
+    def test_load_demo_data_volleyball_positions(self):
+        """Test volleyball demo data has valid position preferences"""
+        data = load_demo_data(sport="volleyball")
+        assert data is not None
+
+        valid_positions = ["OH", "MB", "S", "OPP", "L", "DS"]
+        position_counts = {pos: 0 for pos in valid_positions}
+
+        for player in data["players"]:
+            pos = player["position_preference"]
+            assert pos in valid_positions, f"Invalid position: {pos}"
+            position_counts[pos] += 1
+
+        # Verify we have at least one player for each position type
+        assert position_counts["S"] >= 1, "Should have at least 1 setter"
+        assert position_counts["OH"] >= 1, "Should have at least 1 outside hitter"
+        assert position_counts["MB"] >= 1, "Should have at least 1 middle blocker"
+        assert position_counts["OPP"] >= 1, "Should have at least 1 opposite"
+        assert position_counts["L"] >= 1, "Should have at least 1 libero"
+        assert position_counts["DS"] >= 1, "Should have at least 1 defensive specialist"
+
+    def test_demo_mode_volleyball_integration(self, client):
+        """Test volleyball demo mode end-to-end"""
+        # Access volleyball demo mode
+        response = client.get("/demo/volleyball", follow_redirects=False)
+        assert response.status_code == 302  # Redirect
+        assert response.location.endswith("/volleyball")
+
+        # Check session was set up correctly
+        with client.session_transaction() as sess:
+            assert sess.get("demo_mode") is True
+            assert sess.get("access_token") == "demo_token"
+            assert sess.get("demo_sport") == "volleyball"
+
+        # Test that API endpoints return volleyball data
+        teams_response = client.get("/api/teams")
+        if teams_response.status_code == 200:
+            teams_data = teams_response.get_json()
+            assert "collection" in teams_data
+            # The team name should be volleyball team
+            team_items = teams_data["collection"]["items"]
+            if team_items:
+                team_name = next(
+                    (
+                        item["value"]
+                        for item in team_items[0]["data"]
+                        if item["name"] == "name"
+                    ),
+                    None,
+                )
+                assert team_name == "Demo Volleyball All-Stars"
+
     def test_demo_mode_without_demo_data_file(self, client, monkeypatch):
         """Test demo mode behavior when demo data file is missing"""
 
