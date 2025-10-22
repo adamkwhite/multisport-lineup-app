@@ -5,6 +5,7 @@ Tests for demo mode functionality
 import json
 import os
 import sys
+from unittest.mock import mock_open, patch
 
 import pytest
 
@@ -12,6 +13,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import app, load_demo_data
+from sports.services.sport_loader import load_sport_config
 
 
 @pytest.fixture
@@ -133,7 +135,11 @@ class TestDemoMode:
         data = load_demo_data(sport="volleyball")
         assert data is not None
 
-        valid_positions = ["OH", "MB", "S", "OPP", "L", "DS"]
+        # Load valid positions from volleyball config instead of hardcoding
+        volleyball_config = load_sport_config("volleyball")
+        assert volleyball_config is not None, "Volleyball config should load"
+
+        valid_positions = [pos.id for pos in volleyball_config.positions]
         position_counts = {pos: 0 for pos in valid_positions}
 
         for player in data["players"]:
@@ -142,12 +148,11 @@ class TestDemoMode:
             position_counts[pos] += 1
 
         # Verify we have at least one player for each position type
-        assert position_counts["S"] >= 1, "Should have at least 1 setter"
-        assert position_counts["OH"] >= 1, "Should have at least 1 outside hitter"
-        assert position_counts["MB"] >= 1, "Should have at least 1 middle blocker"
-        assert position_counts["OPP"] >= 1, "Should have at least 1 opposite"
-        assert position_counts["L"] >= 1, "Should have at least 1 libero"
-        assert position_counts["DS"] >= 1, "Should have at least 1 defensive specialist"
+        # This ensures demo data showcases all available positions
+        for position in volleyball_config.positions:
+            assert (
+                position_counts[position.id] >= 1
+            ), f"Should have at least 1 {position.name} ({position.id})"
 
     def test_demo_mode_volleyball_integration(self, client):
         """Test volleyball demo mode end-to-end"""
@@ -179,6 +184,42 @@ class TestDemoMode:
                     None,
                 )
                 assert team_name == "Demo Volleyball All-Stars"
+
+    def test_load_demo_data_invalid_sport(self):
+        """Test load_demo_data with invalid sport parameter"""
+        # Should fall back to default (baseball) demo data
+        data = load_demo_data(sport="invalid_sport")
+        assert data is not None
+        # Should load baseball data as fallback
+        assert data["team"]["name"] == "Demo All-Stars"
+
+    def test_load_demo_data_volleyball_missing_file(self):
+        """Test load_demo_data when volleyball demo file is missing"""
+        with patch(
+            "builtins.open",
+            side_effect=lambda f, *args, **kwargs: (
+                FileNotFoundError() if "volleyball" in f else open(f, *args, **kwargs)
+            ),
+        ):
+            result = load_demo_data(sport="volleyball")
+            assert result is None
+
+    def test_load_demo_data_volleyball_corrupted_json(self):
+        """Test load_demo_data with corrupted volleyball JSON"""
+        corrupted_json = (
+            '{"team": {"id": "vb-001", "name": "Demo Team"'  # Missing closing braces
+        )
+
+        original_open = open
+
+        def mock_open_wrapper(file, *args, **kwargs):
+            if "volleyball-demo-data.json" in str(file):
+                return mock_open(read_data=corrupted_json)()
+            return original_open(file, *args, **kwargs)
+
+        with patch("builtins.open", side_effect=mock_open_wrapper):
+            result = load_demo_data(sport="volleyball")
+            assert result is None
 
     def test_demo_mode_without_demo_data_file(self, client, monkeypatch):
         """Test demo mode behavior when demo data file is missing"""
