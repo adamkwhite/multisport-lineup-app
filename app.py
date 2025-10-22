@@ -11,7 +11,16 @@ from urllib.parse import urlencode
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from flask import (
+    Flask,
+    has_request_context,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 
@@ -846,15 +855,33 @@ def generate_lineup():
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
 
-def load_demo_data():
-    """Load demo data from JSON file"""
+def load_demo_data(sport=None):
+    """Load demo data from JSON file based on sport"""
     import json
 
+    # Determine which sport's demo data to load
+    if sport is None:
+        # Only access session if we're in a request context (for test compatibility)
+        sport = (
+            session.get("demo_sport", "baseball")
+            if has_request_context()
+            else "baseball"
+        )
+
+    # Map sport to demo data file
+    demo_files = {
+        "baseball": "static/demo-data.json",
+        "volleyball": "static/volleyball-demo-data.json",
+        "soccer": "static/demo-data.json",  # Fallback to baseball for now
+    }
+
+    demo_file = demo_files.get(sport, "static/demo-data.json")
+
     try:
-        with open("static/demo-data.json", "r") as f:
+        with open(demo_file, "r") as f:
             return json.load(f)
     except FileNotFoundError:
-        print("Demo data file not found!")
+        print(f"Demo data file not found: {demo_file}")
         return None
     except json.JSONDecodeError as e:
         print(f"Error parsing demo data: {e}")
@@ -871,6 +898,9 @@ def demo_mode(sport="baseball"):
     # Validate sport and redirect to sport-specific dashboard
     if sport not in VALID_SPORTS:
         sport = "baseball"  # Default to baseball for backwards compatibility
+
+    # Store the sport in session for demo data loading
+    session["demo_sport"] = sport
 
     return redirect(url_for(f"{sport}_dashboard"))
 
