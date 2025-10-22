@@ -107,7 +107,7 @@
       "id": "vb-player-012",
       "name": "Misty May-Treanor",
       "obfuscated_name": "M*** M***-T***",
-      "position_preference": "any",
+      "position_preference": "L",
       "status_code": 1,
       "type": "player",
       "jersey_number": "1"
@@ -125,7 +125,7 @@
       "id": "vb-player-014",
       "name": "Logan Tom",
       "obfuscated_name": "L*** T**",
-      "position_preference": "OH",
+      "position_preference": "DS",
       "status_code": 1,
       "type": "player",
       "jersey_number": "15"
