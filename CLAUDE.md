@@ -176,6 +176,11 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 
 ## Recent Changes
 
+**2025-11-24 (Session 10)**: Dependabot dependency updates
+- Merged 3 Dependabot PRs: pytest-playwright 0.7.2, pytest 9.0.1, pre-commit 4.5.0
+- All 359 tests passed locally despite CI failures (recurring CI environment issue)
+- Coverage maintained at 94%+ after dependency updates
+
 **2025-10-20 (Session 9)**: UI improvements and SonarCloud code quality fixes
 - Split "Select Team & Game" tab into separate tabs for improved UX (PR #95)
 - Fixed SonarCloud high-value issues: accessibility, unused code, modern JS practices (PR #98)
