@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   sonarcloud:
-    name: SonarCloud Analysis
+    name: Run Tests & Submit to SonarCloud
     runs-on: ubuntu-latest
 
     steps:
