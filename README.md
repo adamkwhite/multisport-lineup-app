@@ -1,16 +1,11 @@
 # Multi-Sport Lineup Manager
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=coverage)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=bugs)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=coverage)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=adamkwhite_multisport-lineup-app&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=adamkwhite_multisport-lineup-app)
 
 A web application that connects to the TeamSnap API to automatically generate baseball fielding positions for upcoming games.
 
