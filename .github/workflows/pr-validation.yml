@@ -107,6 +107,7 @@ jobs:
           ls -la coverage.xml lcov.info 2>/dev/null || echo "⚠️ Coverage files not found"
 
       - name: SonarCloud Scan
+        if: github.actor != 'dependabot[bot]'
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -131,7 +132,7 @@ jobs:
     # CRITICAL: Only run if sonarcloud job fully succeeds
     # This prevents Claude review from running if ANY test fails
     needs: sonarcloud
-    if: success()  # Explicit check that previous job succeeded
+    if: success() && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
 
     steps:
