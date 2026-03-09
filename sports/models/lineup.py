@@ -58,8 +58,11 @@ class Player:
             name=data["name"],
             position_preferences=data.get("position_preferences", []),
             jersey_number=data.get("jersey_number"),
-            metadata={k: v for k, v in data.items()
-                     if k not in ["id", "name", "position_preferences", "jersey_number"]},
+            metadata={
+                k: v
+                for k, v in data.items()
+                if k not in ["id", "name", "position_preferences", "jersey_number"]
+            },
         )
 
     def to_dict(self) -> dict:
@@ -169,9 +172,7 @@ class Lineup:
 
         if duplicates:
             duplicate_names = [
-                a.player.name
-                for a in self.assignments
-                if a.player.id in duplicates
+                a.player.name for a in self.assignments if a.player.id in duplicates
             ]
             errors.append(
                 f"Players assigned to multiple positions: {', '.join(set(duplicate_names))}"

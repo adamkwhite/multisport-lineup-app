@@ -58,9 +58,7 @@ def get_lineup_generator(sport_id: str) -> LineupGenerator:
         return BaseballLineupGenerator(config)
     elif sport_id == "soccer":
         # Soccer not yet implemented - see issue #52
-        raise NotImplementedError(
-            "Soccer lineup generation is not yet implemented."
-        )
+        raise NotImplementedError("Soccer lineup generation is not yet implemented.")
     elif sport_id == "volleyball":
         return VolleyballLineupGenerator(config)
     else:

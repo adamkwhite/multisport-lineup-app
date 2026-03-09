@@ -80,8 +80,7 @@ def assign_positions_smart(
             # Temporarily assign this candidate
             temp_remaining = [p for p in remaining_players if p.id != candidate.id]
             temp_remaining_positions = [
-                pos for pos, _ in position_scarcity
-                if pos.id != position.id
+                pos for pos, _ in position_scarcity if pos.id != position.id
             ]
 
             # Check if remaining positions can still be filled

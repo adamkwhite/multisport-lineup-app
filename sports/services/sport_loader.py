@@ -158,9 +158,7 @@ def get_available_sports() -> list[dict]:
                 sport_id = filename[:-5]  # Remove .json extension
                 try:
                     config = load_sport_config(sport_id)
-                    sports.append(
-                        {"id": config.sport_id, "name": config.display_name}
-                    )
+                    sports.append({"id": config.sport_id, "name": config.display_name})
                 except (FileNotFoundError, ValueError):
                     # Skip invalid configurations (ValueError includes JSONDecodeError)
                     continue
