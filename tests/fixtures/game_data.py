@@ -18,8 +18,8 @@ def create_upcoming_games(count=3):
         game_time = game_date.replace(hour=18, minute=0, second=0)
         games.append(
             create_game(
-                game_id=f"game_{i+1}",
-                name=f"vs Opponent {i+1}",
+                game_id=f"game_{i + 1}",
+                name=f"vs Opponent {i + 1}",
                 starts_at=game_time.isoformat() + "Z",
             )
         )
@@ -34,8 +34,8 @@ def create_past_games(count=3):
         game_time = game_date.replace(hour=18, minute=0, second=0)
         games.append(
             create_game(
-                game_id=f"past_game_{i+1}",
-                name=f"vs Past Opponent {i+1}",
+                game_id=f"past_game_{i + 1}",
+                name=f"vs Past Opponent {i + 1}",
                 starts_at=game_time.isoformat() + "Z",
             )
         )

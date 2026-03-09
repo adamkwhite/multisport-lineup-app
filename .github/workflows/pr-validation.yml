@@ -35,19 +35,15 @@ jobs:
 
       - name: Install linting tools
         run: |
-          pip install flake8 mypy black isort
+          pip install ruff mypy
 
-      - name: Check code formatting (Black)
+      - name: Check formatting (ruff format)
         run: |
-          black --check app.py tests/ || (echo "❌ Code formatting issues found. Run 'black app.py tests/' to fix." && exit 1)
+          ruff format --check app.py tests/ sports/ || (echo "❌ Code formatting issues found. Run 'ruff format app.py tests/ sports/' to fix." && exit 1)
 
-      - name: Check import sorting (isort)
+      - name: Lint code (ruff check)
         run: |
-          isort --check-only app.py tests/ || (echo "❌ Import sorting issues found. Run 'isort app.py tests/' to fix." && exit 1)
-
-      - name: Lint code (Flake8)
-        run: |
-          flake8 app.py tests/ --max-line-length=100 --extend-ignore=E203,W503,E402,F401,F841,F811,E501,F541
+          ruff check app.py tests/ sports/
 
   # Stage 2: Tests and SonarCloud analysis (2-3 minutes)
   sonarcloud:

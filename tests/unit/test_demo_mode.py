@@ -150,9 +150,9 @@ class TestDemoMode:
         # Verify we have at least one player for each position type
         # This ensures demo data showcases all available positions
         for position in volleyball_config.positions:
-            assert (
-                position_counts[position.id] >= 1
-            ), f"Should have at least 1 {position.name} ({position.id})"
+            assert position_counts[position.id] >= 1, (
+                f"Should have at least 1 {position.name} ({position.id})"
+            )
 
     def test_demo_mode_volleyball_integration(self, client):
         """Test volleyball demo mode end-to-end"""

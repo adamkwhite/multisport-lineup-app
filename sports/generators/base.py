@@ -94,9 +94,7 @@ class LineupGenerator(ABC):
 
         # Check required positions available
         for req_pos in self.required_positions:
-            has_candidate = any(
-                p.can_play_position(req_pos) for p in players
-            )
+            has_candidate = any(p.can_play_position(req_pos) for p in players)
             if not has_candidate:
                 position_name = self._get_position_name(req_pos)
                 errors.append(

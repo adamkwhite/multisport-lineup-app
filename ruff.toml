@@ -1,0 +1,34 @@
+# Ruff configuration - replaces black, isort, and flake8
+# https://docs.astral.sh/ruff/
+
+line-length = 88
+target-version = "py312"
+
+[lint]
+# E = pycodestyle errors, F = pyflakes, I = isort, W = pycodestyle warnings
+select = ["E", "F", "I", "W"]
+ignore = [
+    "E203",  # whitespace before ':'
+    "E402",  # module level import not at top of file
+    "E501",  # line too long (handled by formatter)
+    "F401",  # imported but unused
+    "F541",  # f-string without placeholders
+    "F811",  # redefinition of unused name
+    "F841",  # local variable assigned but never used
+]
+
+exclude = [
+    "lineup-venv",
+    "venv",
+    "env",
+    ".git",
+    "__pycache__",
+    "node_modules",
+]
+
+[lint.isort]
+known-first-party = ["sports"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

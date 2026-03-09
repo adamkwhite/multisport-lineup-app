@@ -136,9 +136,7 @@ class BaseballLineupGenerator(LineupGenerator):
             )
 
         # Identify must-play players (sat out previous periods)
-        must_play_players = self._get_must_play_players(
-            players, bench_tracker, period
-        )
+        must_play_players = self._get_must_play_players(players, bench_tracker, period)
 
         # Filter out ineligible pitchers by creating modified player list
         # Players who pitched last period temporarily lose ability to pitch
@@ -149,11 +147,15 @@ class BaseballLineupGenerator(LineupGenerator):
             # Create a copy with modified preferences if needed
             if player.can_play_position("P") and player.id not in eligible_pitcher_ids:
                 # Player can pitch but not eligible this period - remove P temporarily
-                modified_prefs = [pos for pos in player.position_preferences if pos != "P"]
+                modified_prefs = [
+                    pos for pos in player.position_preferences if pos != "P"
+                ]
                 # If they had only P, give them all non-P positions
                 if not modified_prefs and player.position_preferences == ["P"]:
                     # Pitcher-only player who can't pitch this period - can play any non-P position
-                    all_non_p_positions = [pos.id for pos in self.config.positions if pos.id != "P"]
+                    all_non_p_positions = [
+                        pos.id for pos in self.config.positions if pos.id != "P"
+                    ]
                     modified_player = Player(
                         id=player.id,
                         name=player.name,
