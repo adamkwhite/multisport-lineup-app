@@ -4,14 +4,13 @@ require('@testing-library/jest-dom');
 global.fetch = jest.fn();
 
 // Mock DOM APIs that aren't available in jsdom
-Object.defineProperty(window, 'location', {
-  value: {
-    href: 'http://localhost',
-    assign: jest.fn(),
-    reload: jest.fn()
-  },
-  writable: true
-});
+// delete + reassign is compatible with jsdom 30.x (which makes location non-configurable)
+delete window.location;
+window.location = {
+  href: 'http://localhost',
+  assign: jest.fn(),
+  reload: jest.fn()
+};
 
 // Mock localStorage
 const localStorageMock = {
