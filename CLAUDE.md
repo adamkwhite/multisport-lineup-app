@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **API Integration**: TeamSnap API (OAuth 2.0)
 - **Testing**: pytest, pytest-cov (94%+ coverage target)
 - **CI/CD**: GitHub Actions (3-stage pipeline), SonarCloud
-- **Code Quality**: Black, isort, flake8, mypy, bandit
+- **Code Quality**: Ruff (linter + formatter), mypy, bandit
 - **Security**: gitleaks (secret scanning), pre-commit hooks
 
 ## Key Features
@@ -124,8 +124,8 @@ See directory tree for complete structure.
 - **SonarCloud**: Code quality analysis (public dashboard, "Sonar way" quality gate: 80%+ coverage, 0 bugs/vulnerabilities)
 
 ### Development Tools
-- **Pre-commit hooks**: Black, isort, Flake8, gitleaks (v8.18.4)
-- **CI/CD**: Black, isort, flake8, mypy, bandit
+- **Pre-commit hooks**: Ruff (lint + format), gitleaks
+- **CI/CD**: Ruff, mypy, bandit
 - **Playwright**: Visual regression tests
 - See `requirements.txt` for Python packages
 
@@ -172,9 +172,14 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 - **Self-Signed Certificates**: Local development uses self-signed certificates (browser warnings expected)
 - **Print Optimization**: Designs optimized for printing on field (landscape layouts, clear fonts)
 - **PRD Workflow**: Use `ai_docs/create-prd.mdc` for creating new feature PRDs with GitHub issue tracking
-- **Test Coverage**: Maintain 94%+ coverage (currently 353 tests passing)
+- **Test Coverage**: Maintain 94%+ coverage (currently 359 tests passing)
 
 ## Recent Changes
+
+**2026-03-09 (Session 11)**: jsdom fix and ruff migration
+- Fixed jsdom 30.x window.location mock compatibility (PR #128)
+- Migrated from flake8/isort/black to ruff for linting and formatting (PR #129, closes #96)
+- Claude Code Review CI step failing (SDK execution error) — not a code issue
 
 **2025-11-24 (Session 10)**: Dependabot dependency updates
 - Merged 3 Dependabot PRs: pytest-playwright 0.7.2, pytest 9.0.1, pre-commit 4.5.0
@@ -210,7 +215,9 @@ For detailed session history, see `docs/archive/CHANGELOG.md`
 ## Next Steps
 
 **Immediate:**
+- Refactor sport dashboards to shared base template (Issue #97)
 - Complete sport-specific configuration rules (Issue #53)
+- Investigate Claude Code Review CI failure (SDK execution error)
 
 **Short-term:**
 - Update frontend UI for multi-sport selection
