@@ -85,7 +85,7 @@ pre-commit install                   # One-time setup
 
 ```
 multisport-lineup-app/
-├── ai_docs/               # AI-specific documentation (PRD workflow)
+├── docs/ai-docs/          # AI-specific documentation (PRD/ADR workflow)
 ├── config/sports/         # Sport-specific JSON configs
 ├── docs/                  # Documentation (deployment, development, features, testing)
 ├── scripts/               # Build and deployment scripts
@@ -171,7 +171,7 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 - **HTTPS Required**: TeamSnap OAuth requires HTTPS for redirect URIs
 - **Self-Signed Certificates**: Local development uses self-signed certificates (browser warnings expected)
 - **Print Optimization**: Designs optimized for printing on field (landscape layouts, clear fonts)
-- **PRD Workflow**: Use `ai_docs/create-prd.mdc` for creating new feature PRDs with GitHub issue tracking
+- **PRD Workflow**: Use `docs/ai-docs/create-prd.md` for creating new feature PRDs with GitHub issue tracking. For architectural decisions, use `docs/ai-docs/create-adr.md`.
 - **Test Coverage**: Maintain 94%+ coverage (currently 359 tests passing)
 
 ## Recent Changes
