@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Database**: SQLite (development), PostgreSQL (production)
 - **API Integration**: TeamSnap API (OAuth 2.0)
 - **Testing**: pytest, pytest-cov (94%+ coverage target)
-- **CI/CD**: GitHub Actions (3-stage pipeline), SonarCloud
+- **CI/CD**: GitHub Actions (2-stage pipeline), SonarCloud
 - **Code Quality**: Ruff (linter + formatter), mypy, bandit
 - **Security**: gitleaks (secret scanning), pre-commit hooks
 
@@ -71,10 +71,9 @@ pre-commit install                   # One-time setup
 
 ## CI/CD Pipeline
 
-**3-Stage GitHub Actions Workflow** (`.github/workflows/pr-validation.yml`):
+**2-Stage GitHub Actions Workflow** (`.github/workflows/pr-validation.yml`):
 1. **Quick Validation** (15-30s) - Code formatting, import sorting, linting
 2. **Tests & SonarCloud** (2-3min) - Unit tests, coverage, quality gate
-3. **Claude Review** (3-5min) - AI-powered code review
 
 **Key Features:**
 - 6 layers of safeguards ensure test failures block pipeline
@@ -179,7 +178,6 @@ See global `~/Code/CLAUDE.md` for complete Git workflow documentation.
 **2026-03-09 (Session 11)**: jsdom fix and ruff migration
 - Fixed jsdom 30.x window.location mock compatibility (PR #128)
 - Migrated from flake8/isort/black to ruff for linting and formatting (PR #129, closes #96)
-- Claude Code Review CI step failing (SDK execution error) — not a code issue
 
 **2025-11-24 (Session 10)**: Dependabot dependency updates
 - Merged 3 Dependabot PRs: pytest-playwright 0.7.2, pytest 9.0.1, pre-commit 4.5.0
@@ -217,7 +215,6 @@ For detailed session history, see `docs/archive/CHANGELOG.md`
 **Immediate:**
 - Refactor sport dashboards to shared base template (Issue #97)
 - Complete sport-specific configuration rules (Issue #53)
-- Investigate Claude Code Review CI failure (SDK execution error)
 
 **Short-term:**
 - Update frontend UI for multi-sport selection
