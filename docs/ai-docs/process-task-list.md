@@ -31,17 +31,10 @@ When working with task lists, the AI must:
 3. Add newly discovered tasks.
 4. Keep “Relevant Files” accurate and up to date.
 5. Before starting work, check which sub‑task is next.
-6. After implementing a sub‑task, update the file,
-7. Pause for user approval to commit to gh. (Reply "yes" or "y" to continue)
-8. Commit code code to git.
+6. After implementing a sub‑task, update the file.
+7. Pause for user approval to commit to gh. (Reply “yes” or “y” to continue)
+8. Commit code to git.
 
-## Vibe Coding Quality Checks
+## Architectural Decisions During Execution
 
-After each subtask completion, run these checks:
-
-### Automatic Reviews
-- **Bloat Check:** If generated code >400 lines, prompt: "Optimize this code and extract components"
-- **Package Audit:** Verify all npm packages against known vulnerabilities
-- **Secret Scan:** Search for hardcoded: API keys, passwords, tokens, connection strings
-- **Input Validation:** Confirm all user inputs have sanitization (use Zod or similar)
-- **Mobile Ready:** Check responsive design, especially tables → cards conversion
+If while executing a sub-task you realize a significant architectural or design decision is being made that isn't explained by the PRD or existing code (e.g., choosing a library, locking in a data model, picking between two valid approaches), **pause and create an ADR using `create-adr.md` before committing the implementation**. The ADR rides along in the same feature branch as the code change. This prevents undocumented decisions from accreting silently as you work through the task list.
