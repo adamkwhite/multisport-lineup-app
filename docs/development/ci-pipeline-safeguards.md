@@ -109,10 +109,6 @@ jobs:
 
   sonarqube:
     needs: quick-checks  # Only run if quick-checks succeeds
-
-  claude-review:
-    needs: sonarqube     # Only run if sonarqube succeeds
-    if: success()        # Explicit success check
 ```
 
 **What it does:**
@@ -141,9 +137,6 @@ Stage 2: Tests & SonarQube ✅
   → SonarQube scan PASS
   → Quality gate PASS
   → Verification step PASS
-
-Stage 3: Claude Review ✅
-  → Review runs
 ```
 
 ---
@@ -155,15 +148,11 @@ Stage 1: Quick Checks ✅
 Stage 2: Tests & SonarQube ❌
   → Python tests FAIL (2 failures)
   ❌ Job fails immediately (errexit)
-
-Stage 3: Claude Review
-  → SKIPPED (needs: sonarqube failed)
 ```
 
 **Why it's blocked:**
 - Layer 1: `errexit` stops job immediately on pytest failure
 - Layer 3: `continue-on-error: false` marks step as failed
-- Layer 6: Claude review `needs: sonarqube` won't run
 
 ---
 
@@ -177,15 +166,11 @@ Stage 2: Tests & SonarQube ❌
   → SonarQube scan PASS
   → Quality gate FAIL (new bugs detected)
   ❌ Job fails
-
-Stage 3: Claude Review
-  → SKIPPED (needs: sonarqube failed)
 ```
 
 **Why it's blocked:**
 - Layer 3: Quality gate `continue-on-error: false` fails the job
 - Layer 5: Verification step checks `sonar-gate.outcome != success`
-- Layer 6: Claude review doesn't run due to `needs` + `if: success()`
 
 ---
 

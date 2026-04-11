@@ -2,7 +2,7 @@
 
 ## Overview
 
-The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for comprehensive PR validation. Each stage builds on the previous, providing fast feedback while ensuring code quality.
+The multisport-lineup-app uses a **2-stage GitHub Actions pipeline** for comprehensive PR validation. Each stage builds on the previous, providing fast feedback while ensuring code quality.
 
 **Pipeline File:** `.github/workflows/pr-validation.yml`
 
@@ -29,15 +29,6 @@ The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for compreh
 │  ✓ Code coverage (94%+ target)                              │
 │  ✓ SonarCloud quality gate (80%+ new code coverage)         │
 │  ✓ Verification step (outcome checks)                       │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ PASS
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Stage 3: Claude Code Review (3-5 minutes)                  │
-│  ✓ AI-powered code review                                   │
-│  ✓ Best practices check                                     │
-│  ✓ Security review                                          │
-│  ✓ Automated feedback on PR                                 │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -45,7 +36,7 @@ The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for compreh
 
 **Purpose:** Fast feedback on code style issues
 **Duration:** 15-30 seconds
-**Blocks:** Stages 2 and 3
+**Blocks:** Stage 2
 
 ### Checks
 
@@ -74,7 +65,6 @@ The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for compreh
 
 **Purpose:** Comprehensive testing and quality analysis
 **Duration:** 2-3 minutes
-**Blocks:** Stage 3
 **Depends on:** Stage 1 passing
 
 ### Checks
@@ -112,32 +102,15 @@ The multisport-lineup-app uses a **3-stage GitHub Actions pipeline** for compreh
    - Redundant safety check
    - See `docs/development/ci-pipeline-safeguards.md`
 
-## Stage 3: Claude Code Review
-
-**Purpose:** AI-powered code review
-**Duration:** 3-5 minutes
-**Depends on:** Stage 2 passing
-
-### Review Areas
-
-- Code quality and best practices
-- Potential bugs or issues
-- Performance considerations
-- Security concerns
-- Test coverage adequacy
-
-**Note:** Review comments are posted directly on the PR.
-
 ## Safeguards
 
-The pipeline has **6 layers of safeguards** to ensure test failures always block the pipeline:
+The pipeline has **5 layers of safeguards** to ensure test failures always block the pipeline:
 
 1. Global shell options (`-eo pipefail`)
 2. Job-level `continue-on-error: false`
 3. Step-level `continue-on-error: false`
 4. No error suppression operators (`|| true`)
 5. Explicit outcome verification
-6. Job dependency chain with `if: success()`
 
 **Full documentation:** `docs/development/ci-pipeline-safeguards.md`
 
@@ -165,7 +138,6 @@ SonarCloud project configuration
 
 Required GitHub Secrets:
 - `SONAR_TOKEN` - SonarCloud authentication token
-- `CLAUDE_CODE_OAUTH_TOKEN` - Claude Code API token
 
 ## Running Locally
 
@@ -200,23 +172,16 @@ sonar-scanner
 ### Stage 1 Fails
 - **Symptom:** Red X on "Quick Validation"
 - **Fix:** Run Black/isort/Flake8 locally and commit fixes
-- **Impact:** Stages 2 and 3 skipped
+- **Impact:** Stage 2 skipped
 
 ### Stage 2 Fails - Tests
 - **Symptom:** Red X on "Tests & SonarCloud Analysis"
 - **Fix:** Fix failing tests, verify locally with pytest
-- **Impact:** Stage 3 skipped
 
 ### Stage 2 Fails - Quality Gate
 - **Symptom:** Red X on "SonarCloud Quality Gate Check"
 - **Fix:** Address code quality issues reported in SonarCloud dashboard
 - **Dashboard:** https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
-- **Impact:** Stage 3 skipped
-
-### Stage 3 Fails
-- **Symptom:** Claude review finds issues
-- **Fix:** Address review comments
-- **Impact:** Informational, doesn't block merge (but should be addressed)
 
 ## Performance
 
@@ -224,8 +189,7 @@ sonar-scanner
 |-------|----------|---------------------|
 | Stage 1 | 15-30s | No (sequential) |
 | Stage 2 | 2-3 min | No (depends on Stage 1) |
-| Stage 3 | 3-5 min | No (depends on Stage 2) |
-| **Total** | **5-8 min** | N/A |
+| **Total** | **2.5-3.5 min** | N/A |
 
 ## Best Practices
 
@@ -237,11 +201,7 @@ sonar-scanner
    - Catch failures early
    - Don't waste CI resources
 
-3. **Address Claude review comments**
-   - Even if they don't block merge
-   - Improve code quality
-
-4. **Monitor SonarCloud dashboard**
+3. **Monitor SonarCloud dashboard**
    - Public dashboard: https://sonarcloud.io/project/overview?id=adamkwhite_multisport-lineup-app
    - Track technical debt
    - Improve code quality over time
@@ -298,7 +258,7 @@ git commit -m "Fix import sorting"
 
 ### Pipeline Evolution
 
-Current version: v1.0 (3-stage pipeline)
+Current version: v2.0 (2-stage pipeline)
 
 Future improvements:
 - Parallel test execution
