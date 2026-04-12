@@ -78,3 +78,4 @@ test-results/
 # Local Claude settings (may contain internal URLs)
 .claude/settings.local.json
 lineup-venv/
+.venv/
