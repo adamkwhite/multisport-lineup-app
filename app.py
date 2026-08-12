@@ -6,7 +6,7 @@ Main Flask application for managing baseball fielding positions
 
 import os
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
 
 import requests
@@ -145,6 +145,262 @@ FIELDING_POSITIONS = {
 ERROR_NOT_AUTHENTICATED = "Not authenticated"
 
 
+def _collection_items(payload):
+    """Items of a Collection+JSON payload, tolerating a missing collection."""
+    return (payload.get("collection") or {}).get("items") or []
+
+
+def _collection_value(payload, field_name):
+    """Value of the named `data` field within a Collection+JSON payload.
+
+    Later items win. The original scanned with a `break` on the inner loop
+    only, so a subsequent item carrying the same field overwrote the earlier
+    one; that is preserved rather than switched to first-match.
+    """
+    found = None
+    for item in _collection_items(payload):
+        for data in item.get("data", []):
+            if data["name"] == field_name:
+                found = data["value"]
+                break
+    return found
+
+
+def _collection_link(payload, rel):
+    """href of the first link with the given rel, per item; later items win."""
+    found = None
+    for item in _collection_items(payload):
+        for link in item.get("links", []):
+            if link.get("rel") == rel:
+                found = link.get("href")
+                break
+    return found
+
+
+STATUS_MEANING = {
+    0: "No Response/Unknown",
+    1: "Yes/Attending",
+    2: "No/Not Attending",
+    3: "Maybe",
+}
+
+
+def _demo_availability_response(event_id):
+    """All demo players as attending, or 404/500 when the event or data is absent."""
+    demo_data = load_demo_data()
+    if not demo_data:
+        return jsonify({"error": "Demo data not available"}), 500
+
+    for game in demo_data["games"]:
+        if game["id"] == event_id:
+            return jsonify({"attending_players": demo_data["players"]})
+    return jsonify({"error": "Demo game not found"}), 404
+
+
+def _print_availability_record(index, avail_info):
+    """Dump the first few availability records for debugging."""
+    if index > 3:
+        return
+    print(f"\n📋 AVAILABILITY RECORD {index}:")
+    for key, value in avail_info.items():
+        print(f"    {key}: {value}")
+
+
+def _fetch_member_info(member_id, headers):
+    """Member data as a name->value dict, or None if the lookup yields nothing."""
+    member_url = f"{TEAMSNAP_API_BASE}/members/search?id={member_id}"
+    member_response = requests.get(member_url, headers=headers)
+
+    if member_response.status_code != 200:
+        print(f"  ❌ Failed to get member details: {member_response.status_code}")
+        return None
+
+    items = member_response.json().get("collection", {}).get("items")
+    if not items:
+        return None
+    return {d["name"]: d.get("value") for d in items[0].get("data", [])}
+
+
+def _player_from_member(member_info, member_id, status_code):
+    """A player dict for a non-manager member, else None. Prints the trace."""
+    first = member_info.get("first_name", "")
+    last = member_info.get("last_name", "")
+    player_name = f"{first} {last}".strip()
+    member_type = member_info.get("type", "unknown")
+    is_manager = member_info.get("is_manager", False)
+    is_owner = member_info.get("is_owner", False)
+
+    print("  📋 Member Details:")
+    print(f"    Name: {player_name}")
+    print(f"    Type: {member_type}")
+    print(f"    Is Manager: {is_manager}")
+    print(f"    Is Owner: {is_owner}")
+
+    # Only add players, skip managers/coaches
+    if not (member_type == "player" or (not is_manager and not is_owner)):
+        print(f"  🚫 Skipped (Manager/Coach): {player_name}")
+        return None
+
+    # Send both original and obfuscated names for frontend toggle
+    original_name = player_name or f"Player {member_id}"
+    obfuscated_name = obfuscate_name(original_name)
+    print(f"  ✅ Added as player: {player_name} -> {obfuscated_name}")
+
+    return {
+        "id": member_id,
+        "name": original_name,
+        "obfuscated_name": obfuscated_name,
+        "position_preference": None,
+        "status_code": status_code,
+        "type": member_type,
+    }
+
+
+def _demo_games_response(team_id):
+    """Demo games for the demo team, or a 404 when the id does not match."""
+    demo_data = load_demo_data()
+    if not (demo_data and team_id == demo_data["team"]["id"]):
+        return jsonify({"error": "Demo team not found"}), 404
+
+    return jsonify({"games": [_demo_game(game) for game in demo_data["games"]]})
+
+
+def _demo_game(game):
+    """One demo game, with its 12-hour time normalized to 24-hour."""
+    time_str = game["time"]
+    if "AM" in time_str or "PM" in time_str:
+        time_24h = datetime.strptime(time_str, "%I:%M %p").strftime("%H:%M")
+    else:
+        time_24h = time_str
+
+    return {
+        "id": game["id"],
+        "name": f"vs {game['opponent']}",
+        "starts_at": f"{game['date']}T{time_24h}:00Z",
+        "location": "Demo Stadium",
+    }
+
+
+def _build_events_url(team_id, include_all_states):
+    """Events search URL: all states, or the next 30 days."""
+    if include_all_states:
+        events_url = f"{TEAMSNAP_API_BASE}/events/search?team_id={team_id}"
+        print(f"Events URL (ALL STATES): {events_url}")
+        return events_url
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    thirty_days_later = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
+    events_url = (
+        f"{TEAMSNAP_API_BASE}/events/search?team_id={team_id}"
+        f"&started_after={today}&started_before={thirty_days_later}"
+    )
+    print(f"Events URL (UPCOMING): {events_url}")
+    return events_url
+
+
+def _parse_event_start(starts_at):
+    """TeamSnap start_date to an aware datetime; assumes UTC when unzoned."""
+    if starts_at.endswith("Z"):
+        return datetime.fromisoformat(starts_at.replace("Z", "+00:00"))
+    return datetime.fromisoformat(starts_at).replace(tzinfo=timezone.utc)
+
+
+def _should_include_game(start_time, now, include_all_states):
+    """Whether a parsed game qualifies. Prints the decision trace."""
+    if include_all_states:
+        # Include all games regardless of date or state
+        print("    ✅ Including (ALL STATES mode)")
+        return True
+
+    # Only include future games within 30 days
+    is_future = start_time > now
+    is_within_range = start_time <= now + timedelta(days=30)
+    print(f"    ⏭️  Future: {'YES' if is_future else 'NO'}")
+    print(f"    📊 In Range: {'YES' if is_within_range else 'NO'}")
+    return is_future and is_within_range
+
+
+def _print_raw_event(index, event_data):
+    """Dump the first few raw events for debugging."""
+    if index > 3:
+        return
+    print(f"🔍 RAW EVENT {index} DATA:")
+    for key, value in event_data.items():
+        print(f"    {key}: {value}")
+    print()
+
+
+def _print_search_header(team_id, now, include_all_states, total_events):
+    """The banner block printed before the per-event trace."""
+    print("\n" + "=" * 80)
+    filter_type = "ALL GAMES (ANY STATE)" if include_all_states else "UPCOMING GAMES"
+    print(f"🏟️  SEARCHING FOR {filter_type} - Team ID: {team_id}")
+    print("=" * 80)
+    print(f"📅 Current time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+    if not include_all_states:
+        thirty_days = now + timedelta(days=30)
+        print(f"📅 Looking until: {thirty_days.strftime('%Y-%m-%d %H:%M:%S')}")
+    print()
+    print(f"📋 Found {total_events} total events for this team:")
+    print("-" * 50)
+
+
+def _game_from_event(
+    event_data, event_name, is_game, starts_at, now, include_all_states
+):
+    """A game dict for an event that qualifies, else None. Prints the trace."""
+    if not (is_game and starts_at and starts_at != "No date"):
+        if not is_game:
+            print("    ⚠️  SKIPPED: Not marked as a game")
+        else:
+            print("    ⚠️  SKIPPED: No start time")
+        return None
+
+    try:
+        start_time = _parse_event_start(starts_at)
+    except (ValueError, TypeError) as e:
+        print(f"    ❌ DATE ERROR: {e}")
+        return None
+
+    print(f"    🕐 Parsed: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    if not _should_include_game(start_time, now, include_all_states):
+        reason = "Past event" if not start_time > now else "Too far in future"
+        print(f"    ❌ SKIPPED: {reason}")
+        return None
+
+    print("    ✅ ADDED TO LINEUP LIST!")
+    return {
+        "id": event_data.get("id"),
+        "name": event_name,
+        "starts_at": starts_at,
+        "location": event_data.get("location_name", "TBD"),
+    }
+
+
+def _demo_teams_response():
+    """Demo team in Collection+JSON format, or a 500 when demo data is absent."""
+    demo_data = load_demo_data()
+    if not demo_data:
+        return jsonify({"error": "Demo data not available"}), 500
+
+    return jsonify(
+        {
+            "collection": {
+                "items": [
+                    {
+                        "data": [
+                            {"name": "id", "value": demo_data["team"]["id"]},
+                            {"name": "name", "value": demo_data["team"]["name"]},
+                            {"name": "location", "value": "Demo City"},
+                        ]
+                    }
+                ]
+            }
+        }
+    )
+
+
 @app.route("/")
 def index():
     """Sport selection landing page"""
@@ -242,29 +498,7 @@ def get_teams():
 
     # Demo mode handling
     if session.get("demo_mode"):
-        demo_data = load_demo_data()
-        if demo_data:
-            # Return demo team in Collection+JSON format
-            return jsonify(
-                {
-                    "collection": {
-                        "items": [
-                            {
-                                "data": [
-                                    {"name": "id", "value": demo_data["team"]["id"]},
-                                    {
-                                        "name": "name",
-                                        "value": demo_data["team"]["name"],
-                                    },
-                                    {"name": "location", "value": "Demo City"},
-                                ]
-                            }
-                        ]
-                    }
-                }
-            )
-        else:
-            return jsonify({"error": "Demo data not available"}), 500
+        return _demo_teams_response()
 
     headers = {"Authorization": f"Bearer {session['access_token']}"}
 
@@ -277,23 +511,8 @@ def get_teams():
         # Debug: log the me response structure
         print("ME Response:", me_data)
 
-        # Get user ID from me response
-        user_id = None
-        if "collection" in me_data and "items" in me_data["collection"]:
-            for item in me_data["collection"]["items"]:
-                for data in item.get("data", []):
-                    if data["name"] == "id":
-                        user_id = data["value"]
-                        break
-
-        # Look for user-specific teams link
-        teams_url = None
-        if "collection" in me_data and "items" in me_data["collection"]:
-            for item in me_data["collection"]["items"]:
-                for link in item.get("links", []):
-                    if link.get("rel") == "teams":
-                        teams_url = link.get("href")
-                        break
+        user_id = _collection_value(me_data, "id")
+        teams_url = _collection_link(me_data, "teams")
 
         # If no user-specific teams link, construct the search URL with user_id
         if not teams_url and user_id:
@@ -322,30 +541,7 @@ def get_games(team_id):
 
     # Demo mode handling
     if session.get("demo_mode"):
-        demo_data = load_demo_data()
-        if demo_data and team_id == demo_data["team"]["id"]:
-            # Transform demo games to match expected format
-            transformed_games = []
-            for game in demo_data["games"]:
-                # Convert time format (e.g., "10:00 AM" to "10:00")
-                time_str = game["time"]
-                if "AM" in time_str or "PM" in time_str:
-                    time_obj = datetime.strptime(time_str, "%I:%M %p")
-                    time_24h = time_obj.strftime("%H:%M")
-                else:
-                    time_24h = time_str
-
-                transformed_games.append(
-                    {
-                        "id": game["id"],
-                        "name": f"vs {game['opponent']}",
-                        "starts_at": f"{game['date']}T{time_24h}:00Z",
-                        "location": "Demo Stadium",
-                    }
-                )
-            return jsonify({"games": transformed_games})
-        else:
-            return jsonify({"error": "Demo team not found"}), 404
+        return _demo_games_response(team_id)
 
     headers = {"Authorization": f"Bearer {session['access_token']}"}
 
@@ -355,18 +551,7 @@ def get_games(team_id):
     )
 
     try:
-        if include_all_states:
-            # Get all events for this team (no date filter)
-            events_url = f"{TEAMSNAP_API_BASE}/events/search?team_id={team_id}"
-            print(f"Events URL (ALL STATES): {events_url}")
-        else:
-            # Use the events search endpoint with team_id parameter and date filter
-            today = datetime.now().strftime("%Y-%m-%d")
-            thirty_days_later = (datetime.now() + timedelta(days=30)).strftime(
-                "%Y-%m-%d"
-            )
-            events_url = f"{TEAMSNAP_API_BASE}/events/search?team_id={team_id}&started_after={today}&started_before={thirty_days_later}"
-            print(f"Events URL (UPCOMING): {events_url}")
+        events_url = _build_events_url(team_id, include_all_states)
 
         response = requests.get(events_url, headers=headers)
         response.raise_for_status()
@@ -377,36 +562,17 @@ def get_games(team_id):
         games = []
         all_events = []
         # Make timezone-aware datetime for comparison
-        from datetime import timezone
 
         now = datetime.now(timezone.utc)
 
-        print("\n" + "=" * 80)
-        filter_type = (
-            "ALL GAMES (ANY STATE)" if include_all_states else "UPCOMING GAMES"
-        )
-        print(f"🏟️  SEARCHING FOR {filter_type} - Team ID: {team_id}")
-        print("=" * 80)
-        print(f"📅 Current time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
-        if not include_all_states:
-            thirty_days = now + timedelta(days=30)
-            print(f"📅 Looking until: {thirty_days.strftime('%Y-%m-%d %H:%M:%S')}")
-        print()
+        items = events_data.get("collection", {}).get("items", [])
+        _print_search_header(team_id, now, include_all_states, len(items))
 
-        total_events = len(events_data.get("collection", {}).get("items", []))
-        print(f"📋 Found {total_events} total events for this team:")
-        print("-" * 50)
-
-        for i, item in enumerate(events_data.get("collection", {}).get("items", []), 1):
+        for i, item in enumerate(items, 1):
             event_data = {d["name"]: d.get("value") for d in item.get("data", [])}
             all_events.append(event_data)
 
-            # Debug: Show raw event data for first few events
-            if i <= 3:
-                print(f"🔍 RAW EVENT {i} DATA:")
-                for key, value in event_data.items():
-                    print(f"    {key}: {value}")
-                print()
+            _print_raw_event(i, event_data)
 
             # Use formatted_title if name is empty, fallback to label
             event_name = (
@@ -422,65 +588,11 @@ def get_games(team_id):
             print(f"    🏆 Is Game: {'YES' if is_game else 'NO'}")
             print(f"    📅 Start: {starts_at}")
 
-            # Check if it's a game and upcoming
-            if is_game and starts_at and starts_at != "No date":
-                try:
-                    # Handle TeamSnap's UTC datetime format
-                    start_time_str = starts_at
-                    if start_time_str.endswith("Z"):
-                        # Remove Z and add UTC timezone
-                        start_time = datetime.fromisoformat(
-                            start_time_str.replace("Z", "+00:00")
-                        )
-                    else:
-                        # Assume UTC if no timezone
-                        start_time = datetime.fromisoformat(start_time_str).replace(
-                            tzinfo=timezone.utc
-                        )
-
-                    readable_date = start_time.strftime("%Y-%m-%d %H:%M:%S")
-
-                    print(f"    🕐 Parsed: {readable_date}")
-
-                    should_include = False
-                    if include_all_states:
-                        # Include all games regardless of date or state
-                        should_include = True
-                        print("    ✅ Including (ALL STATES mode)")
-                    else:
-                        # Only include future games within 30 days
-                        is_future = start_time > now
-                        thirty_days = now + timedelta(days=30)
-                        is_within_range = start_time <= thirty_days
-
-                        print(f"    ⏭️  Future: {'YES' if is_future else 'NO'}")
-                        print(f"    📊 In Range: {'YES' if is_within_range else 'NO'}")
-
-                        should_include = is_future and is_within_range
-
-                    if should_include:
-                        games.append(
-                            {
-                                "id": event_data.get("id"),
-                                "name": event_name,
-                                "starts_at": starts_at,
-                                "location": event_data.get("location_name", "TBD"),
-                            }
-                        )
-                        print("    ✅ ADDED TO LINEUP LIST!")
-                    else:
-                        is_future = start_time > now
-                        reason = "Past event" if not is_future else "Too far in future"
-                        print(f"    ❌ SKIPPED: {reason}")
-
-                except (ValueError, TypeError) as e:
-                    print(f"    ❌ DATE ERROR: {e}")
-                    continue
-            else:
-                if not is_game:
-                    print("    ⚠️  SKIPPED: Not marked as a game")
-                else:
-                    print("    ⚠️  SKIPPED: No start time")
+            game = _game_from_event(
+                event_data, event_name, is_game, starts_at, now, include_all_states
+            )
+            if game is not None:
+                games.append(game)
 
             print()  # Blank line between events
 
@@ -507,16 +619,7 @@ def get_availability(event_id):
 
     # Demo mode handling
     if session.get("demo_mode"):
-        demo_data = load_demo_data()
-        if demo_data:
-            # Find the game in demo data
-            for game in demo_data["games"]:
-                if game["id"] == event_id:
-                    # Return all demo players as attending
-                    return jsonify({"attending_players": demo_data["players"]})
-            return jsonify({"error": "Demo game not found"}), 404
-        else:
-            return jsonify({"error": "Demo data not available"}), 500
+        return _demo_availability_response(event_id)
 
     headers = {"Authorization": f"Bearer {session['access_token']}"}
 
@@ -543,85 +646,29 @@ def get_availability(event_id):
         ):
             avail_info = {d["name"]: d.get("value") for d in item.get("data", [])}
 
-            # Debug first few availability records
-            if i <= 3:
-                print(f"\n📋 AVAILABILITY RECORD {i}:")
-                for key, value in avail_info.items():
-                    print(f"    {key}: {value}")
+            _print_availability_record(i, avail_info)
 
             member_id = avail_info.get("member_id")
             status_code = avail_info.get("status_code")
-
-            # Decode status codes for better debugging
-            status_meaning = {
-                0: "No Response/Unknown",
-                1: "Yes/Attending",
-                2: "No/Not Attending",
-                3: "Maybe",
-            }
-            status_text = status_meaning.get(status_code, f"Unknown ({status_code})")
-
+            status_text = STATUS_MEANING.get(status_code, f"Unknown ({status_code})")
             print(f"👤 Member {member_id}: Status {status_code} = {status_text}")
 
-            if status_code == 1:  # Only include confirmed attending players
-                if member_id:
-                    # Get member details using search endpoint
-                    member_url = f"{TEAMSNAP_API_BASE}/members/search?id={member_id}"
-                    member_response = requests.get(member_url, headers=headers)
-
-                    if member_response.status_code == 200:
-                        member_data = member_response.json()
-
-                        if member_data.get("collection", {}).get("items"):
-                            member_info = {
-                                d["name"]: d.get("value")
-                                for d in member_data["collection"]["items"][0].get(
-                                    "data", []
-                                )
-                            }
-
-                            player_name = f"{member_info.get('first_name', '')} {member_info.get('last_name', '')}".strip()
-                            member_type = member_info.get("type", "unknown")
-                            is_manager = member_info.get("is_manager", False)
-                            is_owner = member_info.get("is_owner", False)
-
-                            print("  📋 Member Details:")
-                            print(f"    Name: {player_name}")
-                            print(f"    Type: {member_type}")
-                            print(f"    Is Manager: {is_manager}")
-                            print(f"    Is Owner: {is_owner}")
-
-                            # Only add players, skip managers/coaches
-                            if member_type == "player" or (
-                                not is_manager and not is_owner
-                            ):
-                                # Send both original and obfuscated names for frontend toggle
-                                original_name = player_name or f"Player {member_id}"
-                                obfuscated_name = obfuscate_name(original_name)
-
-                                attending_players.append(
-                                    {
-                                        "id": member_id,
-                                        "name": original_name,  # Send original name
-                                        "obfuscated_name": obfuscated_name,  # Send obfuscated name
-                                        "position_preference": None,
-                                        "status_code": status_code,
-                                        "type": member_type,
-                                    }
-                                )
-                                print(
-                                    f"  ✅ Added as player: {player_name} -> {obfuscated_name}"
-                                )
-                            else:
-                                print(f"  🚫 Skipped (Manager/Coach): {player_name}")
-                    else:
-                        print(
-                            f"  ❌ Failed to get member details: {member_response.status_code}"
-                        )
-            else:
+            if status_code != 1:  # Only include confirmed attending players
                 print(
-                    f"  🚫 Skipped Member {member_id}: Status {status_code} = {status_text} (not attending)"
+                    f"  🚫 Skipped Member {member_id}: Status {status_code} = "
+                    f"{status_text} (not attending)"
                 )
+                continue
+            if not member_id:
+                continue
+
+            member_info = _fetch_member_info(member_id, headers)
+            if not member_info:
+                continue
+
+            player = _player_from_member(member_info, member_id, status_code)
+            if player is not None:
+                attending_players.append(player)
 
         print(f"\n📊 SUMMARY: {len(attending_players)} players attending")
         print("=" * 60)
