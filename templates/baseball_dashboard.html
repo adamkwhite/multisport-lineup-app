@@ -1288,6 +1288,69 @@
             filterGames();
         }
 
+        // Request games for a team, distinguishing "the request threw" from
+        // "the server answered, but said no". Both used to be caught and
+        // discarded without so much as a console line, which left a failed
+        // load looking identical to a team with no games.
+        async function requestGames(url) {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    console.error('Games request rejected', response.status, data);
+                    return { rejected: true };
+                }
+                return { games: data.games };
+            } catch (error) {
+                console.error('Games request failed', url, error);
+                return { failed: true };
+            }
+        }
+
+        function showGamesMessage(gamesList, message) {
+            const messageEl = document.createElement('p');
+            messageEl.textContent = message;
+            gamesList.appendChild(messageEl);
+        }
+
+        // Load games for the current filter into `allGames`.
+        // Returns false when the caller should stop and leave the message on screen.
+        async function loadGamesForFilter(filter, gamesList) {
+            if (!selectedTeam) {
+                return true;
+            }
+
+            const isAllStates = filter === 'all-states';
+            if (!isAllStates && filter !== 'next' && filter !== 'all') {
+                return true;
+            }
+
+            const url = isAllStates
+                ? `/api/games/${selectedTeam}?include_all_states=true`
+                : `/api/games/${selectedTeam}`;
+
+            const loading = document.getElementById('games-loading');
+            loading.style.display = 'block';
+            const result = await requestGames(url);
+            loading.style.display = 'none';
+
+            if (result.games) {
+                allGames = result.games;
+                return true;
+            }
+
+            // A thrown request always surfaces. A non-OK response only stops the
+            // all-states path: the next/all path deliberately keeps whatever was
+            // already loaded and carries on rendering, which is the behaviour
+            // this refactor preserves rather than the behaviour it endorses.
+            if (result.failed || isAllStates) {
+                showGamesMessage(gamesList, 'Error loading games');
+                return false;
+            }
+            return true;
+        }
+
         async function filterGames() {
             const gamesList = document.getElementById('games-list');
             const filter = document.getElementById('game-filter').value;
@@ -1297,49 +1360,8 @@
                 gamesList.removeChild(gamesList.firstChild);
             }
 
-            // If "all-states" is selected and we have a team selected, reload data
-            if (filter === 'all-states' && selectedTeam) {
-                document.getElementById('games-loading').style.display = 'block';
-                try {
-                    const response = await fetch(`/api/games/${selectedTeam}?include_all_states=true`);
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        allGames = data.games;
-                    } else {
-                        const errorMsg = document.createElement('p');
-                        errorMsg.textContent = 'Error loading games';
-                        gamesList.appendChild(errorMsg);
-                        document.getElementById('games-loading').style.display = 'none';
-                        return;
-                    }
-                } catch (error) {
-                    const errorMsg = document.createElement('p');
-                    errorMsg.textContent = 'Error loading games';
-                    gamesList.appendChild(errorMsg);
-                    document.getElementById('games-loading').style.display = 'none';
-                    return;
-                }
-                document.getElementById('games-loading').style.display = 'none';
-            } else if ((filter === 'next' || filter === 'all') && selectedTeam) {
-                // If switching back from all-states, reload upcoming games only
-                const currentFilter = filter;
-                document.getElementById('games-loading').style.display = 'block';
-                try {
-                    const response = await fetch(`/api/games/${selectedTeam}`);
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        allGames = data.games;
-                    }
-                } catch (error) {
-                    const errorMsg = document.createElement('p');
-                    errorMsg.textContent = 'Error loading games';
-                    gamesList.appendChild(errorMsg);
-                    document.getElementById('games-loading').style.display = 'none';
-                    return;
-                }
-                document.getElementById('games-loading').style.display = 'none';
+            if (!await loadGamesForFilter(filter, gamesList)) {
+                return;
             }
 
             let filteredGames = allGames || [];
@@ -1969,7 +1991,7 @@
             // Display fielding positions on the diamond
             Object.keys(data.lineup).forEach(position => {
                 const positionCard = document.createElement('div');
-                const positionNum = parseInt(position);
+                const positionNum = Number.parseInt(position, 10);
                 const positionClass = positionClasses[positionNum] || '';
 
                 positionCard.className = `position-card ${positionClass}`;

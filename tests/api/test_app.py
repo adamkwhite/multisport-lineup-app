@@ -2,6 +2,7 @@
 Basic app tests to verify the Flask application is working correctly
 """
 
+import importlib
 import os
 import sys
 
@@ -92,16 +93,10 @@ def test_flask_version():
 
 def test_required_modules_importable():
     """Test that required modules can be imported"""
-    try:
-        import os
-
-        import dotenv
-        import flask
-        import requests
-
-        # If we reach here, all imports succeeded
-    except ImportError as e:
-        pytest.fail(f"Required module not available: {e}")
+    # A missing or broken module raises here and fails the test with the real
+    # traceback. Catching it only to call pytest.fail() discarded that.
+    for module_name in ("os", "dotenv", "flask", "requests"):
+        importlib.import_module(module_name)
 
 
 def test_environment_loading():
@@ -109,8 +104,5 @@ def test_environment_loading():
     # This should work even if .env doesn't have valid credentials
     from dotenv import load_dotenv
 
-    try:
-        load_dotenv()
-        # If we reach here, load_dotenv() succeeded without error
-    except Exception as e:
-        pytest.fail(f"Environment loading failed: {e}")
+    # Any failure raises and fails the test on its own.
+    load_dotenv()
