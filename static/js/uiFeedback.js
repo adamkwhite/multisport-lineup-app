@@ -41,7 +41,7 @@ const UIFeedback = {
             if (duration > 0) {
                 setTimeout(() => {
                     if (errorDiv.parentNode) {
-                        errorDiv.parentNode.removeChild(errorDiv);
+                        errorDiv.remove();
                     }
                 }, duration);
             }
@@ -90,7 +90,7 @@ const UIFeedback = {
             if (duration > 0) {
                 setTimeout(() => {
                     if (successDiv.parentNode) {
-                        successDiv.parentNode.removeChild(successDiv);
+                        successDiv.remove();
                     }
                 }, duration);
             }
@@ -111,7 +111,7 @@ const UIFeedback = {
             const messages = document.querySelectorAll(`.${className}`);
             messages.forEach(message => {
                 if (message.parentNode) {
-                    message.parentNode.removeChild(message);
+                    message.remove();
                 }
             });
         } catch (error) {
