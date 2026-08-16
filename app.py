@@ -919,14 +919,23 @@ if __name__ == "__main__":
     is_production = os.getenv("RENDER") or os.getenv("FLASK_ENV") == "production"
     debug = not is_production and os.getenv("FLASK_DEBUG", "True").lower() == "true"
 
+    # Bind to loopback only. This block runs the Werkzeug development server,
+    # which is reached solely via `python app.py` during local development -
+    # production runs `gunicorn app:app` (docs/deployment/render.yaml) and never
+    # executes it. Binding to 0.0.0.0 here published the dev server, and its
+    # interactive debugger, to every interface on the developer's machine.
+    #
+    # Override deliberately when you need it, e.g. to test from a phone on the
+    # same LAN:  FLASK_HOST=0.0.0.0 python app.py
+    host = os.getenv("FLASK_HOST", "127.0.0.1")
+
     if debug and os.getenv("FLASK_SSL", "false").lower() == "true":
         # Development with SSL
         import ssl
 
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         context.load_cert_chain("cert.pem", "key.pem")
-        app.run(host="0.0.0.0", port=port, debug=debug, ssl_context=context)
+        app.run(host=host, port=port, debug=debug, ssl_context=context)
     else:
-        # Production (Render) or development without SSL
-        # Render handles SSL automatically, no need for SSL context
-        app.run(host="0.0.0.0", port=port, debug=debug)
+        # Development without SSL
+        app.run(host=host, port=port, debug=debug)

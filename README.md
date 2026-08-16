@@ -43,7 +43,17 @@ cp .env.example .env
 python app.py
 ```
 
-Visit `http://localhost:5000` to use the app.
+Visit `http://localhost:5001` to use the app (override with `PORT`).
+
+The development server binds to `127.0.0.1`, so it is reachable only from this
+machine. To reach it from another device on your network — a phone, say —
+opt in explicitly:
+
+```bash
+FLASK_HOST=0.0.0.0 python app.py
+```
+
+Only do that on a network you trust: it exposes the Werkzeug debugger too.
 
 ## TeamSnap API Setup
 
