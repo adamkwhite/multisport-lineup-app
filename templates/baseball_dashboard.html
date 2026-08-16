@@ -1090,9 +1090,7 @@
             console.log('Filtering teams with filter:', filter, 'Current selection:', selectedTeam);
 
             // Clear teams list safely
-            while (teamsList.firstChild) {
-                teamsList.removeChild(teamsList.firstChild);
-            }
+            teamsList.replaceChildren();
 
             let filteredTeams = allTeams;
 
@@ -1356,9 +1354,7 @@
             const filter = document.getElementById('game-filter').value;
 
             // Clear games list safely
-            while (gamesList.firstChild) {
-                gamesList.removeChild(gamesList.firstChild);
-            }
+            gamesList.replaceChildren();
 
             if (!await loadGamesForFilter(filter, gamesList)) {
                 return;
@@ -1492,9 +1488,7 @@
             loadToggleState();
 
             // Clear players list safely
-            while (playersList.firstChild) {
-                playersList.removeChild(playersList.firstChild);
-            }
+            playersList.replaceChildren();
 
             console.log(`Displaying ${players.length} players`);
 
@@ -1520,14 +1514,14 @@
                 // Create player name element
                 const playerName = document.createElement('strong');
                 playerName.className = 'player-name';
-                playerName.setAttribute('data-original-name', player.name);
-                playerName.setAttribute('data-obfuscated-name', player.obfuscated_name || obfuscateName(player.name));
+                playerName.dataset.originalName = player.name;
+                playerName.dataset.obfuscatedName = player.obfuscated_name || obfuscateName(player.name);
                 playerName.textContent = displayName;
 
                 // Create position checkboxes container
                 const positionCheckboxes = document.createElement('div');
                 positionCheckboxes.className = 'position-checkboxes';
-                positionCheckboxes.setAttribute('data-player-id', player.id);
+                positionCheckboxes.dataset.playerId = player.id;
 
                 // Define positions (values must match position IDs in config)
                 const positions = [
@@ -1710,7 +1704,6 @@
 
         function displayLineup(data) {
             console.log('displayLineup called with data:', data);
-            const lineupDisplay = document.getElementById('lineup-display');
 
             if (data.lineups && Array.isArray(data.lineups)) {
                 console.log('Displaying multiple lineups:', data.lineups.length);
@@ -1744,9 +1737,7 @@
             const lineupDisplay = document.getElementById('lineup-display');
 
             // Clear lineup display safely
-            while (lineupDisplay.firstChild) {
-                lineupDisplay.removeChild(lineupDisplay.firstChild);
-            }
+            lineupDisplay.replaceChildren();
 
             // Create header section
             const headerDiv = document.createElement('div');
@@ -1925,7 +1916,7 @@
                         // Create player name element safely
                         const playerNameSpan = document.createElement('span');
                         playerNameSpan.className = 'player-name';
-                        playerNameSpan.setAttribute('data-original-name', player.name);
+                        playerNameSpan.dataset.originalName = player.name;
                         playerNameSpan.textContent = displayName;
                         benchPlayer.appendChild(playerNameSpan);
                         currentBenchList.appendChild(benchPlayer);
@@ -1942,9 +1933,7 @@
             const lineupDisplay = document.getElementById('lineup-display');
 
             // Clear lineup display safely
-            while (lineupDisplay.firstChild) {
-                lineupDisplay.removeChild(lineupDisplay.firstChild);
-            }
+            lineupDisplay.replaceChildren();
 
             // Create baseball diamond structure safely
             const baseballDiamond = document.createElement('div');
@@ -2017,7 +2006,7 @@
                 // Create player name
                 const playerNameDiv = document.createElement('div');
                 playerNameDiv.className = 'player-name';
-                playerNameDiv.setAttribute('data-original-name', playerInfo.player_name);
+                playerNameDiv.dataset.originalName = playerInfo.player_name;
                 playerNameDiv.style.fontSize = '11px';
                 playerNameDiv.style.fontWeight = 'bold';
                 playerNameDiv.textContent = displayName;
@@ -2036,9 +2025,7 @@
                 const benchList = document.getElementById('bench-list');
 
                 // Clear bench list safely
-                while (benchList.firstChild) {
-                    benchList.removeChild(benchList.firstChild);
-                }
+                benchList.replaceChildren();
 
                 data.bench.forEach(player => {
                     const benchPlayer = document.createElement('div');
@@ -2052,7 +2039,7 @@
                     // Create player name element safely
                     const playerNameStrong = document.createElement('strong');
                     playerNameStrong.className = 'player-name';
-                    playerNameStrong.setAttribute('data-original-name', player.name);
+                    playerNameStrong.dataset.originalName = player.name;
                     playerNameStrong.textContent = displayName;
 
                     benchPlayer.appendChild(playerNameStrong);

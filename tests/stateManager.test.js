@@ -68,7 +68,7 @@ describe('StateManager', () => {
 
       expect(result.id).toBe(teamId);
       expect(result.name).toBe(teamName);
-      expect(result.data).toBe(null);
+      expect(result.data).toBeNull();
       expect(result.selectedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 
@@ -113,10 +113,10 @@ describe('StateManager', () => {
 
       const cleared = StateManager.clearSelectedTeam();
 
-      expect(cleared.id).toBe(null);
-      expect(cleared.name).toBe(null);
-      expect(cleared.data).toBe(null);
-      expect(cleared.selectedAt).toBe(null);
+      expect(cleared.id).toBeNull();
+      expect(cleared.name).toBeNull();
+      expect(cleared.data).toBeNull();
+      expect(cleared.selectedAt).toBeNull();
     });
 
     test('should validate team selection status', () => {
@@ -139,7 +139,7 @@ describe('StateManager', () => {
 
       expect(result.id).toBe(gameId);
       expect(result.name).toBe(gameName);
-      expect(result.data).toBe(null);
+      expect(result.data).toBeNull();
       expect(result.selectedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 
@@ -184,10 +184,10 @@ describe('StateManager', () => {
 
       const cleared = StateManager.clearSelectedGame();
 
-      expect(cleared.id).toBe(null);
-      expect(cleared.name).toBe(null);
-      expect(cleared.data).toBe(null);
-      expect(cleared.selectedAt).toBe(null);
+      expect(cleared.id).toBeNull();
+      expect(cleared.name).toBeNull();
+      expect(cleared.data).toBeNull();
+      expect(cleared.selectedAt).toBeNull();
     });
 
     test('should validate game selection status', () => {
@@ -302,8 +302,8 @@ describe('StateManager', () => {
       }).not.toThrow();
 
       const team = StateManager.getSelectedTeam();
-      expect(team.id).toBe(null);
-      expect(team.name).toBe(null);
+      expect(team.id).toBeNull();
+      expect(team.name).toBeNull();
     });
 
     test('should handle undefined values gracefully', () => {
@@ -312,8 +312,8 @@ describe('StateManager', () => {
       }).not.toThrow();
 
       const team = StateManager.getSelectedTeam();
-      expect(team.id).toBe(undefined);
-      expect(team.name).toBe(undefined);
+      expect(team.id).toBeUndefined();
+      expect(team.name).toBeUndefined();
     });
 
     test('should handle empty string values', () => {
