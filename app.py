@@ -128,6 +128,10 @@ TEAMSNAP_AUTH_BASE = "https://auth.teamsnap.com"
 # Multi-sport configuration
 VALID_SPORTS = ["baseball", "volleyball", "soccer"]
 
+# Demo fixtures. Soccer has no fixture of its own yet and falls back to this
+# one, which is also the default for any sport not listed in DEMO_DATA_FILES.
+DEMO_DATA_FILE = "static/demo-data.json"
+
 # Baseball positions
 FIELDING_POSITIONS = {
     1: "Pitcher",
@@ -365,7 +369,7 @@ def _game_from_event(
     print(f"    🕐 Parsed: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
     if not _should_include_game(start_time, now, include_all_states):
-        reason = "Past event" if not start_time > now else "Too far in future"
+        reason = "Past event" if start_time <= now else "Too far in future"
         print(f"    ❌ SKIPPED: {reason}")
         return None
 
@@ -917,12 +921,12 @@ def load_demo_data(sport=None):
 
     # Map sport to demo data file
     demo_files = {
-        "baseball": "static/demo-data.json",
+        "baseball": DEMO_DATA_FILE,
         "volleyball": "static/volleyball-demo-data.json",
-        "soccer": "static/demo-data.json",  # Fallback to baseball for now
+        "soccer": DEMO_DATA_FILE,  # Fallback to baseball for now
     }
 
-    demo_file = demo_files.get(sport, "static/demo-data.json")
+    demo_file = demo_files.get(sport, DEMO_DATA_FILE)
 
     try:
         with open(demo_file, "r") as f:

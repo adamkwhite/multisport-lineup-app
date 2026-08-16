@@ -57,7 +57,7 @@ const UserGuidance = {
                 if (currentIndex < userGuidanceSteps.length - 1) {
                     const nextStep = userGuidanceSteps[currentIndex + 1];
                     const nextElement = document.getElementById(nextStep);
-                    if (nextElement && nextElement.className === 'pending') {
+                    if (nextElement?.className === 'pending') {
                         nextElement.className = 'active';
                         console.log(`User guidance: ${nextStep} marked as active`);
                     }

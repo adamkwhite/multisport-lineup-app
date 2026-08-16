@@ -100,7 +100,7 @@ const StateManager = {
 
     // State management methods
     getFullState() {
-        return JSON.parse(JSON.stringify(appState));
+        return structuredClone(appState);
     },
 
     resetState() {
