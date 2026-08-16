@@ -100,7 +100,12 @@ const StateManager = {
 
     // State management methods
     getFullState() {
-        return structuredClone(appState);
+        // Deliberately not structuredClone (sonar javascript:S7784). appState is
+        // plain JSON - nulls, strings, booleans, and selectedAt is already an
+        // ISO string - so a JSON round-trip loses nothing here, while
+        // structuredClone is undefined in this Jest environment and takes 25
+        // StateManager tests down with it.
+        return JSON.parse(JSON.stringify(appState));
     },
 
     resetState() {
