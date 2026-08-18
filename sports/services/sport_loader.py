@@ -7,6 +7,7 @@ from JSON files in the config/sports/ directory.
 
 import json
 import os
+import re
 from typing import Dict, Optional
 
 from sports.models.sport_config import (
@@ -30,7 +31,18 @@ def get_config_path(sport_id: str) -> str:
 
     Returns:
         Absolute path to the sport config JSON file
+
+    Raises:
+        ValueError: If sport_id is not a bare identifier
     """
+    # sport_id is interpolated into a filesystem path, so constrain it to a
+    # bare identifier. Both current callers are already safe (app.py checks
+    # is_sport_supported() against a hardcoded list; list_available_sports()
+    # derives the id from os.listdir), but this keeps a future caller from
+    # reaching the filesystem with "../".
+    if not re.fullmatch(r"[a-z0-9_-]+", sport_id or ""):
+        raise ValueError(f"Invalid sport_id: {sport_id!r}")
+
     # Get the project root directory (2 levels up from this file)
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(os.path.dirname(current_dir))

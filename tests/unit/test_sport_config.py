@@ -262,6 +262,17 @@ class TestSportLoader:
         assert path.endswith("config/sports/baseball.json")
         assert os.path.isabs(path)
 
+    def test_get_config_path_rejects_traversal(self):
+        """get_config_path refuses ids that would escape config/sports/."""
+        for bad in ("../../etc/passwd", "base/ball", "..", "", "Baseball!"):
+            with pytest.raises(ValueError):
+                get_config_path(bad)
+
+    def test_get_config_path_allows_bare_identifiers(self):
+        """Normal sport ids still resolve."""
+        for good in ("baseball", "volleyball", "ultimate_frisbee", "beach-volley"):
+            assert get_config_path(good).endswith(f"config/sports/{good}.json")
+
     def test_load_baseball_config(self):
         """Test loading baseball configuration."""
         config = load_sport_config("baseball")
